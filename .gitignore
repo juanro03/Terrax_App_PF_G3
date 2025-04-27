@@ -1,0 +1,6 @@
+# Ignorar node_modules de frontend y backend
+frontend/node_modules/
+backend/node_modules/
+
+# Ignorar entorno virtual de Python (backend Django)
+backend/venv/
