@@ -38,7 +38,7 @@ python -m venv venv
 - En Windows:
 
 ```bash
-.\env\Scriptsctivate
+.\env\Scripts\ctivate
 ```
 
 - En Mac/Linux:
