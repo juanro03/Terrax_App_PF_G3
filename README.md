@@ -90,8 +90,6 @@ cd ../frontend
 
 Instala las dependencias necesarias utilizando `npm`:
 
-- Con **npm**:
-
 ```bash
 npm install (o npm i)
 ```
@@ -99,8 +97,6 @@ npm install (o npm i)
 ### Paso 4: Ejecutar el Servidor de Desarrollo
 
 Inicia el servidor de desarrollo de React:
-
-- Con **npm**:
 
 ```bash
 npm start
