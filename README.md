@@ -3,6 +3,12 @@
 
 Este proyecto tiene como objetivo la creación de una aplicación web para gestionar el monitoreo de lotes agrícolas, permitiendo el análisis de imágenes satelitales y de drones, la visualización de índices de vegetación y la gestión de usuarios.
 
+Integrantes:
+- **García, Agustina**
+- **Sanchez, Camila**
+- **Lorenzo, Matías**
+- **Roldán, Juan Pedro**
+
 ## Estructura del Proyecto
 
 - **backend/**: Código del servidor API en Django.
