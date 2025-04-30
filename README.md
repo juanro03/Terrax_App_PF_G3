@@ -158,6 +158,12 @@ Instala las dependencias necesarias utilizando `npm`:
 npm install (o npm i)
 ```
 
+- Si te pide permisos, ejecutar antes:
+  
+```bash
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
+
 ### Paso 4: Ejecutar el Servidor de Desarrollo
 
 Inicia el servidor de desarrollo de React:
