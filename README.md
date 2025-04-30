@@ -123,6 +123,7 @@ DATABASES = {
 Aplica las migraciones para configurar las tablas de la base de datos:
 
 ```bash
+pip install requests
 python manage.py migrate
 ```
 
