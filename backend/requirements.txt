@@ -1,0 +1,8 @@
+Django>=4.2,<5.0
+djangorestframework>=3.14
+psycopg2-binary>=2.9  # Cliente PostgreSQL
+django-cors-headers>=4.0
+python-decouple>=3.8  # Para variables de entorno
+Pillow>=10.0  # Para manejo de imágenes
+dj-rest-auth>=2.2
+django-allauth>=0.54
