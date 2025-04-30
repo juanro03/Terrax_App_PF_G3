@@ -161,7 +161,7 @@ npm install (o npm i)
 - Si te pide permisos, ejecutar antes:
   
 ```bash
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 ```
 
 ### Paso 4: Ejecutar el Servidor de Desarrollo
