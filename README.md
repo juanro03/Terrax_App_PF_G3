@@ -44,7 +44,12 @@ python -m venv venv
 - En Windows:
 
 ```bash
-.\env\Scripts\ctivate
+venv\Scripts\activate
+```
+- Si te pide permisos, ejecutar antes:
+  
+```bash
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 
 - En Mac/Linux:
