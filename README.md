@@ -88,12 +88,11 @@ GRANT ALL PRIVILEGES ON DATABASE terrax_db TO terrax_user;
 ```
 
 ### Opción B - Usando pgAdmin 4
-Abrí pgAdmin 4.
-
-Conectate a tu servidor PostgreSQL.
-Click derecho sobre "Databases" → Create → Database:
-Name: terrax_db
-Owner: terrax_user (o crealo si no existe)
+- **Abrí pgAdmin 4.
+- **Conectate a tu servidor PostgreSQL.
+- **Click derecho sobre "Databases" → Create → Database:
+- **Name: terrax_db
+- **Owner: terrax_user (o crealo si no existe)
 
 ### Configurar Django para usar PostgreSQL
 Abrí el archivo backend/terrax_app/settings.py.
