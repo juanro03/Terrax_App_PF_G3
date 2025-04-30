@@ -85,22 +85,14 @@ ALTER ROLE terrax_user SET client_encoding TO 'UTF8';
 ALTER ROLE terrax_user SET default_transaction_isolation TO 'read committed';
 ALTER ROLE terrax_user SET timezone TO 'UTC';
 GRANT ALL PRIVILEGES ON DATABASE terrax_db TO terrax_user;
-
-Aplica las migraciones para configurar las tablas de la base de datos:
-
-```bash
-python manage.py migrate
 ```
 
 ### Opción B - Usando pgAdmin 4
 Abrí pgAdmin 4.
 
 Conectate a tu servidor PostgreSQL.
-
 Click derecho sobre "Databases" → Create → Database:
-
 Name: terrax_db
-
 Owner: terrax_user (o crealo si no existe)
 
 ### Configurar Django para usar PostgreSQL
@@ -125,6 +117,12 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+```
+
+Aplica las migraciones para configurar las tablas de la base de datos:
+
+```bash
+python manage.py migrate
 ```
 
 ### Paso 8: Ejecutar el Servidor
