@@ -19,6 +19,7 @@ Integrantes:
 Antes de comenzar, asegúrate de tener instalados los siguientes programas:
 
 - **Python 3.x**: Para ejecutar el backend.
+- **PostgreSQL**: para crear la BD.
 - **Node.js**: Para ejecutar el frontend.
 - **Git**: Para clonar el repositorio.
 
