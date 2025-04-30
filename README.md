@@ -68,10 +68,63 @@ pip install -r requirements.txt
 
 ### Paso 6: Ejecutar Migraciones
 
+Es necesario tener la Base de Datos Postgresql para poder realizar este paso, para ello:
+
+## 🐘 Crear la base de datos en PostgreSQL
+
+### Opción A - Usando SQL Shell (psql)
+
+1. Abrí la SQL Shell (psql).
+2. Cuando te pregunte, presioná Enter para usar los valores por defecto (o escribí el usuario y contraseña si lo configuraste).
+3. Ejecutá los siguientes comandos:
+
+```sql
+CREATE DATABASE terrax_db;
+CREATE USER terrax_user WITH PASSWORD 'terrax_pass';
+ALTER ROLE terrax_user SET client_encoding TO 'UTF8';
+ALTER ROLE terrax_user SET default_transaction_isolation TO 'read committed';
+ALTER ROLE terrax_user SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE terrax_db TO terrax_user;
+
 Aplica las migraciones para configurar las tablas de la base de datos:
 
 ```bash
 python manage.py migrate
+```
+
+### Opción B - Usando pgAdmin 4
+Abrí pgAdmin 4.
+
+Conectate a tu servidor PostgreSQL.
+
+Click derecho sobre "Databases" → Create → Database:
+
+Name: terrax_db
+
+Owner: terrax_user (o crealo si no existe)
+
+### Configurar Django para usar PostgreSQL
+Abrí el archivo backend/terrax_app/settings.py.
+
+Asegurarse que la configuración de la base de datos en el archivo settings.py sea:
+
+```bash
+SITE_ID = 1
+AUTHENTICATION_BACKENDS = (
+    'allauth.account.auth_backends.AuthenticationBackend',  
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'terrax_db',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
 ```
 
 ### Paso 8: Ejecutar el Servidor
