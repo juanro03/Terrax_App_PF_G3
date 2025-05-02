@@ -70,7 +70,9 @@ pip install -r requirements.txt
 ### Paso 6: Ejecutar Migraciones
 
 Es necesario tener la Base de Datos Postgresql para poder realizar este paso, para ello:
-## (Asegurarse de tener la misma configuración (usuario, contraseña, puerto, nombre) que el archivo settings.py para poder realizar la conexión con el backend)
+
+### (Asegurarse de tener la misma configuración (usuario, contraseña, puerto, nombre) que el archivo settings.py para poder realizar la conexión con el backend)
+
 ## 🐘 Crear la base de datos en PostgreSQL
 
 ### Opción A - Usando SQL Shell (psql)
