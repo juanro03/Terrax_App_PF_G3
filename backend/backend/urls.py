@@ -21,4 +21,5 @@ urlpatterns = [
     path('api/auth/', include('dj_rest_auth.urls')),  # Login, logout
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),  # Registro
     path('admin/', admin.site.urls),
+    path('api/', include('usuarios.urls')),
 ]
