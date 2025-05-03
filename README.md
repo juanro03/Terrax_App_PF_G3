@@ -83,11 +83,6 @@ Es necesario tener la Base de Datos Postgresql para poder realizar este paso, pa
 
 ```sql
 CREATE DATABASE terrax_db;
-CREATE USER terrax_user WITH PASSWORD 'terrax_pass';
-ALTER ROLE terrax_user SET client_encoding TO 'UTF8';
-ALTER ROLE terrax_user SET default_transaction_isolation TO 'read committed';
-ALTER ROLE terrax_user SET timezone TO 'UTC';
-GRANT ALL PRIVILEGES ON DATABASE terrax_db TO terrax_user;
 ```
 
 ### Opción B - Usando pgAdmin 4
@@ -157,7 +152,7 @@ cd ../frontend
 Instala las dependencias necesarias utilizando `npm`:
 
 ```bash
-npm install (o npm i)
+npm i
 ```
 
 - Si te pide permisos, ejecutar antes:
@@ -171,7 +166,7 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 Inicia el servidor de desarrollo de React:
 
 ```bash
-npm start
+npm run start
 ```
 
 El frontend estará corriendo en `http://localhost:3000/`.
