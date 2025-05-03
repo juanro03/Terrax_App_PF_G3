@@ -34,7 +34,7 @@ export default function Sidebar() {
                 src="/logo.png"
                 alt="Terrax Logo"
                 className="img-fluid"
-                style={{ maxWidth: "120px" }}
+                style={{ maxWidth: "200px" }}
               />
             )}
           </div>

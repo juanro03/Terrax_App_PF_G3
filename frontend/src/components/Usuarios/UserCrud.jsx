@@ -31,23 +31,23 @@ const UserCrud = () => {
         <form className="border p-3 rounded bg-light mb-3">
           <div className="mb-3">
             <label className="form-label">Nombre</label>
-            <input type="text" className="form-control" placeholder="Juan" />
+            <input type="text" className="form-control"/>
           </div>
           <div className="mb-3">
             <label className="form-label">Apellido</label>
-            <input type="text" className="form-control" placeholder="Pérez" />
+            <input type="text" className="form-control"/>
           </div>
           <div className="mb-3">
             <label className="form-label">Nombre de Usuario</label>
-            <input type="text" className="form-control" placeholder="juanperez123" />
+            <input type="text" className="form-control"/>
           </div>
           <div className="mb-3">
             <label className="form-label">Email</label>
-            <input type="email" className="form-control" placeholder="juan@mail.com" />
+            <input type="email" className="form-control"/>
           </div>
           <div className="mb-3">
             <label className="form-label">Contraseña</label>
-            <input type="password" className="form-control" placeholder="********" />
+            <input type="text" className="form-control" />
           </div>
           <div className="mb-3">
             <label className="form-label">Rol</label>
