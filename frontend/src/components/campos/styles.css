@@ -1,0 +1,68 @@
+body {
+    background-color: #ffffff;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+}
+
+/* Contenedor del formulario */
+.form-card {
+    background-color: #117256;
+    color: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+
+/* Etiquetas */
+.form-label {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Inputs */
+.form-control {
+    border-radius: 10px;
+    border: 1px solid #c2e9dc;
+    background-color: #e1f8e4;
+    color: #333;
+    padding: 10px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.form-control:focus {
+    background-color: #d0f5db;
+    border-color: #66d6a9;
+    outline: none;
+    box-shadow: none;
+}
+
+/* Botón guardar */
+.btn-guardar {
+    background-color: #00bf63;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 30px;
+    font-weight: bold;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-guardar:hover {
+    background-color: #00bf63;
+}
+
+/* Título */
+h2 {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 30px;
+    color: #117256;
+}
+.bg-white {
+    background-color: #117256 !important;
+}
+.btn-success {
+    background-color: #00bf63;
+}
