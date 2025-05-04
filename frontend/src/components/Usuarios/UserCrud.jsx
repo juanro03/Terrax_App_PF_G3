@@ -2,13 +2,14 @@ import { useState } from "react";
 import axios from "axios";
 
 const UserCrud = () => {
-  const [formType, setFormType] = useState(null); // create, edit, delete
+  const [formType, setFormType] = useState(null); // create, edit, delete, get
+  const [usuarios, setUsuarios] = useState([]);
   const [deleteOption, setDeleteOption] = useState("id");
   const [deleteValue, setDeleteValue] = useState("");
 
   const [formData, setFormData] = useState({
-    nombre: "",
-    apellido: "",
+    firts_name: "",
+    last_name: "",
     username: "",
     email: "",
     password: "",
@@ -26,6 +27,19 @@ const UserCrud = () => {
     setFormType(type);
     setDeleteOption("id");
     setDeleteValue("");
+    if (type === "get") {
+      getUsuarios();
+    }
+  };
+
+  const getUsuarios = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/api/usuarios/");
+      setUsuarios(response.data);
+    } catch (error) {
+      console.error("Error al obtener usuarios:", error);
+      alert("No se pudieron obtener los usuarios");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -78,6 +92,9 @@ const UserCrud = () => {
     <div>
       {/* Botones CRUD */}
       <div className="d-flex gap-2 mb-3">
+        <button className="btn btn-warning" onClick={() => handleForm("get")}>
+          Ver Usuarios
+        </button>
         <button
           className="btn btn-success"
           onClick={() => handleForm("create")}
@@ -92,6 +109,36 @@ const UserCrud = () => {
         </button>
       </div>
 
+      {/* Mostrar usuarios */}
+      {formType === "get" && (
+        <div className="table-responsive">
+          <table className="table table-bordered table-striped">
+            <thead className="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Rol</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usuarios.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.id}</td>
+                  <td>{user.first_name}</td>
+                  <td>{user.last_name}</td>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.rol}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {/* Formulario Crear / Editar */}
       {(formType === "create" || formType === "edit") && (
         <form
@@ -103,8 +150,8 @@ const UserCrud = () => {
             <input
               type="text"
               className="form-control"
-              name="nombre"
-              value={formData.nombre}
+              name="first_name"
+              value={formData.first_name}
               onChange={handleInputChange}
             />
           </div>
@@ -113,8 +160,8 @@ const UserCrud = () => {
             <input
               type="text"
               className="form-control"
-              name="apellido"
-              value={formData.apellido}
+              name="last_name"
+              value={formData.last_name}
               onChange={handleInputChange}
             />
           </div>
@@ -187,7 +234,9 @@ const UserCrud = () => {
 
           <div className="mb-3">
             <label className="form-label">
-              {deleteOption === "id" ? "Ingrese el ID" : "Ingrese el valor"}
+              {deleteOption === "id"
+                ? "Ingrese el ID"
+                : "Ingrese el nombre de usuario"}
             </label>
             <input
               type="text"
