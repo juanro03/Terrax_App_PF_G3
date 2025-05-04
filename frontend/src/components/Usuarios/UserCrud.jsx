@@ -53,10 +53,18 @@ const UserCrud = () => {
   const handleDelete = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.delete(
-        `http://localhost:8000/api/usuarios/${deleteValue}/`
-      );
+      if (deleteOption === "username") {
+        await axios.delete(
+          `http://localhost:8000/api/usuarios/delete-by-username/${deleteValue}/`
+        );
+      } else {
+        await axios.delete(
+          `http://localhost:8000/api/usuarios/${deleteValue}/`
+        );
+      }
+
       alert("Usuario eliminado exitosamente");
+      setDeleteValue("");
     } catch (error) {
       console.error(
         "Error al eliminar:",
@@ -172,6 +180,7 @@ const UserCrud = () => {
               onChange={(e) => setDeleteOption(e.target.value)}
             >
               <option value="id">ID</option>
+              <option value="username">Nombre de Usuario</option>
               {/* A futuro podrías implementar por username o email */}
             </select>
           </div>
