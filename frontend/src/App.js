@@ -9,7 +9,10 @@ function App() {
   return (
     <div className="d-flex">
       <Sidebar />
-      <div className="flex-grow-1 p-4 bg-white" style={{ height: "100vh", overflowY: "auto" }}>
+      <div
+        className="flex-grow-1 p-4 bg-white"
+        style={{ height: "100vh", overflowY: "auto" }}
+      >
         <Routes location={location}>
           <Route path="/usuarios" element={<UserCrud />} />
           <Route path="/" element={<div />} />
@@ -21,4 +24,3 @@ function App() {
 }
 
 export default App;
-
