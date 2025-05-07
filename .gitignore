@@ -4,3 +4,9 @@ backend/node_modules/
 
 # Ignorar entorno virtual de Python (backend Django)
 backend/venv/
+
+__pycache__/
+*.py[cod]
+
+# Django
+*.log

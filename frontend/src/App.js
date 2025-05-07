@@ -1,25 +1,31 @@
-import logo from './logo.svg';
-import './App.css';
+// App.js
+import { Routes, Route, useLocation } from "react-router-dom";
+import Sidebar from "./components/Inicio/Sidebar";
+import UserCrud from "./components/Usuarios/UserCrud";
+import CampoCRUD from "./components/campos/campos";
+import './components/campos/styles.css';
+import VerCampos from "./components/campos/ver_campos";
+
+
 
 function App() {
+  const location = useLocation();
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="d-flex">
+      <Sidebar />
+      <div className="flex-grow-1 p-4 bg-white" style={{ height: "100vh", overflowY: "auto" }}>
+        <Routes location={location}>
+          <Route path="/usuarios" element={<UserCrud />} />
+          <Route path="/campos" element={<CampoCRUD/>} />
+          <Route path="/" element={<div />} />
+          <Route path="/ver-campos" element={<VerCampos />} />
+          {/* otras rutas */}
+        </Routes>
+      </div>
     </div>
   );
 }
 
 export default App;
+
