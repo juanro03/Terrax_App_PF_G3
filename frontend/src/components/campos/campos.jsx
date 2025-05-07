@@ -1,5 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./styles.css"; // Asegurate de importar tu CSS personalizado
+import axios from "../../axiosconfig"; // importá tu configuración de axios
+import "@fontsource/poppins"; // estilo por defecto (400)
+import "@fontsource/poppins/600.css"; // peso 600 si querés
+
+
+
 
 export default function CampoCRUD() {
   const [form, setForm] = useState({
@@ -7,9 +13,47 @@ export default function CampoCRUD() {
     provincia: "",
     localidad: "",
     cantidadLotes: "",
-    imagenSatelital: null,
+    imagen_satelital: null,
     observacion: "",
   });
+  useEffect(() => {
+    const fetchProvincias = async () => {
+      try {
+        const res = await axios.get("https://apis.datos.gob.ar/georef/api/provincias");
+        const nombresProvincias = res.data.provincias.map((p) => p.nombre).sort();
+        setProvincias(nombresProvincias);
+      } catch (error) {
+        console.error("Error al obtener provincias:", error);
+      }
+    };
+  
+    fetchProvincias();
+  }, []);  
+  useEffect(() => {
+    const fetchLocalidades = async () => {
+      if (form.provincia) {
+        try {
+          const res = await axios.get(
+            `https://apis.datos.gob.ar/georef/api/localidades?provincia=${form.provincia}&max=1000`
+          );
+          const nombresLocalidades = res.data.localidades.map((l) => l.nombre).sort();
+          setLocalidades(nombresLocalidades);
+        } catch (error) {
+          console.error("Error al obtener localidades:", error);
+          setLocalidades([]);
+        }
+      } else {
+        setLocalidades([]);
+      }
+    };
+  
+    fetchLocalidades();
+  }, [form.provincia]);
+  
+  const [mensajeExito, setMensajeExito] = useState("");
+  const [provincias, setProvincias] = useState([]);
+  const [localidades, setLocalidades] = useState([]);
+
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -19,20 +63,63 @@ export default function CampoCRUD() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    Object.entries(form).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
-
-    console.log("Formulario enviado:", formData);
-    alert("Formulario enviado. Revisá consola para ver los datos.");
+    formData.append("nombre", form.nombre);
+    formData.append("provincia", form.provincia);
+    formData.append("localidad", form.localidad);
+    formData.append("cantidadLotes", form.cantidadLotes);
+    formData.append("imagen_satelital", form.imagen_satelital);  // 👈 nombre correcto
+    formData.append("observacion", form.observacion);
+    
+  
+    try {
+      await axios.post("http://127.0.0.1:8000/api/campos/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setMensajeExito("Campo registrado con éxito.");
+      setForm({
+        nombre: "",
+        provincia: "",
+        localidad: "",
+        cantidadLotes: "",
+        imagen_satelital: null,
+        observacion: "",
+      });
+    
+      // Hacer que el mensaje desaparezca después de unos segundos
+      setTimeout(() => {
+        setMensajeExito("");
+      }, 6000);
+    
+    } catch (error) {
+      console.error("Error al registrar campo:", error);
+      alert("Ocurrió un error al enviar el formulario.");
+    }
+    
+    
   };
+  
 
   return (
     <div className="container-fluid">
+      <div className="mb-3">
+        <a href="http://localhost:3000/ver-campos" className="btn btn-outline-success">
+          ← Ver Campos
+        </a>
+      </div>
+
       <h2>Registrar Campo</h2>
+      {mensajeExito && (
+        <div className="alert alert-success" role="alert">
+          {mensajeExito}
+        </div>
+      )}
+
+
       <form
         onSubmit={handleSubmit}
         className="form-card w-100"
@@ -68,10 +155,11 @@ export default function CampoCRUD() {
             required
           >
             <option value="">Seleccionar</option>
-            <option value="Buenos Aires">Buenos Aires</option>
-            <option value="Córdoba">Córdoba</option>
-            <option value="Santa Fe">Santa Fe</option>
-            <option value="Mendoza">Mendoza</option>
+            {provincias.map((provincia, index) => (
+              <option key={`${provincia}-${index}`} value={provincia}>
+                {provincia}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -80,15 +168,24 @@ export default function CampoCRUD() {
           <label htmlFor="localidad" className="form-label">
             Localidad
           </label>
-          <input
-            type="text"
+          <select
             name="localidad"
             id="localidad"
             className="form-control"
             value={form.localidad}
             onChange={handleChange}
             required
-          />
+            disabled={localidades.length === 0}
+          >
+            <option value="">Seleccionar</option>
+            {localidades.map((localidad, index) => (
+              <option key={`${localidad}-${index}`} value={localidad}>
+                {localidad}
+              </option>
+            ))}
+
+          </select>
+
         </div>
 
         {/* Cantidad de Lotes */}
@@ -109,13 +206,13 @@ export default function CampoCRUD() {
 
         {/* Imagen Satelital */}
         <div className="row mb-3">
-          <label htmlFor="imagenSatelital" className="form-label">
+          <label htmlFor="imagen_satelital" className="form-label">
             Imagen Satelital
           </label>
           <input
             type="file"
-            name="imagenSatelital"
-            id="imagenSatelital"
+            name="imagen_satelital"
+            id="imagen_satelital"
             className="form-control"
             accept="image/*"
             onChange={handleChange}
