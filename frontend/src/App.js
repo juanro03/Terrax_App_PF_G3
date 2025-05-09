@@ -11,12 +11,10 @@ import Sidebar from "./components/Inicio/Sidebar";
 import UserCrud from "./components/Usuarios/UserCrud";
 import CampoCRUD from "./components/campos/campos";
 import VerCampos from "./components/campos/ver_campos";
-import Dashboard from "./components/Inicio/Dashboard";
-
-import "./components/campos/styles.css";
 
 function App() {
   const location = useLocation();
+  const hideSidebarRoutes = ["/login"];
 
   return (
     <div className="d-flex">
@@ -28,9 +26,9 @@ function App() {
         <Routes location={location}>
           <Route path="/usuarios" element={<UserCrud />} />
           <Route path="/campos" element={<CampoCRUD />} />
+          <Route path="/" element={<div />} />
           <Route path="/ver-campos" element={<VerCampos />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          {/* Otras rutas internas */}
+          {/* otras rutas */}
         </Routes>
       </div>
     </div>
