@@ -4,6 +4,8 @@ import Sidebar from "./components/Inicio/Sidebar";
 import UserCrud from "./components/Usuarios/UserCrud";
 import CampoCRUD from "./components/campos/campos";
 import './components/campos/styles.css';
+import VerCampos from "./components/campos/ver_campos";
+
 
 
 function App() {
@@ -17,6 +19,7 @@ function App() {
           <Route path="/usuarios" element={<UserCrud />} />
           <Route path="/campos" element={<CampoCRUD/>} />
           <Route path="/" element={<div />} />
+          <Route path="/ver-campos" element={<VerCampos />} />
           {/* otras rutas */}
         </Routes>
       </div>
