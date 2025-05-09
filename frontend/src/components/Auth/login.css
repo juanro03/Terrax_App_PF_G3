@@ -22,3 +22,28 @@
 .login-right {
   width: 50%;
 }
+
+.login-container {
+  height: 100vh;
+  background-color: #264d3c; /* Verde oscuro de fondo */
+}
+
+.login-card {
+  width: 850px;
+  height: 500px;
+}
+
+.login-left {
+  width: 50%;
+  background-image: url("./campo.png"); /* Imagen de campo en /public */
+  background-size: cover;
+  background-position: center;
+}
+
+.logo-img {
+  width: 200px;
+}
+
+.login-right {
+  width: 50%;
+}
