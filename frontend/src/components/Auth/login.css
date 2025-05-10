@@ -1,49 +1,26 @@
 .login-container {
-  height: 100vh;
-  background-color: #264d3c; /* Verde oscuro de fondo */
+  background-color: #264e3d; /* Fondo general */
 }
 
-.login-card {
-  width: 850px;
-  height: 500px;
-}
-
-.login-left {
-  width: 50%;
-  background-image: url("/campo.png"); /* Imagen de campo en /public */
-  background-size: cover;
-  background-position: center;
+.left-panel {
+  flex: 1;
+  background: url("./campo.png") center/cover no-repeat;
+  position: relative;
+  padding: 20px;
 }
 
 .logo-img {
-  width: 200px;
+  width: 600px;
+  max-width: 100%;
+  height: auto;
+}
+.fuente-bonita {
+  font-family: "Poppins", sans-serif;
 }
 
-.login-right {
-  width: 50%;
-}
-
-.login-container {
-  height: 100vh;
-  background-color: #264d3c; /* Verde oscuro de fondo */
-}
-
-.login-card {
-  width: 850px;
-  height: 500px;
-}
-
-.login-left {
-  width: 50%;
-  background-image: url("./campo.png"); /* Imagen de campo en /public */
-  background-size: cover;
-  background-position: center;
-}
-
-.logo-img {
-  width: 200px;
-}
-
-.login-right {
-  width: 50%;
+.right-panel {
+  flex: 1;
+  background-color: #1e1e1e;
+  color: white;
+  border-radius: 0 12px 12px 0;
 }
