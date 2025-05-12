@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Form, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import "./login.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,6 +25,7 @@ const Login = () => {
     if (response.ok) {
       localStorage.setItem("accessToken", data.access || data.key);
       alert("Login exitoso");
+      navigate("/inicio");
       // Redirigir o actualizar estado de sesión si querés
     } else {
       alert("Error: " + (data.detail || "Credenciales inválidas"));
