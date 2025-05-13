@@ -1,6 +1,8 @@
 // src/components/Inicio/Inicio.jsx
 import React from "react";
 import Sidebar from "./Sidebar";
+import Carrusel from "./Carrusel";
+import WeatherWidget from "./WeatherWidget";
 
 const Inicio = () => {
   const token = localStorage.getItem("accessToken");
@@ -16,7 +18,8 @@ const Inicio = () => {
       <Sidebar />
       <div className="flex-grow-1 p-4 bg-white">
         <h1>Bienvenido a Terrax</h1>
-        <p>Este es tu panel de inicio.</p>
+        <Carrusel />
+        <WeatherWidget />
       </div>
     </div>
   );
