@@ -53,15 +53,57 @@ export default function CampoCRUD() {
   const [mensajeExito, setMensajeExito] = useState("");
   const [provincias, setProvincias] = useState([]);
   const [localidades, setLocalidades] = useState([]);
-
+  const [previewImagen, setPreviewImagen] = useState(null);
+  const [nombreArchivo, setNombreArchivo] = useState("");
+  const [tamañoArchivo, setTamañoArchivo] = useState(0);  
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
-    setForm({
-      ...form,
-      [name]: type === "file" ? files[0] : value,
-    });
+
+    if (type === "file" && name === "imagen_satelital") {
+      const file = files[0];
+      if (file) {
+        setForm((prevForm) => ({
+          ...prevForm,
+          imagen_satelital: file,
+        }));
+
+        setNombreArchivo(file.name);
+        setTamañoArchivo((file.size / 1024).toFixed(2)); // KB
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreviewImagen(reader.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    } else {
+      setForm({
+        ...form,
+        [name]: value,
+      });
+    }
   };
+
+  const eliminarImagen = () => {
+    setForm({ ...form, imagen_satelital: null });
+    setPreviewImagen(null);
+    setNombreArchivo("");
+    setTamañoArchivo(0);
+
+    // 👇 Esto es clave: clona el input y lo reemplaza para reiniciar completamente el campo
+    const input = document.getElementById("imagen_satelital");
+    if (input) {
+      input.value = "";
+      const newInput = input.cloneNode(true);
+      input.parentNode.replaceChild(newInput, input);
+
+      // Reasigná el evento onChange al nuevo input
+      newInput.addEventListener("change", handleChange);
+    }
+  };
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -205,8 +247,8 @@ export default function CampoCRUD() {
         </div>
 
         {/* Imagen Satelital */}
-        <div className="row mb-3">
-          <label htmlFor="imagen_satelital" className="form-label">
+        <div className="mb-4">
+          <label htmlFor="imagen_satelital" className="form-label fw-bold">
             Imagen Satelital
           </label>
           <input
@@ -217,7 +259,46 @@ export default function CampoCRUD() {
             accept="image/*"
             onChange={handleChange}
           />
+
+          {previewImagen && (
+            <div
+              className="p-3 mt-3 rounded border shadow-sm"
+              style={{ backgroundColor: "#ffffff" }}
+            >
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                  <span style={{ color: '#6c757d', fontWeight: 500 }}>{nombreArchivo}</span>
+                  <span className="text-muted">({(tamañoArchivo / 1024).toFixed(2)} KB)</span>
+                </div>
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById("imagen_satelital").click()}
+                    className="btn btn-sm btn-outline-success me-2"
+                  >
+                    Cambiar imagen
+                  </button>
+                  <button
+                    type="button"
+                    onClick={eliminarImagen}
+                    className="btn btn-sm btn-outline-danger"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+              <div className="text-center">
+                <img
+                  src={previewImagen}
+                  alt="Vista previa"
+                  className="img-fluid rounded"
+                  style={{ maxHeight: "300px" }}
+                />
+              </div>
+            </div>
+          )}
         </div>
+
 
         {/* Observaciones */}
         <div className="row mb-3">
