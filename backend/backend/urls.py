@@ -16,9 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.conf.urls.static import static
+from django.conf import settings
+
 
 urlpatterns = [
     path('api/auth/', include('dj_rest_auth.urls')),  # Login, logout
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),  # Registro
     path('admin/', admin.site.urls),
-]
+    path('api/', include('usuarios.urls')),
+    path('api/', include('campos.urls')), 
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
