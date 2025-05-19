@@ -43,10 +43,11 @@ export default function Sidebar() {
           <ul className="nav nav-pills flex-column gap-2">
             <SidebarItem icon={<Home size={18} />} label="Inicio" isOpen={isOpen} to="/" />
             <SidebarItem icon={<Calendar size={18} />} label="Calendario" isOpen={isOpen} to="/calendario" />
-            <SidebarItem icon={<Map size={18} />} label="Campos" isOpen={isOpen} to="/campos" />
+            <SidebarItem icon={<Map size={18} />} label="Campos" isOpen={isOpen} to="/ver-campos" />
             <SidebarItem icon={<BarChart2 size={18} />} label="Reportes" isOpen={isOpen} to="/reportes" />
             <SidebarItem icon={<FlaskConical size={18} />} label="Calculadora" isOpen={isOpen} to="/calculadora" />
             <SidebarItem icon={<User size={18} />} label="Usuarios" isOpen={isOpen} to="/usuarios" />
+            <SidebarItem icon={<User size={18} />} label="Administracion" isOpen={isOpen} to="/usuarios" />
           </ul>
         </div>
 
@@ -72,20 +73,51 @@ export default function Sidebar() {
       <div className="flex-grow-1 p-4 bg-white">
         {/* Tu contenido principal */}
       </div>
+
+      {/* Estilos para el efecto hover */}
+      <style>
+        {`
+          .sidebar-item {
+            margin-bottom: 0.4rem;
+          }
+
+          .sidebar-link {
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+          }
+
+          .icon-wrapper {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+          }
+
+          .sidebar-link:hover .icon-wrapper {
+            background-color: rgba(255, 255, 255, 0.3);
+          }
+        `}
+      </style>
     </div>
   );
 }
 
 function SidebarItem({ icon, label, isOpen, to }) {
   return (
-    <li>
+    <li className="sidebar-item">
       <Link
         to={to}
-        className="nav-link d-flex align-items-center gap-2 rounded w-100 text-white"
+        className="sidebar-link nav-link text-white d-flex align-items-center"
       >
-        {icon}
-        {isOpen && <span>{label}</span>}
+        <div className="icon-wrapper">{icon}</div>
+        {isOpen && <span className="ms-2">{label}</span>}
       </Link>
     </li>
   );
 }
+

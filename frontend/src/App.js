@@ -1,6 +1,9 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import Sidebar from "./components/Inicio/Sidebar";
 import UserCrud from "./components/Usuarios/UserCrud";
+import CampoCRUD from "./components/campos/campos";
+import './components/campos/styles.css';
+import VerCampos from "./components/campos/ver_campos";
 import VerUsuarios from "./components/Usuarios/VerUsuarios";
 import FormularioUsuario from "./components/Usuarios/FormularioUsuario";
 
@@ -16,7 +19,9 @@ function App() {
       >
         <Routes location={location}>
           <Route path="/usuarios" element={<VerUsuarios />} />
+          <Route path="/campos" element={<CampoCRUD/>} />
           <Route path="/usuarios/nuevo" element={<FormularioUsuario />} />
+          <Route path="/ver-campos" element={<VerCampos />} />
           <Route path="/usuarios/editar/:id" element={<FormularioUsuario />} />
         </Routes>
       </div>
