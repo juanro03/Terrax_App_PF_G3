@@ -1,34 +1,46 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Login = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      navigate("/inicio");
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    const response = await fetch("http://localhost:8000/api/auth/login/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      const response = await fetch("http://localhost:8000/api/auth/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }), 
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      localStorage.setItem("accessToken", data.access || data.key);
-      alert("Login exitoso");
-      navigate("/inicio");
-      // Redirigir o actualizar estado de sesión si querés
-    } else {
-      alert("Error: " + (data.detail || "Credenciales inválidas"));
+      if (response.ok) {
+        localStorage.setItem("accessToken", data.access);
+        localStorage.setItem("refreshToken", data.refresh);
+        alert("Login exitoso");
+        navigate("/inicio", { replace: true });
+      } else {
+        alert("Error: " + (data.detail || "Credenciales inválidas"));
+      }
+    } catch (error) {
+      alert("Error al intentar iniciar sesión");
+      console.error(error);
     }
   };
 
@@ -60,12 +72,12 @@ const Login = () => {
         <div style={{ marginTop: "100px", width: "100%", maxWidth: "400px" }}>
           <h2 className="mb-4 text-center">Iniciar Sesión</h2>
           <Form onSubmit={handleLogin}>
-            <Form.Group className="mb-3" controlId="formUsername">
+            <Form.Group className="mb-3" controlId="formEmail">
               <Form.Control
-                type="text"
-                placeholder="Nombre de Usuario"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email"
+                placeholder="Correo electrónico"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </Form.Group>
 
