@@ -1,0 +1,113 @@
+body {
+    background-color: #f0fdf4 !important; /* fondo más suave y moderno */
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+}
+
+/* Contenedor del formulario */
+.form-card {
+    background-color: rgb(25 135 84);
+    color: white;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 1000px;
+    margin: 40px auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Etiquetas */
+.form-label {
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Inputs */
+.form-control {
+    border-radius: 12px;
+    border: 1px solid #c2e9dc;
+    background-color: #e8fdf0;
+    color: #333;
+    padding: 12px 15px;
+    font-size: 15px;
+    width: 100%;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background-color: #d4fae2;
+    border-color: #38b98a;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(56, 185, 138, 0.3);
+}
+
+/* Botón guardar */
+.btn-guardar {
+    background-color: #00bf63;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 35px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 191, 99, 0.3);
+}
+
+.btn-guardar:hover {
+    background-color: #059669;
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 191, 99, 0.4);
+}
+
+/* Título */
+h2 {
+    text-align: center;
+    font-weight: 800;
+    margin-bottom: 30px;
+    color: #117256;
+    font-size: 36px;
+    font-family: 'Poppins', sans-serif;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Ajustes adicionales */
+.bg-white {
+    background-color: #117256 !important;
+}
+
+.btn-success {
+    background-color: #00bf63;
+}
+
+button {
+    transition: all 0.3s ease;
+}
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #c3e6cb;
+  }
+  .card {
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+  }
+  .card:hover {
+    transform: scale(1.02);
+  }
+  .card-title {
+    font-weight: 700;
+    color: #117256;
+  }
+  .card-text {
+    color: #ffffff;
+    text-align: center;
+  }
+  
