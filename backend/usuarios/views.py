@@ -1,9 +1,10 @@
 from rest_framework import viewsets
 from .models import Usuario
-from .serializers import UsuarioSerializer
+from .serializers import UsuarioSerializer, CustomTokenObtainPairSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
@@ -18,5 +19,9 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         except Usuario.DoesNotExist:  # Nombre de modelo correcto
             return Response({"detail": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
+
+# Vista personalizada para login con email
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
     

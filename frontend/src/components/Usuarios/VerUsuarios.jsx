@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "./styles.css";
+import "./Usuarios.css";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -57,7 +57,7 @@ const VerUsuarios = () => {
             </div>
             <div className="card-body text-center">
               <img
-                src="https://randomuser.me/api/portraits/men/80.jpg"
+                src="/user.jpg"
                 className="rounded-circle mb-3"
                 alt="Perfil"
                 style={{ width: "80px", height: "80px", objectFit: "cover" }}

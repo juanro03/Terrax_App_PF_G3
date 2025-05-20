@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from "react";
-import "./styles.css"; // Asegurate de importar tu CSS personalizado
-import axios from "../../axiosconfig"; // importá tu configuración de axios
-import "@fontsource/poppins"; // estilo por defecto (400)
-import "@fontsource/poppins/600.css"; // peso 600 si querés
-
-
-
+import "./Campos.css"; 
+import axios from "../../axiosconfig"; 
+import "@fontsource/poppins"; 
+import "@fontsource/poppins/600.css"; 
 
 export default function CampoCRUD() {
   const [form, setForm] = useState({
@@ -91,14 +88,12 @@ export default function CampoCRUD() {
     setNombreArchivo("");
     setTamañoArchivo(0);
 
-    // 👇 Esto es clave: clona el input y lo reemplaza para reiniciar completamente el campo
     const input = document.getElementById("imagen_satelital");
     if (input) {
       input.value = "";
       const newInput = input.cloneNode(true);
       input.parentNode.replaceChild(newInput, input);
 
-      // Reasigná el evento onChange al nuevo input
       newInput.addEventListener("change", handleChange);
     }
   };
@@ -132,7 +127,6 @@ export default function CampoCRUD() {
         observacion: "",
       });
     
-      // Hacer que el mensaje desaparezca después de unos segundos
       setTimeout(() => {
         setMensajeExito("");
       }, 6000);
@@ -147,7 +141,7 @@ export default function CampoCRUD() {
   
 
   return (
-    <div className="container-fluid">
+    <div className="container-fluid" style={{ backgroundColor: "#e8fdf0", minHeight: "100vh", padding: "20px" }}>
       <div className="mb-3">
         <a href="http://localhost:3000/ver-campos" className="btn btn-outline-success">
           ← Ver Campos

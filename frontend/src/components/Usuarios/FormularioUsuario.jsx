@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import "./Usuarios.css";
 import { useNavigate, useParams } from "react-router-dom";
 
 const FormularioUsuario = () => {

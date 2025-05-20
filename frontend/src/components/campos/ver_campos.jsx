@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../axiosconfig";
-import "./styles.css"; // asegúrate de tener estilos compatibles o crea clases nuevas
+import "./Campos.css"; 
 
 const VerCampos = () => {
   const [campos, setCampos] = useState([]);
@@ -22,7 +22,7 @@ const VerCampos = () => {
     <div className="container-fluid" style={{ backgroundColor: "#e8fdf0", minHeight: "100vh", padding: "20px" }}>
         <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="m-0 fw-bold">Campos Registrados</h2>
-            <a href="http://localhost:3000/campos" className="btn btn-success fw-bold">
+            <a href="http://localhost:3000/campos" className="btn btn-outline-success">
             + Agregar Campo
             </a>
         </div>
@@ -33,7 +33,7 @@ const VerCampos = () => {
             <div key={campo.id} className="card m-3 p-0 shadow" style={{ width: "18rem" }}>
                 <div className="card-header bg-success text-white text-center fw-bold">
                 <div className="card-body">
-                    <h5 className="card-title">Campo {campo.nombre}</h5>
+                    <h5>Campo {campo.nombre}</h5>
                     <p className="card-text">{campo.provincia}, {campo.localidad} </p>
                 </div>
                 {campo.imagen_satelital && (

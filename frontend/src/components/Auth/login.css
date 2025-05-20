@@ -1,0 +1,26 @@
+.login-container {
+  background-color: #264e3d; /* Fondo general */
+}
+
+.left-panel {
+  flex: 1;
+  background: url("./campo.png") center/cover no-repeat;
+  position: relative;
+  padding: 20px;
+}
+
+.logo-img {
+  width: 700px;
+  max-width: 100%;
+  height: auto;
+}
+.fuente-bonita {
+  font-family: "Poppins", sans-serif;
+}
+
+.right-panel {
+  flex: 1;
+  background-color: #1e1e1e;
+  color: white;
+  border-radius: 0 12px 12px 0;
+}
