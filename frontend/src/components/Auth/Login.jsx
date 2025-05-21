@@ -33,10 +33,9 @@ const Login = () => {
       if (response.ok) {
         localStorage.setItem("accessToken", data.access);
         localStorage.setItem("refreshToken", data.refresh);
-        alert("Login exitoso");
         navigate("/inicio", { replace: true });
       } else {
-        alert("Error: " + (data.detail || "Credenciales inválidas"));
+        alert("Credenciales inválidas");
       }
     } catch (error) {
       alert("Error al intentar iniciar sesión");
@@ -63,7 +62,7 @@ const Login = () => {
             top: "70px",
             left: "50%",
             transform: "translateX(-50%)",
-            maxWidth: "800px",
+            maxWidth: "500px",
             height: "auto",
           }}
         />

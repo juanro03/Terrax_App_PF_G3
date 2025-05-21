@@ -20,7 +20,6 @@ function App() {
         style={{
           overflowY: "auto",
           marginLeft: isSidebarVisible ? "250px" : "0px",
-          padding: "1.5rem",
           width: "100%",
           backgroundColor: "#fff",
         }}

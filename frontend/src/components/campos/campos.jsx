@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Campos.css"; 
 import axios from "../../axiosconfig"; 
 import "@fontsource/poppins"; 
@@ -13,6 +14,8 @@ export default function CampoCRUD() {
     imagen_satelital: null,
     observacion: "",
   });
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchProvincias = async () => {
       try {
@@ -23,9 +26,9 @@ export default function CampoCRUD() {
         console.error("Error al obtener provincias:", error);
       }
     };
-  
     fetchProvincias();
   }, []);  
+
   useEffect(() => {
     const fetchLocalidades = async () => {
       if (form.provincia) {
@@ -43,7 +46,6 @@ export default function CampoCRUD() {
         setLocalidades([]);
       }
     };
-  
     fetchLocalidades();
   }, [form.provincia]);
   
@@ -107,7 +109,7 @@ export default function CampoCRUD() {
     formData.append("provincia", form.provincia);
     formData.append("localidad", form.localidad);
     formData.append("cantidadLotes", form.cantidadLotes);
-    formData.append("imagen_satelital", form.imagen_satelital);  // 👈 nombre correcto
+    formData.append("imagen_satelital", form.imagen_satelital);
     formData.append("observacion", form.observacion);
     
   
@@ -130,10 +132,11 @@ export default function CampoCRUD() {
       setTimeout(() => {
         setMensajeExito("");
       }, 6000);
+
+      navigate("/ver-campos");
     
     } catch (error) {
       console.error("Error al registrar campo:", error);
-      alert("Ocurrió un error al enviar el formulario.");
     }
     
     
@@ -251,6 +254,7 @@ export default function CampoCRUD() {
             id="imagen_satelital"
             className="form-control"
             accept="image/*"
+            required
             onChange={handleChange}
           />
 

@@ -10,3 +10,12 @@ __pycache__/
 
 # Django
 *.log
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Django migrations
+**/migrations/
+!**/migrations/__init__.py
