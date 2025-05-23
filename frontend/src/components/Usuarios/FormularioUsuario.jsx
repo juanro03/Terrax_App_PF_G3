@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 const FormularioUsuario = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // si estamos editando
+  const { id } = useParams();
   const isEdit = Boolean(id);
 
   const [formData, setFormData] = useState({
@@ -18,10 +18,13 @@ const FormularioUsuario = () => {
     is_active: true,
   });
 
+  const [imagenPerfil, setImagenPerfil] = useState(null);
+
   useEffect(() => {
     if (isEdit) {
       axios.get(`http://localhost:8000/api/usuarios/${id}/`).then((res) => {
         setFormData({ ...res.data, password: "" });
+        setImagenPerfil(null); // no mostramos la imagen actual aquí, solo permite cambiarla
       });
     }
   }, [id]);
@@ -30,14 +33,32 @@ const FormularioUsuario = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e) => {
+    setImagenPerfil(e.target.files[0]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const data = new FormData();
+
+    for (const key in formData) {
+      data.append(key, formData[key]);
+    }
+
+    if (imagenPerfil) {
+      data.append("imagen_perfil", imagenPerfil); // nombre debe coincidir con models.py
+    }
+
     try {
       if (isEdit) {
-        await axios.put(`http://localhost:8000/api/usuarios/${id}/`, formData);
+        await axios.put(`http://localhost:8000/api/usuarios/${id}/`, data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
         alert("Usuario actualizado");
       } else {
-        await axios.post("http://localhost:8000/api/usuarios/", formData);
+        await axios.post("http://localhost:8000/api/usuarios/", data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
         alert("Usuario creado");
       }
       navigate("/usuarios");
@@ -50,7 +71,11 @@ const FormularioUsuario = () => {
   return (
     <div className="container">
       <h2>{isEdit ? "Editar Usuario" : "Registrar Usuario"}</h2>
-      <form onSubmit={handleSubmit} className="border p-4 bg-light rounded">
+      <form
+        onSubmit={handleSubmit}
+        className="border p-4 bg-light rounded"
+        encType="multipart/form-data"
+      >
         <div className="mb-3">
           <label>Nombre</label>
           <input
@@ -114,6 +139,17 @@ const FormularioUsuario = () => {
             <option value="productor">Productor</option>
             <option value="admin">Administrador</option>
           </select>
+        </div>
+        <div className="mb-3">
+          <label>Imagen de Perfil</label>
+          <input
+            type="file"
+            name="imagen_perfil"
+            className="form-control"
+            accept="image/*"
+            onChange={handleFileChange}
+            required={!isEdit}
+          />
         </div>
         <div className="form-check mb-3">
           <input

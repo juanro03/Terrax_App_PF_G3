@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Menu,
   Home,
@@ -10,6 +10,24 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
+import axios from "../../axiosconfig";
+
+/*Para obtener el usuario logueado y mostrarlo en el sidebar*/
+function parseJwt(token) {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
 
 function SidebarItem({ icon, label, isOpen, to }) {
   return (
@@ -29,6 +47,36 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const navigate = useNavigate();
   const toggleSidebar = () => setIsOpen(!isOpen);
+  const [usuario, setUsuario] = useState(null);
+
+  useEffect(() => {
+    const fetchUsuario = async () => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        console.log("No hay token");
+        return;
+      }
+
+      const decoded = parseJwt(token);
+      console.log("Token decodificado:", decoded);
+
+      const userId = decoded?.user_id; 
+      if (!userId) {
+        console.log("No se encontró userId en el token");
+        return;
+      }
+
+      try {
+        const res = await axios.get(`/usuarios/${userId}/`);
+        console.log("Datos de usuario:", res.data);
+        setUsuario(res.data);
+      } catch (error) {
+        console.error("Error al obtener el usuario:", error);
+      }
+    };
+
+    fetchUsuario();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -42,12 +90,12 @@ export default function Sidebar() {
         isOpen ? "" : "collapsed-sidebar"
       }`}
       style={{
-        position: "fixed", // 👈 clave
+        position: "fixed",
         top: 0,
         left: 0,
         height: "100vh",
         width: isOpen ? "250px" : "70px",
-        zIndex: 1000, // para que quede por encima
+        zIndex: 1000,
       }}
     >
       <div>
@@ -120,15 +168,16 @@ export default function Sidebar() {
           style={{ fontSize: "1rem" }}
         >
           <img
-            src="https://i.pravatar.cc/32?u=juancito"
+            src={usuario?.imagen_perfil || "/user.png"}
             alt="Avatar"
             className="rounded-circle"
             width="32"
             height="32"
+            style={{ objectFit: "cover" }}
           />
-          {isOpen && (
+          {isOpen && usuario && (
             <span style={{ fontSize: "1.05rem", fontWeight: "500" }}>
-              Juan Perez
+              {usuario.first_name} {usuario.last_name}
             </span>
           )}
         </Dropdown.Toggle>

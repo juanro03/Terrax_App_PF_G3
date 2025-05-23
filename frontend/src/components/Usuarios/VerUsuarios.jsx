@@ -57,7 +57,7 @@ const VerUsuarios = () => {
             </div>
             <div className="card-body text-center">
               <img
-                src="/user.jpg"
+                src={user.imagen_perfil}
                 className="rounded-circle mb-3"
                 alt="Perfil"
                 style={{ width: "80px", height: "80px", objectFit: "cover" }}
