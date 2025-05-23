@@ -19,6 +19,18 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         except Usuario.DoesNotExist:  # Nombre de modelo correcto
             return Response({"detail": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
+    @action(detail=True, methods=["post"], url_path="cambiar-password")
+    def cambiar_password(self, request, pk=None):
+        usuario = self.get_object()
+        actual = request.data.get("actual")
+        nueva = request.data.get("nueva")
+
+        if not usuario.check_password(actual):
+            return Response({"detail": "Contraseña actual incorrecta"}, status=status.HTTP_400_BAD_REQUEST)
+
+        usuario.set_password(nueva)
+        usuario.save()
+        return Response({"detail": "Contraseña actualizada correctamente"}, status=status.HTTP_200_OK)
 
 # Vista personalizada para login con email
 class CustomTokenObtainPairView(TokenObtainPairView):

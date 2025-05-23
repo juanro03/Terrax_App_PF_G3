@@ -13,7 +13,6 @@ const FormularioUsuario = () => {
     last_name: "",
     username: "",
     email: "",
-    password: "",
     rol: "productor",
     is_active: true,
   });
@@ -118,17 +117,6 @@ const FormularioUsuario = () => {
           />
         </div>
         <div className="mb-3">
-          <label>Contraseña</label>
-          <input
-            name="password"
-            type="password"
-            className="form-control"
-            value={formData.password}
-            onChange={handleChange}
-            required={!isEdit}
-          />
-        </div>
-        <div className="mb-3">
           <label>Rol</label>
           <select
             name="rol"
@@ -139,17 +127,6 @@ const FormularioUsuario = () => {
             <option value="productor">Productor</option>
             <option value="admin">Administrador</option>
           </select>
-        </div>
-        <div className="mb-3">
-          <label>Imagen de Perfil</label>
-          <input
-            type="file"
-            name="imagen_perfil"
-            className="form-control"
-            accept="image/*"
-            onChange={handleFileChange}
-            required={!isEdit}
-          />
         </div>
         <div className="form-check mb-3">
           <input

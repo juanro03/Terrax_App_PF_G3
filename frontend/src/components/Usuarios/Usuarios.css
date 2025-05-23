@@ -110,4 +110,7 @@ button {
     color: #ffffff;
     text-align: center;
   }
-  
+
+.modal-label {
+  color: #000 !important;
+}
