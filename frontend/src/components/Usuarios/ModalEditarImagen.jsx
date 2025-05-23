@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Modal, Button, Form } from "react-bootstrap";
-import "./Usuarios.css";
 
-const ModalEditarImagen = ({ show, onHide, usuarioId, onSuccess }) => {
+const EditarImagen = ({ show, onHide, usuarioId, onSuccess }) => {
   const [imagen, setImagen] = useState(null);
 
   const handleSubmit = async (e) => {
@@ -53,4 +52,4 @@ const ModalEditarImagen = ({ show, onHide, usuarioId, onSuccess }) => {
   );
 };
 
-export default ModalEditarImagen;
+export default EditarImagen;

@@ -10,6 +10,7 @@ class Campo(models.Model):
     localidad = models.CharField(max_length=100)
     imagen_satelital = models.ImageField(upload_to='imagenes/', null=True, blank=True)
     propietario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='campos', null=True)
+    cantidadLotes = models.PositiveIntegerField(default=1)
     fecha_creacion = models.DateTimeField(default=timezone.now)
     observacion = models.TextField(blank=True, null=True)
 

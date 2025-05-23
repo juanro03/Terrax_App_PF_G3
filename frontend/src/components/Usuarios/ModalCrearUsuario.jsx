@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import axios from "axios";
-import "./Usuarios.css";
 
-const ModalCrearUsuario = ({ show, onHide, onSuccess }) => {
+const CrearUsuario = ({ show, onHide, onSuccess }) => {
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -100,4 +99,4 @@ const ModalCrearUsuario = ({ show, onHide, onSuccess }) => {
   );
 };
 
-export default ModalCrearUsuario;
+export default CrearUsuario;
