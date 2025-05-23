@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import axios from "axios";
+import "./Usuarios.css";
 
 const ModalEditarUsuario = ({ show, onHide, usuario, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -63,7 +64,7 @@ const ModalEditarUsuario = ({ show, onHide, usuario, onSuccess }) => {
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
-            <Form.Label>Nombre</Form.Label>
+            <Form.Label className="modal-label">Nombre</Form.Label>
             <Form.Control
               name="first_name"
               value={formData.first_name}
@@ -72,7 +73,7 @@ const ModalEditarUsuario = ({ show, onHide, usuario, onSuccess }) => {
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Apellido</Form.Label>
+            <Form.Label className="modal-label">Apellido</Form.Label>
             <Form.Control
               name="last_name"
               value={formData.last_name}
@@ -81,7 +82,7 @@ const ModalEditarUsuario = ({ show, onHide, usuario, onSuccess }) => {
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Username</Form.Label>
+            <Form.Label className="modal-label">Username</Form.Label>
             <Form.Control
               name="username"
               value={formData.username}
@@ -90,7 +91,7 @@ const ModalEditarUsuario = ({ show, onHide, usuario, onSuccess }) => {
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Email</Form.Label>
+            <Form.Label className="modal-label">Email</Form.Label>
             <Form.Control
               name="email"
               type="email"
@@ -100,7 +101,7 @@ const ModalEditarUsuario = ({ show, onHide, usuario, onSuccess }) => {
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Rol</Form.Label>
+            <Form.Label className="modal-label">Rol</Form.Label>
             <Form.Select name="rol" value={formData.rol} onChange={handleChange}>
               <option value="productor">Productor</option>
               <option value="admin">Administrador</option>

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import axios from "axios";
+import "./Usuarios.css";
 
 const ModalCrearUsuario = ({ show, onHide, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -52,34 +53,34 @@ const ModalCrearUsuario = ({ show, onHide, onSuccess }) => {
       <Modal.Body>
         <Form onSubmit={handleSubmit} encType="multipart/form-data">
           <Form.Group className="mb-3">
-            <Form.Label>Nombre</Form.Label>
+            <Form.Label className="modal-label">Nombre</Form.Label>
             <Form.Control name="first_name" value={formData.first_name} onChange={handleChange} required />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Apellido</Form.Label>
+            <Form.Label className="modal-label">Apellido</Form.Label>
             <Form.Control name="last_name" value={formData.last_name} onChange={handleChange} required />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Username</Form.Label>
+            <Form.Label className="modal-label">Username</Form.Label>
             <Form.Control name="username" value={formData.username} onChange={handleChange} required />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Email</Form.Label>
+            <Form.Label className="modal-label">Email</Form.Label>
             <Form.Control name="email" type="email" value={formData.email} onChange={handleChange} required />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Contraseña</Form.Label>
+            <Form.Label className="modal-label">Contraseña</Form.Label>
             <Form.Control name="password" type="password" value={formData.password} onChange={handleChange} required />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Rol</Form.Label>
+            <Form.Label className="modal-label">Rol</Form.Label>
             <Form.Select name="rol" value={formData.rol} onChange={handleChange}>
               <option value="productor">Productor</option>
               <option value="admin">Administrador</option>
             </Form.Select>
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Imagen de Perfil</Form.Label>
+            <Form.Label className="modal-label">Imagen de Perfil</Form.Label>
             <Form.Control type="file" name="imagen_perfil" accept="image/*" onChange={handleFileChange} required />
           </Form.Group>
           <Form.Check
