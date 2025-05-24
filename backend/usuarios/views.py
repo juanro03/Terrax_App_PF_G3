@@ -10,6 +10,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
 
+
     @action(detail=False, methods=['delete'], url_path='delete-by-username/(?P<username>[^/.]+)')
     def delete_by_username(self, request, username=None):
         try:

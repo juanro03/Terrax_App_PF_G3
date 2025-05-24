@@ -8,6 +8,7 @@ export function UserProvider({ children }) {
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
+    console.log("token de acceso: ", token)
     if (!token) return;
 
     try {
@@ -21,12 +22,13 @@ export function UserProvider({ children }) {
       );
       const data = JSON.parse(jsonPayload);
       const userId = data.user_id;
+      console.log("id de usuario: ", userId)
 
       if (userId) {
-        axios.get(`/api/usuarios/${userId}/`)
+        axios.get(`api/usuarios/${userId}/`)
           .then(res => setUsuario(res.data))
           .catch(err => {
-            console.error("Error al obtener el usuario:", err);
+            console.error("Error al obtener el usuario:", err.response?.data || err);
             setUsuario(null);
           });
       }

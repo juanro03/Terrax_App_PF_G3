@@ -2,6 +2,7 @@
 import React from "react";
 import Carrusel from "./Carrusel";
 import WeatherWidget from "./WeatherWidget";
+import Sidebar from "./Sidebar";
 
 const Inicio = () => {
   const token = localStorage.getItem("accessToken");
