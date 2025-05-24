@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
+import { useUser } from "../../UserContext";
 
 function SidebarItem({ icon, label, isOpen, to }) {
   return (
@@ -29,6 +30,7 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const navigate = useNavigate();
   const toggleSidebar = () => setIsOpen(!isOpen);
+  const { usuario } = useUser();
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -36,81 +38,46 @@ export default function Sidebar() {
     navigate("/login");
   };
 
+  if (!usuario) return null;
+
   return (
     <div
       className={`bg-success text-white shadow-sm transition-all p-3 d-flex flex-column justify-content-between rounded-end ${
         isOpen ? "" : "collapsed-sidebar"
       }`}
       style={{
-        position: "fixed", 
+        position: "fixed",
         top: 0,
         left: 0,
         height: "100vh",
         width: isOpen ? "250px" : "70px",
-        zIndex: 1000, 
+        zIndex: 1000,
       }}
     >
       <div>
-        {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <button
-            onClick={toggleSidebar}
-            className="btn btn-outline-light btn-sm"
-          >
+          <button onClick={toggleSidebar} className="btn btn-outline-light btn-sm">
             <Menu size={20} />
           </button>
           {isOpen && (
-            <img
-              src="/logo.png"
-              alt="Terrax Logo"
-              className="img-fluid"
-              style={{ maxWidth: "200px" }}
-            />
+            <img src="/logo.png" alt="Terrax Logo" className="img-fluid" style={{ maxWidth: "200px" }} />
           )}
         </div>
 
-        {/* Navigation */}
         <ul className="nav nav-pills flex-column gap-2">
-          <SidebarItem
-            icon={<Home size={18} />}
-            label="Inicio"
-            isOpen={isOpen}
-            to="/"
-          />
-          <SidebarItem
-            icon={<Calendar size={18} />}
-            label="Calendario"
-            isOpen={isOpen}
-            to="/calendario"
-          />
-          <SidebarItem
-            icon={<Map size={18} />}
-            label="Campos"
-            isOpen={isOpen}
-            to="/VerCampos"
-          />
-          <SidebarItem
-            icon={<BarChart2 size={18} />}
-            label="Reportes"
-            isOpen={isOpen}
-            to="/reportes"
-          />
-          <SidebarItem
-            icon={<FlaskConical size={18} />}
-            label="Calculadora"
-            isOpen={isOpen}
-            to="/calculadora"
-          />
-          <SidebarItem
-            icon={<User size={18} />}
-            label="Usuarios"
-            isOpen={isOpen}
-            to="/usuarios"
-          />
+          <SidebarItem icon={<Home size={18} />} label="Inicio" isOpen={isOpen} to="/inicio" />
+          <SidebarItem icon={<Calendar size={18} />} label="Calendario" isOpen={isOpen} to="/calendario" />
+          {usuario.rol === "productor" && (
+            <SidebarItem icon={<Map size={18} />} label="Mis campos" isOpen={isOpen} to="/VerCampos" />
+          )}
+          <SidebarItem icon={<BarChart2 size={18} />} label="Reportes" isOpen={isOpen} to="/reportes" />
+          <SidebarItem icon={<FlaskConical size={18} />} label="Calculadora" isOpen={isOpen} to="/calculadora" />
+          {usuario.rol === "admin" && (
+            <SidebarItem icon={<User size={18} />} label="Panel de control" isOpen={isOpen} to="/usuarios" />
+          )}
         </ul>
       </div>
 
-      {/* Footer con dropdown de usuario */}
       <Dropdown drop="up">
         <Dropdown.Toggle
           variant="outline-light"
@@ -120,15 +87,16 @@ export default function Sidebar() {
           style={{ fontSize: "1rem" }}
         >
           <img
-            src="https://i.pravatar.cc/32?u=juancito"
+            src={usuario?.imagen_perfil || "/user.png"}
             alt="Avatar"
             className="rounded-circle"
             width="32"
             height="32"
+            style={{ objectFit: "cover" }}
           />
           {isOpen && (
             <span style={{ fontSize: "1.05rem", fontWeight: "500" }}>
-              Juan Perez
+              {usuario.first_name} {usuario.last_name}
             </span>
           )}
         </Dropdown.Toggle>

@@ -4,10 +4,11 @@ import Inicio from "./components/Inicio/Inicio";
 import VerCampos from "./components/campos/VerCampos";
 import VerUsuarios from "./components/Usuarios/VerUsuarios";
 import Sidebar from "./components/Inicio/Sidebar";
+import AdminRoute from "./components/Auth/AdminRoute"; 
 
 function App() {
   const location = useLocation();
-  const hideSidebarPaths = ["/login", "/"]; // rutas donde NO debe mostrarse el sidebar
+  const hideSidebarPaths = ["/login", "/"];
   const isSidebarVisible = !hideSidebarPaths.includes(location.pathname);
 
   return (
@@ -26,8 +27,15 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Login />} />
           <Route path="/inicio" element={<Inicio />} />
-          <Route path="/usuarios" element={<VerUsuarios />} />
           <Route path="/VerCampos" element={<VerCampos />} />
+          <Route
+            path="/usuarios"
+            element={
+              <AdminRoute>
+                <VerUsuarios />
+              </AdminRoute>
+            }
+          />
         </Routes>
       </div>
     </div>

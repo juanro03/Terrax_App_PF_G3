@@ -22,7 +22,9 @@ const ModalEditarCampo = ({ show, onHide, campo, onSuccess }) => {
   useEffect(() => {
     if (form.provincia) {
       axios
-        .get(`https://apis.datos.gob.ar/georef/api/localidades?provincia=${form.provincia}&max=1000`)
+        .get(
+          `https://apis.datos.gob.ar/georef/api/localidades?provincia=${form.provincia}&max=1000`
+        )
         .then((res) => {
           setLocalidades(res.data.localidades.map((l) => l.nombre).sort());
         });
@@ -48,20 +50,28 @@ const ModalEditarCampo = ({ show, onHide, campo, onSuccess }) => {
         if (value instanceof File) {
           formData.append(key, value);
         }
-        // si es string (URL previa), no la incluimos en el PATCH
+      } else if (key === "propietario") {
+        continue; // evitar enviar el propietario en el PATCH
       } else {
         formData.append(key, value);
       }
     }
 
     try {
-      await axios.patch(`http://127.0.0.1:8000/api/campos/${campo.id}/`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await axios.patch(
+        `http://127.0.0.1:8000/api/campos/${campo.id}/`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
       onSuccess();
       onHide();
     } catch (error) {
-      console.error("Error al actualizar campo:", error);
+      console.error(
+        "Error al actualizar campo:",
+        error.response?.data || error
+      );
       alert("No se pudo actualizar el campo");
     }
   };
@@ -75,41 +85,80 @@ const ModalEditarCampo = ({ show, onHide, campo, onSuccess }) => {
         <Form onSubmit={handleSubmit} encType="multipart/form-data">
           <Form.Group className="mb-3">
             <Form.Label className="modal-label">Nombre</Form.Label>
-            <Form.Control name="nombre" value={form.nombre} onChange={handleChange} required />
+            <Form.Control
+              name="nombre"
+              value={form.nombre}
+              onChange={handleChange}
+              required
+            />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label className="modal-label">Provincia</Form.Label>
-            <Form.Select name="provincia" value={form.provincia} onChange={handleChange} required>
+            <Form.Select
+              name="provincia"
+              value={form.provincia}
+              onChange={handleChange}
+              required
+            >
               <option value="">Seleccionar</option>
               {provincias.map((prov, i) => (
-                <option key={i} value={prov}>{prov}</option>
+                <option key={i} value={prov}>
+                  {prov}
+                </option>
               ))}
             </Form.Select>
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label className="modal-label">Localidad</Form.Label>
-            <Form.Select name="localidad" value={form.localidad} onChange={handleChange} required>
+            <Form.Select
+              name="localidad"
+              value={form.localidad}
+              onChange={handleChange}
+              required
+            >
               <option value="">Seleccionar</option>
               {localidades.map((loc, i) => (
-                <option key={i} value={loc}>{loc}</option>
+                <option key={i} value={loc}>
+                  {loc}
+                </option>
               ))}
             </Form.Select>
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label className="modal-label">Cantidad de Lotes</Form.Label>
-            <Form.Control type="number" name="cantidadLotes" value={form.cantidadLotes} onChange={handleChange} required />
+            <Form.Control
+              type="number"
+              name="cantidadLotes"
+              value={form.cantidadLotes}
+              onChange={handleChange}
+              required
+            />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label className="modal-label">Imagen Satelital</Form.Label>
-            <Form.Control type="file" name="imagen_satelital" accept="image/*" onChange={handleChange} />
+            <Form.Control
+              type="file"
+              name="imagen_satelital"
+              accept="image/*"
+              onChange={handleChange}
+            />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label className="modal-label">Observaciones</Form.Label>
-            <Form.Control as="textarea" name="observacion" value={form.observacion} onChange={handleChange} />
+            <Form.Control
+              as="textarea"
+              name="observacion"
+              value={form.observacion}
+              onChange={handleChange}
+            />
           </Form.Group>
           <div className="text-end">
-            <Button variant="secondary" onClick={onHide} className="me-2">Cancelar</Button>
-            <Button type="submit" variant="primary">Guardar Cambios</Button>
+            <Button variant="secondary" onClick={onHide} className="me-2">
+              Cancelar
+            </Button>
+            <Button type="submit" variant="primary">
+              Guardar Cambios
+            </Button>
           </div>
         </Form>
       </Modal.Body>

@@ -33,7 +33,7 @@ const Login = () => {
       if (response.ok) {
         localStorage.setItem("accessToken", data.access);
         localStorage.setItem("refreshToken", data.refresh);
-        navigate("/inicio", { replace: true });
+        window.location.href = "/inicio";
       } else {
         alert("Credenciales inválidas");
       }

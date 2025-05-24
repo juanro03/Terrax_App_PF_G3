@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from "../../axiosconfig";
 import { Modal, Button, Form } from "react-bootstrap";
 
 const EditarImagen = ({ show, onHide, usuarioId, onSuccess }) => {

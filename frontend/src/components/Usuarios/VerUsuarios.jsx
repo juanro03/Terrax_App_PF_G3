@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../../axiosconfig";
 import "./Usuarios.css";
 import { FaEdit, FaTrash, FaPen } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
