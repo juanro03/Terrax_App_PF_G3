@@ -83,11 +83,8 @@ Es necesario tener la Base de Datos Postgresql para poder realizar este paso, pa
 
 ```sql
 CREATE DATABASE terrax_db;
-CREATE USER terrax_user WITH PASSWORD 'terrax_pass';
-ALTER ROLE terrax_user SET client_encoding TO 'UTF8';
-ALTER ROLE terrax_user SET default_transaction_isolation TO 'read committed';
-ALTER ROLE terrax_user SET timezone TO 'UTC';
-GRANT ALL PRIVILEGES ON DATABASE terrax_db TO terrax_user;
+CREATE USER admin WITH PASSWORD 'admin';
+GRANT ALL PRIVILEGES ON DATABASE terrax_db TO admin;
 ```
 
 ### Opción B - Usando pgAdmin 4

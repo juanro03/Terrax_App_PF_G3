@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 .App {
   text-align: center;
 }
@@ -40,4 +39,26 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.login-card {
+  width: 900px;
+  height: 500px;
+  border-radius: 20px;
+}
+
+.bg-image {
+  height: 100%;
+  position: relative;
+}
+
+.overlay {
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+}
+
+.logo-text {
+  font-size: 3rem;
+  letter-spacing: 2px;
+  margin-top: 10px;
 }
