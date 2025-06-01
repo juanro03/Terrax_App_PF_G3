@@ -6,6 +6,7 @@ import VerUsuarios from "./components/Usuarios/VerUsuarios";
 import Sidebar from "./components/Inicio/Sidebar";
 import AdminRoute from "./components/Auth/AdminRoute";
 import Perfil from "./components/Usuarios/Perfil";
+import Calculadora from "./components/Calculadora/Calculadora";
 
 function App() {
   const location = useLocation();
@@ -30,6 +31,7 @@ function App() {
           <Route path="/inicio" element={<Inicio />} />
           <Route path="/VerCampos" element={<VerCampos />} />
           <Route path="/perfil" element={<Perfil />} />
+          <Route path="/calculadora" element={<Calculadora />} />
           <Route
             path="/usuarios"
             element={

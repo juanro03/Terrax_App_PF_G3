@@ -8,16 +8,21 @@ import {
   FlaskConical,
   User,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
 import { useUser } from "../../UserContext";
 
 function SidebarItem({ icon, label, isOpen, to }) {
+  const location = useLocation();
+  const active = location.pathname.startsWith(to);
+
   return (
     <li>
       <Link
         to={to}
-        className="nav-link d-flex align-items-center gap-2 rounded w-100 text-white"
+        title={label}
+        className={`nav-link d-flex align-items-center gap-2 rounded w-100 text-white
+          ${active ? "active bg-white bg-opacity-25" : ""}`}
       >
         {icon}
         {isOpen && <span>{label}</span>}

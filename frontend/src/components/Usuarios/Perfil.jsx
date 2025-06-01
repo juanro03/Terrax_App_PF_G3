@@ -16,8 +16,30 @@ export default function Perfil() {
 
       <div
         className="card p-4 shadow-sm border-0"
-        style={{ backgroundColor: "#ffffff" }} // ← forzamos fondo blanco
+        style={{ backgroundColor: "#ffffff" }}
       >
+        {/* Imagen de perfil */}
+        <div className="text-center mb-4">
+          <img
+            src={
+              usuario.imagen_perfil
+                ? usuario.imagen_perfil.startsWith("http")
+                  ? usuario.imagen_perfil
+                  : `http://localhost:8000/media/${usuario.imagen_perfil}`
+                : "/user.png"
+            }
+            alt="Imagen de perfil"
+            className="rounded-circle"
+            style={{
+              width: "120px",
+              height: "120px",
+              objectFit: "cover",
+              border: "3px solid #198754",
+            }}
+          />
+        </div>
+
+        {/* Datos personales */}
         <div className="mb-3">
           <label className="form-label text-dark">Nombre</label>
           <div className="form-control-plaintext bg-light rounded p-2">
