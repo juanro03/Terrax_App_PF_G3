@@ -18,14 +18,14 @@ const PRODUCTS = [
     id: "fipronil",
     name: "Fipronil",
     unit: "L",
-    range: "0.1 – 0.2 L/ha",
+    range: "0.1–0.2 L/ha",
     category: "insecticida",
   },
   {
     id: "clorpirifos",
     name: "Clorpirifos",
     unit: "L",
-    range: "0.3 – 0.6 L/ha",
+    range: "0.3–0.6 L/ha",
     category: "insecticida",
   },
   {
@@ -129,14 +129,15 @@ const PRODUCTS = [
 ];
 
 const DEFAULT_ROWS = [
-  { id: 1, name: "Zona 1", area: 0, dose: 0 },
-  { id: 2, name: "Zona 2", area: 0, dose: 0 },
-  { id: 3, name: "Zona 3", area: 0, dose: 0 },
+  { id: 1, productId: PRODUCTS[0].id, area: 0, dose: 0 },
+  { id: 2, productId: PRODUCTS[0].id, area: 0, dose: 0 },
+  { id: 3, productId: PRODUCTS[0].id, area: 0, dose: 0 },
 ];
 
 function Calculadora() {
   const [productId, setProductId] = useState(PRODUCTS[0].id);
   const [tankVolume, setTankVolume] = useState(1000);
+  const [cantHa, setCantHa] = useState(100);
   const [rows, setRows] = useState(DEFAULT_ROWS);
 
   // Producto seleccionado
@@ -147,13 +148,20 @@ function Calculadora() {
 
   // Totales
   const totals = useMemo(() => {
-    const totalProduct = rows.reduce(
-      (sum, r) => sum + Number(r.area || 0) * Number(r.dose || 0),
-      0
-    );
+    const totalProduct = rows.reduce((sum, r) => {
+      const product = PRODUCTS.find((p) => p.id === r.productId);
+      const dose = parseFloat(
+        product?.range
+          .match(/[\d.,]+(?=\s*(L|ml|kg)?\/?ha?$)?/g)
+          ?.at(-1)
+          ?.replace(",", ".") || "0"
+      );
+      return sum + cantHa * dose;
+    }, 0);
+
     const water = tankVolume - totalProduct;
     return { totalProduct, water, overflow: water < 0 };
-  }, [rows, tankVolume]);
+  }, [rows, tankVolume, cantHa]);
 
   // ----- helpers -----
   const updateRow = (id, field, value) =>
@@ -164,7 +172,7 @@ function Calculadora() {
   const addRow = () =>
     setRows((prev) => [
       ...prev,
-      { id: Date.now(), name: `Zona ${prev.length + 1}`, area: 0, dose: 0 },
+      { id: Date.now(), name: `Producto ${prev.length + 1}`, area: 0, dose: 0 },
     ]);
 
   const removeRow = (id) => setRows((prev) => prev.filter((r) => r.id !== id));
@@ -175,27 +183,20 @@ function Calculadora() {
       <Card.Body>
         <Card.Title className="h4 mb-3">Calculadora de Caldo</Card.Title>
 
-        {/* Selector producto + volumen */}
-        <Row className="gy-3 align-items-end">
+        {/* Selector cantidad de hectareas + volumen */}
+        <Row className="gy-2 align-items-end mb-1">
           <Col md={6}>
-            <Form.Group controlId="selectProduct">
-              <Form.Label className="text-dark">Producto</Form.Label>
-              <Form.Select
-                value={productId}
-                onChange={(e) => setProductId(e.target.value)}
-              >
-                {PRODUCTS.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </Form.Select>
-              <Form.Text className="text-muted">
-                Dosis de etiqueta: {product.range}
-              </Form.Text>
-              <Form.Text className="text-muted">
-                Categoría: {product.category}
-              </Form.Text>
+            <Form.Group controlId="cantHa">
+              <Form.Label className="text-dark">
+                Cantidad de Hectáreas
+              </Form.Label>
+              <Form.Control
+                className="bg-light"
+                type="number"
+                min={1}
+                value={cantHa}
+                onChange={(e) => setCantHa(Number(e.target.value))}
+              />
             </Form.Group>
           </Col>
 
@@ -214,65 +215,97 @@ function Calculadora() {
           </Col>
         </Row>
 
-        {/* Tabla de zonas */}
+        <Row className="mb-3">
+          <Col md={6}>
+            <div className="small text-muted">
+              Siga el orden correspondiente a la hora de la aplicación de
+              producto.
+              <br />
+            </div>
+          </Col>
+        </Row>
+
+        {/* Tabla de productos */}
         <div className="table-responsive mt-4">
           <Table bordered hover>
             <thead className="table-light">
-              <tr>
-                <th>Zonas Afectadas</th>
-                <th className="text-end">Área (ha)</th>
-                <th className="text-end">Dosis ({product.unit}/ha)</th>
-                <th className="text-end">Producto ({product.unit})</th>
+              <tr className="text-center">
+                <th>Productos a aplicar</th>
+                <th className="text-end text-center">Ficha Técnica</th>
+                <th className="text-end text-center">Dosis Máxima</th>
+                <th className="text-end text-center">Producto Máximo</th>
                 <th style={{ width: 48 }}></th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
-                <tr key={row.id}>
-                  <td>
-                    <Form.Control
-                      value={row.name}
-                      onChange={(e) =>
-                        updateRow(row.id, "name", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td className="text-end">
-                    <Form.Control
-                      type="number"
-                      min={0}
-                      step={0.1}
-                      value={row.area}
-                      onChange={(e) =>
-                        updateRow(row.id, "area", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td className="text-end">
-                    <Form.Control
-                      type="number"
-                      min={0}
-                      step={0.1}
-                      value={row.dose}
-                      onChange={(e) =>
-                        updateRow(row.id, "dose", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td className="text-end align-middle fw-medium">
-                    {(row.area * row.dose || 0).toFixed(2)}
-                  </td>
-                  <td className="text-center">
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      onClick={() => removeRow(row.id)}
-                    >
-                      <Trash2 size={16} />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+              {rows.map((row) => {
+                const selectedProduct = PRODUCTS.find(
+                  (p) => p.id === row.productId
+                );
+
+                return (
+                  <tr key={row.id}>
+                    <td>
+                      <Form.Select
+                        value={row.productId}
+                        onChange={(e) =>
+                          updateRow(row.id, "productId", e.target.value)
+                        }
+                      >
+                        {PRODUCTS.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </td>
+
+                    <td className="text-end">
+                      <Form.Control
+                        type="text"
+                        value={selectedProduct?.range || ""}
+                        readOnly
+                        className="bg-light text-end"
+                      />
+                    </td>
+
+                    <td className="text-end">
+                      <Form.Control
+                        type="number"
+                        readOnly
+                        value={
+                          selectedProduct
+                            ? parseFloat(
+                                selectedProduct.range
+                                  .match(/[\d.,]+(?=\s*(L|ml|kg)?\/?ha?$)?/g)
+                                  ?.at(-1)
+                                  ?.replace(",", ".") || 0
+                              ).toFixed(2)
+                            : "0.00"
+                        }
+                        className="bg-light text-end"
+                      />
+                    </td>
+
+                    <td className="text-end align-middle fw-medium">
+                      {(() => {
+                        const dose = parseFloat(
+                          selectedProduct?.range
+                            .match(/[\d.,]+(?=\s*(L|ml|kg)?\/?ha?$)?/g)
+                            ?.at(-1)
+                            ?.replace(",", ".") || "0"
+                        );
+                        const area = parseFloat(row.area || 0);
+                        return (
+                          (cantHa * dose).toFixed(2) +
+                          " " +
+                          (selectedProduct?.unit || "")
+                        );
+                      })()}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </Table>
         </div>
@@ -282,7 +315,7 @@ function Calculadora() {
           className="d-flex align-items-center gap-1"
           onClick={addRow}
         >
-          <Plus size={18} /> Agregar zona
+          <Plus size={18} /> Agregar
         </Button>
 
         {/* Resultados */}
