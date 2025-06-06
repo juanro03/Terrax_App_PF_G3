@@ -1,26 +1,66 @@
+/* Reinicia márgenes y define fondo verde para html y body */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #264e3d;
+}
+
+/* Wrapper que cubre toda la ventana y centra el contenido */
+.login-page-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #143125;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Contenedor principal con borde redondeado y altura ajustada */
 .login-container {
-  background-color: #264e3d; /* Fondo general */
+  margin: 100px;
+  border-radius: 30px;
+  overflow: hidden;
+  height: calc(100vh - 130px);
+  display: flex;
 }
 
+/* Panel izquierdo ocupa 60% y muestra imagen de fondo */
 .left-panel {
-  flex: 1;
+  flex: 0 0 60%;
   background: url("./campo.png") center/cover no-repeat;
-  position: relative;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-.logo-img {
-  width: 700px;
-  max-width: 100%;
-  height: auto;
-}
-.fuente-bonita {
-  font-family: "Poppins", sans-serif;
-}
-
+/* Panel derecho ocupa 40% con fondo oscuro para el formulario */
 .right-panel {
-  flex: 1;
+  flex: 0 0 40%;
   background-color: #1e1e1e;
   color: white;
   border-radius: 0 12px 12px 0;
+}
+
+/* Estilo para el texto “Bienvenido!” */
+.bienvenido-text {
+  font-size: 4rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Estilo para la imagen del logo en panel izquierdo */
+.logo-img {
+  width: 300px;
+  max-width: 90%;
+  height: auto;
+  margin-top: 1rem;
 }
