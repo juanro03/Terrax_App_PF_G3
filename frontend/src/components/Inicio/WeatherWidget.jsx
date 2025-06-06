@@ -1,5 +1,7 @@
+// src/components/Inicio/WeatherWidget.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Card, Row, Col } from "react-bootstrap";
 
 const WeatherWidget = () => {
   const [weather, setWeather] = useState(null);
@@ -27,42 +29,63 @@ const WeatherWidget = () => {
     fetchWeather();
   }, []);
 
-  if (loading) return <p style={{ color: "#000" }}>Cargando clima...</p>;
-  if (error) return <p style={{ color: "#000" }}>Error al cargar el clima.</p>;
+  if (loading) {
+    return (
+      <Card className="h-100 shadow-sm">
+        <Card.Body className="d-flex justify-content-center align-items-center" style={{ minHeight: "200px" }}>
+          <span>Cargando clima...</span>
+        </Card.Body>
+      </Card>
+    );
+  }
+
+  if (error || !weather) {
+    return (
+      <Card className="h-100 shadow-sm">
+        <Card.Body className="d-flex justify-content-center align-items-center" style={{ minHeight: "200px" }}>
+          <span>Error al cargar el clima.</span>
+        </Card.Body>
+      </Card>
+    );
+  }
 
   return (
-    <div
-      style={{
-        marginTop: "1.5rem",
-        width: "100%",
-        backgroundColor: "#f5f5f5", // blanco
-        color: "#000000",            // texto negro
-        borderRadius: "0.75rem",
-        padding: "1rem",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+    <Card className="h-100 shadow-sm">
+      <Card.Body>
+        <Card.Title className="mb-5">
+          Clima en {weather.name}
+        </Card.Title>
 
-      }}
-    >
-      <div
-        className="card-header fw-bold"
-        style={{
-          backgroundColor: "transparent",
-          borderBottom: "none",
-          fontSize: "1.25rem",
-          marginBottom: "0.75rem",
-        }}
-      >
-        Clima en {weather.name}
-      </div>
-      <div>
-        <h5 className="text-capitalize ">
-          {weather.weather[0].description}
-        </h5>
-        <p style={{ margin: 0, color: "#000" }}>🌡️ {weather.main.temp}°C</p>
-        <p style={{ margin: 0, color: "#000" }}>💧 {weather.main.humidity}% humedad</p>
-        <p style={{ margin: 0, color: "#000" }}>🌬️ {weather.wind.speed} m/s viento</p>
-      </div>
-    </div>
+        <Row className="text-center">
+          {/* Temperatura */}
+          <Col md={4} xs={12} className="mb-3">
+            <div style={{ fontSize: "3rem" }}>🌡️</div>
+            <div className="fw-bold" style={{ fontSize: "2rem" }}>
+              {weather.main.temp}°C
+            </div>
+            <div>Temperatura</div>
+          </Col>
+
+          {/* Humedad */}
+          <Col md={4} xs={12} className="mb-3">
+            <div style={{ fontSize: "3rem" }}>💧</div>
+            <div className="fw-bold" style={{ fontSize: "2rem" }}>
+              {weather.main.humidity}%
+            </div>
+            <div>Humedad</div>
+          </Col>
+
+          {/* Viento */}
+          <Col md={4} xs={12} className="mb-3">
+            <div style={{ fontSize: "3rem" }}>🌬️</div>
+            <div className="fw-bold" style={{ fontSize: "2rem" }}>
+              {weather.wind.speed} m/s
+            </div>
+            <div>Viento</div>
+          </Col>
+        </Row>
+      </Card.Body>
+    </Card>
   );
 };
 

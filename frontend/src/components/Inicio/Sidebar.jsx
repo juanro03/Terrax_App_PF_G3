@@ -1,13 +1,5 @@
-import { useState } from "react";
-import {
-  Menu,
-  Home,
-  Calendar,
-  Map,
-  BarChart2,
-  FlaskConical,
-  User,
-} from "lucide-react";
+// src/components/Inicio/Sidebar.jsx
+import { Menu, Home, Calendar, Map, BarChart2, FlaskConical, User } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
 import { useUser } from "../../UserContext";
@@ -31,16 +23,12 @@ function SidebarItem({ icon, label, isOpen, to }) {
   );
 }
 
-export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(true);
+export default function Sidebar({ isOpen, setIsOpen }) {
   const navigate = useNavigate();
-  const toggleSidebar = () => setIsOpen(!isOpen);
   const { usuario } = useUser();
 
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    navigate("/login");
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
   };
 
   if (!usuario) return null;
@@ -155,7 +143,11 @@ export default function Sidebar() {
           <Dropdown.Item
             onMouseOver={(e) => (e.target.style.backgroundColor = "#198754")}
             onMouseOut={(e) => (e.target.style.backgroundColor = "")}
-            onClick={handleLogout}
+            onClick={() => {
+              localStorage.removeItem("accessToken");
+              localStorage.removeItem("refreshToken");
+              navigate("/login");
+            }}
           >
             Cerrar sesión
           </Dropdown.Item>
