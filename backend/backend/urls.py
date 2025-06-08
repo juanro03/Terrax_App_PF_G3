@@ -15,6 +15,7 @@ urlpatterns = [
     # Rutas de tus apps
     path('api/', include('usuarios.urls')),
     path('api/', include('campos.urls')),
+    path('api/', include('lotes.urls')),
 ] 
 
 # Agrega soporte para archivos MEDIA en desarrollo
