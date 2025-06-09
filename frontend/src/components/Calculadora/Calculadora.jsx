@@ -129,9 +129,9 @@ const PRODUCTS = [
 ];
 
 const DEFAULT_ROWS = [
-  { id: 1, productId: PRODUCTS[0].id, area: 0, dose: 0 },
-  { id: 2, productId: PRODUCTS[0].id, area: 0, dose: 0 },
-  { id: 3, productId: PRODUCTS[0].id, area: 0, dose: 0 },
+  { id: 1, productId: "", area: 0, dose: 0 },
+  { id: 2, productId: "", area: 0, dose: 0 },
+  { id: 3, productId: "", area: 0, dose: 0 },
 ];
 
 function Calculadora() {
@@ -145,6 +145,12 @@ function Calculadora() {
     () => PRODUCTS.find((p) => p.id === productId) ?? PRODUCTS[0],
     [productId]
   );
+
+  const resetCalculator = () => {
+    setCantHa(0);
+    setTankVolume(0);
+    setRows([]);
+  };
 
   // Totales
   const totals = useMemo(() => {
@@ -252,6 +258,7 @@ function Calculadora() {
                           updateRow(row.id, "productId", e.target.value)
                         }
                       >
+                        <option value="">Seleccionar producto</option>
                         {PRODUCTS.map((p) => (
                           <option key={p.id} value={p.id}>
                             {p.name}
@@ -310,13 +317,19 @@ function Calculadora() {
           </Table>
         </div>
 
-        <Button
-          variant="secondary"
-          className="d-flex align-items-center gap-1"
-          onClick={addRow}
-        >
-          <Plus size={18} /> Agregar
-        </Button>
+        <div className="d-flex gap-2 mt-3">
+          <Button
+            variant="secondary"
+            className="d-flex align-items-center gap-1"
+            onClick={addRow}
+          >
+            <Plus size={18} /> Agregar
+          </Button>
+
+          <Button variant="outline-danger" onClick={resetCalculator}>
+            Limpiar calculadora
+          </Button>
+        </div>
 
         {/* Resultados */}
         <Row className="mt-4 gy-3">
