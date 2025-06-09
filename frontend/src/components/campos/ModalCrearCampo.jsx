@@ -13,6 +13,9 @@ const ModalCrearCampo = ({ show, onHide, onSuccess }) => {
   });
   const [provincias, setProvincias] = useState([]);
   const [localidades, setLocalidades] = useState([]);
+  const [previewImagen, setPreviewImagen] = useState(null);
+  const [nombreArchivo, setNombreArchivo] = useState("");
+  const [tamañoArchivo, setTamañoArchivo] = useState(0);  
 
   useEffect(() => {
     axios.get("https://apis.datos.gob.ar/georef/api/provincias").then((res) => {
@@ -33,14 +36,49 @@ const ModalCrearCampo = ({ show, onHide, onSuccess }) => {
   }, [form.provincia]);
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "imagen_satelital") {
-      setForm({ ...form, imagen_satelital: files[0] });
+    const { name, value, type, files } = e.target;
+
+    if (type === "file" && name === "imagen_satelital") {
+      const file = files[0];
+      if (file) {
+        setForm((prevForm) => ({
+          ...prevForm,
+          imagen_satelital: file,
+        }));
+
+        setNombreArchivo(file.name);
+        setTamañoArchivo((file.size / 1024).toFixed(2)); // KB
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreviewImagen(reader.result);
+        };
+        reader.readAsDataURL(file);
+      }
     } else {
-      setForm({ ...form, [name]: value });
+      setForm({
+        ...form,
+        [name]: value,
+      });
     }
   };
+  const eliminarImagen = () => {
+    setForm({ ...form, imagen_satelital: null });
+    setPreviewImagen(null);
+    setNombreArchivo("");
+    setTamañoArchivo(0);
 
+    // 👇 Esto es clave: clona el input y lo reemplaza para reiniciar completamente el campo
+    const input = document.getElementById("imagen_satelital");
+    if (input) {
+      input.value = "";
+      const newInput = input.cloneNode(true);
+      input.parentNode.replaceChild(newInput, input);
+
+      // Reasigná el evento onChange al nuevo input
+      newInput.addEventListener("change", handleChange);
+    }
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -94,9 +132,53 @@ const ModalCrearCampo = ({ show, onHide, onSuccess }) => {
             <Form.Control type="number" name="cantidadLotes" value={form.cantidadLotes} onChange={handleChange} required />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label className="modal-label">Imagen Satelital</Form.Label>
-            <Form.Control type="file" name="imagen_satelital" accept="image/*" onChange={handleChange} required />
+            <Form.Label className="modal-label fw-bold">Imagen Satelital</Form.Label>
+            <Form.Control
+              type="file"
+              name="imagen_satelital"
+              id="imagen_satelital"
+              accept="image/*"
+              onChange={handleChange}
+              required
+            />
+
+            {previewImagen && (
+              <div className="p-3 mt-3 rounded border shadow-sm" style={{ backgroundColor: "#ffffff" }}>
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <div>
+                    <span style={{ color: '#6c757d', fontWeight: 500 }}>{nombreArchivo}</span>
+                    <span className="text-muted"> ({tamañoArchivo} KB)</span>
+                  </div>
+                  <div>
+                    <Button
+                      variant="outline-success"
+                      size="sm"
+                      className="me-2"
+                      onClick={() => document.getElementById("imagen_satelital").click()}
+                    >
+                      Cambiar imagen
+                    </Button>
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      onClick={eliminarImagen}
+                    >
+                      Eliminar
+                    </Button>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <img
+                    src={previewImagen}
+                    alt="Vista previa"
+                    className="img-fluid rounded"
+                    style={{ maxHeight: "300px" }}
+                  />
+                </div>
+              </div>
+            )}
           </Form.Group>
+
           <Form.Group className="mb-3">
             <Form.Label className="modal-label">Observaciones</Form.Label>
             <Form.Control as="textarea" name="observacion" value={form.observacion} onChange={handleChange} />
