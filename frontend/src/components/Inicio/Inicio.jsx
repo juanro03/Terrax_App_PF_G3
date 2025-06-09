@@ -12,7 +12,7 @@ import {
   LineElement,
   Tooltip,
   Legend,
-  Title
+  Title,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
@@ -43,9 +43,9 @@ const Inicio = () => {
         data: [0.45, 0.52, 0.61, 0.57, 0.49],
         borderColor: "#28a745",
         backgroundColor: "rgba(40, 167, 69, 0.2)",
-        tension: 0.3
-      }
-    ]
+        tension: 0.3,
+      },
+    ],
   };
 
   const ndviOptions = {
@@ -54,24 +54,24 @@ const Inicio = () => {
       title: {
         display: true,
         text: "Evolución NDVI (últimos 5 meses)",
-        color: "#333333"
+        color: "#333333",
       },
       legend: {
         labels: {
-          color: "#333333"
-        }
-      }
+          color: "#333333",
+        },
+      },
     },
     scales: {
       x: {
         ticks: { color: "#333333" },
-        grid: { color: "#dddddd" }
+        grid: { color: "#dddddd" },
       },
       y: {
         ticks: { color: "#333333" },
-        grid: { color: "#dddddd" }
-      }
-    }
+        grid: { color: "#dddddd" },
+      },
+    },
   };
 
   return (
@@ -83,20 +83,20 @@ const Inicio = () => {
           padding: "3rem 0",
         }}
       >
-        <Container>
+        <Container className="ps-5">
           <h1 className="display-4 fuente-bonita">Bienvenido a Terrax</h1>
           <p className="lead fuente-bonita">
             Gestiona tus lotes agrícolas, monitorea índices y planifica tu
             producción en un solo lugar.
           </p>
-          <Button variant="success" size="lg">
+          <Button variant="success" size="lg" href="/VerCampos">
             Ver Mis Campos
           </Button>
         </Container>
       </section>
 
       {/* 2) Carrusel */}
-      <Container fluid style={{ padding: "2rem 0"}}>
+      <Container fluid className="ps-2">
         <Row className="justify-content-center">
           <Col lg={10}>
             <Carrusel />
@@ -105,7 +105,7 @@ const Inicio = () => {
       </Container>
 
       {/* 3) Widgets y Tarjetas informativas */}
-      <Container style={{ padding: "2rem 0"}}>
+      <Container style={{ padding: "2rem 0" }}>
         <Row className="g-4">
           {/* 3.1) WeatherWidget */}
           <Col md={6}>
@@ -171,14 +171,18 @@ const Inicio = () => {
               <Card.Body>
                 <Accordion>
                   <Accordion.Item eventKey="0">
-                    <Accordion.Header>Funcionalidad de Mapeo NDVI</Accordion.Header>
+                    <Accordion.Header>
+                      Funcionalidad de Mapeo NDVI
+                    </Accordion.Header>
                     <Accordion.Body>
                       Ahora Terrax permite cargar imágenes multiespectrales para
                       generar mapas NDVI detallados y tomar decisiones precisas.
                     </Accordion.Body>
                   </Accordion.Item>
                   <Accordion.Item eventKey="1">
-                    <Accordion.Header>Nuevo Módulo de Pronóstico</Accordion.Header>
+                    <Accordion.Header>
+                      Nuevo Módulo de Pronóstico
+                    </Accordion.Header>
                     <Accordion.Body>
                       Hemos integrado el pronóstico del clima a 7 días para
                       optimizar tu planificación. Verás alertas meteorológicas
@@ -200,7 +204,7 @@ const Inicio = () => {
       </Container>
 
       {/* 4) Footer */}
-      <footer style={{padding: "1.5rem 0" }}>
+      <footer style={{ padding: "1.5rem 0" }}>
         <Container className="text-center text-muted">
           © 2025 Terrax. Todos los derechos reservados.
         </Container>
