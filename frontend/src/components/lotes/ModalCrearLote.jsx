@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import axios from "../../axiosconfig";
 import MapaLote from "./MapaLote"; 
@@ -13,6 +13,27 @@ const ModalCrearLote = ({ show, onHide, onSuccess, campoId }) => {
 
   const [coordenadas, setCoordenadas] = useState(null);
   const [imagenAutoGenerada, setImagenAutoGenerada] = useState(null);
+  const [centroMapa, setCentroMapa] = useState([-31.41, -64.19]); // Coordenada por defecto (Córdoba)
+  useEffect(() => {
+    if (campoId) {
+      axios.get(`http://127.0.0.1:8000/api/campos/${campoId}/`).then((res) => {
+        const campo = res.data;
+        const provincia = campo.provincia;
+        const localidad = campo.localidad;
+
+        axios
+          .get(
+            `https://apis.datos.gob.ar/georef/api/localidades?provincia=${provincia}&nombre=${localidad}&max=1`
+          )
+          .then((res) => {
+            const centroide = res.data.localidades[0]?.centroide;
+            if (centroide) {
+              setCentroMapa([centroide.lat, centroide.lon]);
+            }
+          });
+      });
+    }
+  }, [campoId]);
 
 
   const handleChange = (e) => {
@@ -107,8 +128,9 @@ const ModalCrearLote = ({ show, onHide, onSuccess, campoId }) => {
               setCoordenadas(coords);
               setImagenAutoGenerada(imagenBlob);
             }}
-
+            centroInicial={centroMapa}
           />
+
           {!coordenadas && (
             <div className="text-danger mt-2">
               * Este campo es obligatorio

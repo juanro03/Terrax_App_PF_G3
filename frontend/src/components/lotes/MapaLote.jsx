@@ -87,13 +87,13 @@ const MapWithDraw = ({ onPoligonoCreado, coordenadasIniciales, mapContainerRef  
   return null;
 };
 
-const MapaLote = ({ onPoligonoCreado, coordenadasIniciales }) => {
+const MapaLote = ({ onPoligonoCreado, coordenadasIniciales, centroInicial }) => {
   const mapContainerRef = useRef(null);
 
   return (
     <div ref={mapContainerRef}>
       <MapContainer
-        center={[-31.41, -64.19]}
+        center={centroInicial}
         zoom={13}
         style={{ height: "400px", width: "100%" }}
         preferCanvas={true}
