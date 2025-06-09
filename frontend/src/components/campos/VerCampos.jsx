@@ -4,12 +4,16 @@ import "./Campos.css";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import ModalCrearCampo from "./ModalCrearCampo";
 import ModalEditarCampo from "./ModalEditarCampo";
+import { useNavigate } from "react-router-dom";
+
 
 const VerCampos = () => {
   const [campos, setCampos] = useState([]);
   const [showCrear, setShowCrear] = useState(false);
   const [showEditar, setShowEditar] = useState(false);
   const [campoSeleccionado, setCampoSeleccionado] = useState(null);
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     fetchCampos();
@@ -52,19 +56,18 @@ const VerCampos = () => {
         <div className="container mt-4">
           <div className="row">
             {campos.map((campo) => (
-              <div key={campo.id} className="card m-3 p-0 shadow" style={{ width: "18rem" }}>
-                <div className="card-header bg-success text-white text-center fw-bold">
+              <div
+                key={campo.id}
+                className="card m-3 p-0 shadow"
+                style={{ width: "18rem", cursor: "pointer" }}
+              >
+                <div
+                  className="card-header bg-success text-white text-center fw-bold"
+                  onClick={() => navigate(`/campos/${campo.id}/lotes`)}
+                >
                   <div className="card-body">
                     <h5>Campo {campo.nombre}</h5>
                     <p className="card-text">{campo.provincia}, {campo.localidad}</p>
-                    <div className="d-flex justify-content-around mt-2">
-                      <button className="btn btn-outline-primary" onClick={() => handleEditar(campo)}>
-                        <FaEdit />
-                      </button>
-                      <button className="btn btn-outline-danger" onClick={() => handleDelete(campo.id)}>
-                        <FaTrash />
-                      </button>
-                    </div>
                   </div>
                   {campo.imagen_satelital && (
                     <img
@@ -74,6 +77,14 @@ const VerCampos = () => {
                       style={{ height: "200px", objectFit: "cover", borderTop: "1px solid #ccc" }}
                     />
                   )}
+                </div>
+                <div className="d-flex justify-content-around mt-2 mb-3">
+                  <button className="btn btn-outline-primary" onClick={(e) => { e.stopPropagation(); handleEditar(campo); }}>
+                    <FaEdit />
+                  </button>
+                  <button className="btn btn-outline-danger" onClick={(e) => { e.stopPropagation(); handleDelete(campo.id); }}>
+                    <FaTrash />
+                  </button>
                 </div>
               </div>
             ))}

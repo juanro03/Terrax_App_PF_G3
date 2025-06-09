@@ -1,17 +1,21 @@
-// src/App.jsx
 import { useState } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
-
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Login from "./components/Auth/Login";
 import Inicio from "./components/Inicio/Inicio";
 import VerCampos from "./components/campos/VerCampos";
+import VerLotes from "./components/lotes/VerLotes";
 import VerUsuarios from "./components/Usuarios/VerUsuarios";
 import Sidebar from "./components/Inicio/Sidebar";
 import AdminRoute from "./components/Auth/AdminRoute";
 import Perfil from "./components/Usuarios/Perfil";
 import Calculadora from "./components/Calculadora/Calculadora";
+import "leaflet/dist/leaflet.css";
+import "leaflet-draw/dist/leaflet.draw.css";
+import "leaflet-draw"; // importante
+import VerLotesWrapper from "./components/lotes/VerLotesWrapper";
 
-function App() {
+
+function AppContent() {
   const location = useLocation();
 
   // 1) Definimos aquí el estado de si el sidebar está abierto o colapsado:
@@ -51,7 +55,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Login />} />
           <Route path="/inicio" element={<Inicio />} />
-          <Route path="/VerCampos" element={<VerCampos />} />
+          <Route path="/vercampos" element={<VerCampos />} />
+          <Route path="/campos/:campoId/lotes" element={<VerLotesWrapper />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/calculadora" element={<Calculadora />} />
           <Route
@@ -68,4 +73,7 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return <AppContent />;
+}
+
