@@ -1,0 +1,52 @@
+.perfil-bg {
+  background-color: #effff1;
+  min-height: 100vh;
+}
+
+.perfil-card {
+  max-width: 600px;
+  background-color: #ffffff;
+  border-radius: 16px;
+}
+
+.perfil-imagen-container {
+  width: 160px;
+  height: 160px;
+}
+
+.perfil-imagen {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  border: 4px solid #198754;
+}
+
+.perfil-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(25, 135, 84, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: 0.3s ease;
+  cursor: pointer;
+}
+
+.perfil-edit-icon {
+  color: white;
+  font-size: 1.6rem;
+}
+
+.perfil-imagen-container:hover .perfil-overlay {
+  opacity: 1;
+}
+
+.perfil-info span {
+  font-size: 1rem;
+}
