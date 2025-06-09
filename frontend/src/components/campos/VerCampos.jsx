@@ -67,8 +67,31 @@ const VerCampos = () => {
                 >
                   <div className="card-body">
                     <h5>Campo {campo.nombre}</h5>
-                    <p className="card-text">{campo.provincia}, {campo.localidad}</p>
+                    <p className="card-text">
+                      {campo.provincia}, {campo.localidad}
+                    </p>
+                    <div className="d-flex justify-content-around mt-2">
+                      <button
+                        className="btn btn-outline-primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditar(campo);
+                        }}
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        className="btn btn-outline-danger"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(campo.id);
+                        }}
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
                   </div>
+
                   {campo.imagen_satelital && (
                     <img
                       src={campo.imagen_satelital}
@@ -78,16 +101,9 @@ const VerCampos = () => {
                     />
                   )}
                 </div>
-                <div className="d-flex justify-content-around mt-2 mb-3">
-                  <button className="btn btn-outline-primary" onClick={(e) => { e.stopPropagation(); handleEditar(campo); }}>
-                    <FaEdit />
-                  </button>
-                  <button className="btn btn-outline-danger" onClick={(e) => { e.stopPropagation(); handleDelete(campo.id); }}>
-                    <FaTrash />
-                  </button>
-                </div>
               </div>
             ))}
+
           </div>
         </div>
       </div>
