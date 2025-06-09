@@ -43,11 +43,7 @@ const ModalCrearLote = ({ show, onHide, onSuccess, campoId }) => {
     formData.append("coordenadas", JSON.stringify(coordenadas));
 
     try {
-      await axios.post("http://127.0.0.1:8000/api/lotes/", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      await axios.post("http://127.0.0.1:8000/api/lotes/", formData);
       onSuccess();
       onHide();
     } catch (error) {
@@ -106,9 +102,12 @@ const ModalCrearLote = ({ show, onHide, onSuccess, campoId }) => {
           <Form.Label>Seleccionar lote en el mapa</Form.Label>
           <MapaLote
             onPoligonoCreado={(coords, imagenBlob) => {
+              console.log("imagenBlob:", imagenBlob);
+              console.log("Es un File?", imagenBlob instanceof File);
               setCoordenadas(coords);
               setImagenAutoGenerada(imagenBlob);
             }}
+
           />
           {!coordenadas && (
             <div className="text-danger mt-2">

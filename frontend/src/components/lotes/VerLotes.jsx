@@ -75,9 +75,18 @@ const VerLotes = ({ campoId }) => {
                   <div className="card-body">
                     <h5>{lote.nombre}</h5>
                     <p className="card-text">
-                      Área: {lote.area} ha <br />
+                      Área: {lote.area} ha
                     </p>
+                    <div className="d-flex justify-content-around mt-2">
+                      <button className="btn btn-outline-primary" onClick={() => handleEditar(lote)}>
+                        <FaEdit />
+                      </button>
+                      <button className="btn btn-outline-danger" onClick={() => handleDelete(lote.id)}>
+                        <FaTrash />
+                      </button>
+                    </div>
                   </div>
+
                   {lote.imagen_satelital && (
                     <img
                       src={lote.imagen_satelital}
@@ -86,15 +95,6 @@ const VerLotes = ({ campoId }) => {
                       style={{ height: "200px", objectFit: "cover", borderTop: "1px solid #ccc" }}
                     />
                   )}
-                </div>
-
-                <div className="d-flex justify-content-around mt-2 mb-3">
-                  <button className="btn btn-outline-primary" onClick={() => handleEditar(lote)}>
-                    <FaEdit />
-                  </button>
-                  <button className="btn btn-outline-danger" onClick={() => handleDelete(lote.id)}>
-                    <FaTrash />
-                  </button>
                 </div>
               </div>
             ))}

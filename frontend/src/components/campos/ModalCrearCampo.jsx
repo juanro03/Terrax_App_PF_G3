@@ -13,9 +13,7 @@ const ModalCrearCampo = ({ show, onHide, onSuccess }) => {
   });
   const [provincias, setProvincias] = useState([]);
   const [localidades, setLocalidades] = useState([]);
-  const [previewImagen, setPreviewImagen] = useState(null);
-  const [nombreArchivo, setNombreArchivo] = useState("");
-  const [tamañoArchivo, setTamañoArchivo] = useState(0);  
+  
 
   useEffect(() => {
     axios.get("https://apis.datos.gob.ar/georef/api/provincias").then((res) => {
