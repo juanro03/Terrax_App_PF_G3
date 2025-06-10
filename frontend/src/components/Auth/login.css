@@ -14,7 +14,7 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #143125;
+  background-color: #12412d;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -23,16 +23,19 @@ body {
 
 /* Contenedor principal con borde redondeado y altura ajustada */
 .login-container {
-  margin: 100px;
+  width: 70vw; /* nuevo */
+  
+  margin: 50px;
   border-radius: 30px;
   overflow: hidden;
-  height: calc(100vh - 130px);
+  height: calc(100vh - 100px);
   display: flex;
 }
 
 /* Panel izquierdo ocupa 60% y muestra imagen de fondo */
 .left-panel {
-  flex: 0 0 60%;
+  flex: 0 0 60%; /* o ajustá a lo que prefieras */
+  min-width: unset; /* elimina la restricción que lo fuerza a 1100px */
   background: url("./campo.png") center/cover no-repeat;
   padding: 20px;
   display: flex;
@@ -43,7 +46,7 @@ body {
 
 /* Panel derecho ocupa 40% con fondo oscuro para el formulario */
 .right-panel {
-  flex: 0 0 40%;
+  flex: 0 0 40%; 
   background-color: #1e1e1e;
   color: white;
   border-radius: 0 12px 12px 0;
@@ -59,8 +62,8 @@ body {
 
 /* Estilo para la imagen del logo en panel izquierdo */
 .logo-img {
-  width: 300px;
-  max-width: 90%;
+  max-width: 500px;
+  width: auto;
   height: auto;
   margin-top: 1rem;
 }

@@ -43,13 +43,13 @@ const Login = () => {
     <div className="login-page-wrapper">
       <div className="login-container d-flex">
         {/* Panel izquierdo */}
-        <div className="left-panel text-white d-flex flex-column justify-content-center align-items-center">
+        <div className="left-panel text-white position-relative d-flex flex-column justify-content-center align-items-center">
           <h1 className="bienvenido-text">Bienvenido!</h1>
-          <img
-            src="/logo.png"
-            alt="TERRAX"
-            style={{ width: "100%", maxWidth: "1000px" }}
-          />
+            <img
+              src="/logo.png"
+              alt="TERRAX"
+              className="logo-img"
+            />
         </div>
 
         {/* Panel derecho */}
