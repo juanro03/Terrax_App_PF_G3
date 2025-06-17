@@ -128,3 +128,37 @@ input[type="file"]::file-selector-button:hover {
 .modal-label {
   color: #000 !important;
 }
+
+/* === Mostrar botones sobre imagen al pasar el mouse === */
+
+.campo-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.campo-card .imagen-container {
+  position: relative;
+}
+
+.campo-card .botones-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.campo-card:hover .botones-overlay {
+  opacity: 1;
+}
+
+.card.bg-verde {
+  background-color: #198754; /* mismo verde que .bg-success */
+}
