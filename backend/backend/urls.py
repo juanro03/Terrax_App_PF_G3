@@ -16,6 +16,7 @@ urlpatterns = [
     path('api/', include('usuarios.urls')),
     path('api/', include('campos.urls')),
     path('api/', include('lotes.urls')),
+    path('api/productos/', include('productos.urls')),  # ✅ importante
 ] 
 
 # Agrega soporte para archivos MEDIA en desarrollo
