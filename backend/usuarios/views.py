@@ -23,11 +23,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"], url_path="cambiar-password")
     def cambiar_password(self, request, pk=None):
         usuario = self.get_object()
-        actual = request.data.get("actual")
         nueva = request.data.get("nueva")
-
-        if not usuario.check_password(actual):
-            return Response({"detail": "Contraseña actual incorrecta"}, status=status.HTTP_400_BAD_REQUEST)
 
         usuario.set_password(nueva)
         usuario.save()
