@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "django_rest_passwordreset",
 
     'rest_framework', 
     'corsheaders',
@@ -94,6 +95,14 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.tu-servidor.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "tu@mail.com"
+EMAIL_HOST_PASSWORD = "tu_password"
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = "no-reply@tudominio.com"
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
