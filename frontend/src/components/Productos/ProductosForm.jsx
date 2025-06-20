@@ -25,7 +25,7 @@ const opciones = {
     "NITRGENO",
     "FOSFORO",
     "POTASIO",
-    "AZUFREW",
+    "AZUFRE",
     "CALCIO",
     "MAGNESIO",
     "COMPLEJO (NPK)",
@@ -102,23 +102,18 @@ const ProductosForm = () => {
     try {
       const token = localStorage.getItem("accessToken");
 
-      let payload = { categoria: categoriaSeleccionada };
+      // Armamos payload completo siempre
+      const payload = {
+        categoria: categoriaSeleccionada,
+        nombre: formData.nombre || null,
+        tipo: formData.tipo || null,
+        cultivo: formData.cultivo || null,
+        variedad: formData.variedad || null,
+        dias_madurez: formData.diasMadurez || null,
+      };
 
-      if (categoriaSeleccionada === "SEMILLAS") {
-        payload = {
-          ...payload,
-          cultivo: formData.cultivo,
-          variedad: formData.variedad,
-          dias_madurez: formData.diasMadurez,
-        };
-      } else {
-        payload = {
-          ...payload,
-          nombre: formData.nombre,
-          tipo: formData.tipo,
-        };
-      }
-      console.log("Payload a enviar:", payload);
+      console.log("Payload final:", payload);
+
       await axios.post("http://localhost:8000/api/productos/", payload, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -126,6 +121,8 @@ const ProductosForm = () => {
       });
 
       alert("Producto agregado con éxito");
+
+      // Reset form
       setFormData({
         nombre: "",
         tipo: "",
@@ -134,10 +131,13 @@ const ProductosForm = () => {
         diasMadurez: "",
       });
     } catch (error) {
-      console.error("Error al guardar producto", error);
+      console.error(
+        "Error al guardar producto:",
+        error.response?.data || error
+      );
+      alert("Error al guardar producto. Revisá consola.");
     }
   };
-
   const renderInputs = () => {
     if (categoriaSeleccionada === "SEMILLAS") {
       return (

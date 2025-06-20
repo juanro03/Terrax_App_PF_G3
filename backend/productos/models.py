@@ -2,6 +2,7 @@ from django.db import models
 
 class Producto(models.Model):
     nombre = models.CharField(max_length=100, blank=True, null=True)  # Ahora opcional
+    tipo = models.CharField(max_length=100, blank=True, null=True)
     categoria = models.CharField(max_length=100)
 
     # Campos específicos para SEMILLAS
