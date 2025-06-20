@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import Login from "./components/Auth/Login";
 import Inicio from "./components/Inicio/Inicio";
 import VerCampos from "./components/campos/VerCampos";
@@ -9,11 +14,14 @@ import Sidebar from "./components/Inicio/Sidebar";
 import AdminRoute from "./components/Auth/AdminRoute";
 import Perfil from "./components/Usuarios/Perfil";
 import Calculadora from "./components/Calculadora/Calculadora";
+import ProductosInicio from "./components/Productos/ProductosInicio";
+import ProductosLista from "./components/Productos/ProductosLista";
+import ProductoForm from "./components/Productos/ProductosForm";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-draw"; // importante
 import VerLotesWrapper from "./components/lotes/VerLotesWrapper";
-
+import ProductosForm from "./components/Productos/ProductosForm";
 
 function AppContent() {
   const location = useLocation();
@@ -59,6 +67,9 @@ function AppContent() {
           <Route path="/campos/:campoId/lotes" element={<VerLotesWrapper />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/calculadora" element={<Calculadora />} />
+          <Route path="/productos" element={<ProductosInicio />} />
+          <Route path="/productos/agregar" element={<ProductosForm />} />
+          <Route path="/productos/ver" element={<ProductosLista />} />
           <Route
             path="/usuarios"
             element={
@@ -76,4 +87,3 @@ function AppContent() {
 export default function App() {
   return <AppContent />;
 }
-
