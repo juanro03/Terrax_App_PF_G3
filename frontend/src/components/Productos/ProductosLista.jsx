@@ -88,7 +88,7 @@ const ProductosLista = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
             >
-              <Card className="shadow-sm rounded-4 h-100 d-flex flex-column justify-content-between">
+              <Card className="shadow-sm rounded-4">
                 <Card.Body>
                   <Card.Title>
                     {prod.nombre ? (
@@ -106,28 +106,38 @@ const ProductosLista = () => {
 
                   <Card.Text>
                     {prod.categoria === "SEMILLAS" ? (
-                      <>
-                        <strong>Cultivo:</strong> {prod.cultivo} <br />
-                        <strong>Variedad:</strong> {prod.variedad} <br />
-                        <strong>Días de madurez:</strong> {prod.dias_madurez}
-                      </>
+                      <span
+                        style={{
+                          color: "#212529",
+                          textAlign: "left",
+                          display: "block",
+                        }}
+                      >
+                        {prod.cultivo} - {prod.variedad} - {prod.dias_madurez}
+                      </span>
                     ) : (
-                      <>
-                        <strong>Tipo:</strong> {prod.tipo}
-                      </>
+                      <span
+                        style={{
+                          color: "#212529",
+                          textAlign: "left",
+                          display: "block",
+                        }}
+                      >
+                        {prod.tipo}
+                      </span>
                     )}
                   </Card.Text>
-                </Card.Body>
 
-                <div className="text-end p-3 pt-0">
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    onClick={() => handleEliminar(prod.id)}
-                  >
-                    🗑️ Eliminar
-                  </Button>
-                </div>
+                  <div className="text-end">
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      onClick={() => handleEliminar(prod.id)}
+                    >
+                      🗑️ Eliminar
+                    </Button>
+                  </div>
+                </Card.Body>
               </Card>
             </motion.div>
           </Col>
