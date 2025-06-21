@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Alert } from 'react-bootstrap';
 import axios from '../../axiosconfig';
 
-export default function RecuperarContraseña({ show, onHide }) {
+export default function ForgetPassword({ show, onHide }) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState(null);
   const [sending, setSending] = useState(false);

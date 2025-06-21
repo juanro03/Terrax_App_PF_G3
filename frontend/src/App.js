@@ -11,7 +11,7 @@ import Perfil from "./components/Usuarios/Perfil";
 import Calculadora from "./components/Calculadora/Calculadora";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
-import "leaflet-draw"; // importante
+import "leaflet-draw";
 import VerLotesWrapper from "./components/lotes/VerLotesWrapper";
 import ResetPassword from './components/Auth/ResetPassword';
 
