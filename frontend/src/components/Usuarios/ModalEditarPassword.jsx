@@ -1,26 +1,42 @@
 import React, { useState } from "react";
 import axios from "../../axiosconfig";
-import { Modal, Button, Form } from "react-bootstrap";
+import { Modal, Button, Form, InputGroup } from "react-bootstrap";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "./Usuarios.css";
 
 const ModalEditarPassword = ({ show, onHide, usuarioId, onSuccess }) => {
-  const [actual, setActual] = useState("");
   const [nueva, setNueva] = useState("");
+  const [confirmar, setConfirmar] = useState("");
+  const [mostrarNueva, setMostrarNueva] = useState(false);
+  const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (nueva !== confirmar) return alert("Las contraseñas no coinciden.");
     try {
       await axios.post(
         `http://localhost:8000/api/usuarios/${usuarioId}/cambiar-password/`,
-        { actual, nueva },
+        { nueva },
         { headers: { "Content-Type": "application/json" } }
       );
       onSuccess();
       onHide();
     } catch (error) {
       console.error("Error al cambiar contraseña:", error);
-      alert("No se pudo cambiar la contraseña. Verifique la actual.");
+      alert("No se pudo cambiar la contraseña.");
     }
+  };
+
+  // Altura de input-sm: calc(1.5em + .5rem + 2px)
+  const eyeStyle = {
+    width: '2.5rem',
+    height: 'calc(1.5em + 1.4rem + 2px)',
+    cursor: 'pointer',
+    borderTopRightRadius: '.25rem',
+    borderBottomRightRadius: '.25rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   };
 
   return (
@@ -30,29 +46,58 @@ const ModalEditarPassword = ({ show, onHide, usuarioId, onSuccess }) => {
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
+
+          {/* Nueva Contraseña */}
           <Form.Group className="mb-3">
-            <Form.Label className="modal-label">Contraseña Actual</Form.Label>
-            <Form.Control
-              type="password"
-              value={actual}
-              onChange={(e) => setActual(e.target.value)}
-              required
-            />
+            <Form.Label>Nueva Contraseña</Form.Label>
+            <InputGroup className="input-group">
+              <Form.Control
+                className="rounded-start"
+                type={mostrarNueva ? "text" : "password"}
+                value={nueva}
+                onChange={(e) => setNueva(e.target.value)}
+                required
+              />
+              <InputGroup.Text
+                className="rounded-end p-0"
+                style={eyeStyle}
+                onMouseDown={() => setMostrarNueva(true)}
+                onMouseUp={() => setMostrarNueva(false)}
+                onMouseLeave={() => setMostrarNueva(false)}
+              >
+                {mostrarNueva ? <FaEyeSlash /> : <FaEye />}
+              </InputGroup.Text>
+            </InputGroup>
           </Form.Group>
+
+          {/* Confirmar Contraseña */}
           <Form.Group className="mb-3">
-            <Form.Label className="modal-label">Nueva Contraseña</Form.Label>
-            <Form.Control
-              type="password"
-              value={nueva}
-              onChange={(e) => setNueva(e.target.value)}
-              required
-            />
+            <Form.Label>Confirmar Contraseña</Form.Label>
+            <InputGroup className="input-group">
+              <Form.Control
+                className="rounded-start"
+                type={mostrarConfirmar ? "text" : "password"}
+                value={confirmar}
+                onChange={(e) => setConfirmar(e.target.value)}
+                required
+              />
+              <InputGroup.Text
+                className="rounded-end p-0"
+                style={eyeStyle}
+                onMouseDown={() => setMostrarConfirmar(true)}
+                onMouseUp={() => setMostrarConfirmar(false)}
+                onMouseLeave={() => setMostrarConfirmar(false)}
+              >
+                {mostrarConfirmar ? <FaEyeSlash /> : <FaEye />}
+              </InputGroup.Text>
+            </InputGroup>
           </Form.Group>
+
           <div className="text-end">
             <Button variant="secondary" onClick={onHide} className="me-2">
               Cancelar
             </Button>
-            <Button type="submit" variant="primary">
+            <Button type="submit" variant="success">
               Cambiar
             </Button>
           </div>

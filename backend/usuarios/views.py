@@ -38,9 +38,6 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         actual = request.data.get("actual")
         nueva  = request.data.get("nueva")
 
-        if not usuario.check_password(actual):
-            return Response({"detail": "Contraseña actual incorrecta"}, status=status.HTTP_400_BAD_REQUEST)
-
         usuario.set_password(nueva)
         usuario.save()
         return Response({"detail": "Contraseña actualizada correctamente"}, status=status.HTTP_200_OK)
