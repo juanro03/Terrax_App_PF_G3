@@ -96,13 +96,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.tu-servidor.com"
-EMAIL_PORT = 587
-EMAIL_HOST_USER = "tu@mail.com"
-EMAIL_HOST_PASSWORD = "tu_password"
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = "no-reply@tudominio.com"
+FRONTEND_RESET_PASSWORD_URL = "http://localhost:3000/reset-password"
+EMAIL_BACKEND      = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST         = "smtp.gmail.com"
+EMAIL_PORT         = 587
+EMAIL_HOST_USER     = "terrax.app@gmail.com"
+EMAIL_HOST_PASSWORD = "qpvkabvwflsiiatc"
+EMAIL_USE_TLS      = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'

@@ -7,6 +7,9 @@ import ModalEditarImagen from "./ModalEditarImagen";
 import ModalEditarPassword from "./ModalEditarPassword";
 import ModalCrearUsuario from "./ModalCrearUsuario";
 import ModalEditarUsuario from "./ModalEditarUsuario";
+import { FaEnvelope } from "react-icons/fa";
+import ModalNotificarUsuario from "./ModalNotificarUsuario";
+
 
 const VerUsuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
@@ -18,6 +21,9 @@ const VerUsuarios = () => {
   const [filtroBusqueda, setFiltroBusqueda] = useState("");
   const [filtroRol, setFiltroRol] = useState("todos");
   const navigate = useNavigate();
+  const [showNotificarModal, setShowNotificarModal] = useState(false);
+  const [usuarioParaNotificar, setUsuarioParaNotificar] = useState(null);
+
 
   useEffect(() => {
     fetchUsuarios();
@@ -203,6 +209,15 @@ const VerUsuarios = () => {
                 >
                   <FaTrash />
                 </button>
+                <button
+                  className="btn btn-outline-success"
+                  onClick={() => {
+                      setUsuarioParaNotificar(user);
+                      setShowNotificarModal(true);
+                  }}
+                >
+                  <FaEnvelope />
+                </button>
               </div>
             </div>
           ))}
@@ -210,30 +225,38 @@ const VerUsuarios = () => {
 
       {/* Modales */}
       {usuarioSeleccionado && (
-        <>
-          <ModalEditarImagen
-            show={showImgModal}
-            onHide={() => setShowImgModal(false)}
-            usuarioId={usuarioSeleccionado.id}
-            onSuccess={fetchUsuarios}
-            method="patch"
-          />
-          <ModalEditarPassword
-            show={showPassModal}
-            onHide={() => setShowPassModal(false)}
-            usuarioId={usuarioSeleccionado.id}
-            onSuccess={fetchUsuarios}
-            method="patch"
-          />
-          <ModalEditarUsuario
-            show={showEditarModal}
-            onHide={() => setShowEditarModal(false)}
-            usuario={usuarioSeleccionado}
-            onSuccess={fetchUsuarios}
-            method="patch"
-          />
-        </>
-      )}
+  <>
+    <ModalEditarImagen
+      show={showImgModal}
+      onHide={() => setShowImgModal(false)}
+      usuarioId={usuarioSeleccionado.id}
+      onSuccess={fetchUsuarios}
+      method="patch"
+    />
+    <ModalEditarPassword
+      show={showPassModal}
+      onHide={() => setShowPassModal(false)}
+      usuarioId={usuarioSeleccionado.id}
+      onSuccess={fetchUsuarios}
+      method="patch"
+    />
+    <ModalEditarUsuario
+      show={showEditarModal}
+      onHide={() => setShowEditarModal(false)}
+      usuario={usuarioSeleccionado}
+      onSuccess={fetchUsuarios}
+      method="patch"
+    />
+  </>
+)}
+
+{usuarioParaNotificar && (
+  <ModalNotificarUsuario
+    show={showNotificarModal}
+    onHide={() => setShowNotificarModal(false)}
+    usuarioId={usuarioParaNotificar.id}
+  />
+)}
 
       <ModalCrearUsuario
         show={showCrearModal}
