@@ -12,6 +12,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    "UNICODE_JSON": False,
+    "STRICT_JSON": True,  # fuerza a que NaN / Infinity den error antes de llegar al renderizado
 }
 
 SIMPLE_JWT = {
@@ -76,7 +78,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'terrax_db',
         'USER': 'postgres',
-        'PASSWORD': 'admin',
+        'PASSWORD': 'postgres',
         'HOST': 'localhost',
         'PORT': '5432',
     }
