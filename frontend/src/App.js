@@ -14,6 +14,8 @@ import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-draw"; // importante
 import VerLotesWrapper from "./components/lotes/VerLotesWrapper";
 import ResetPassword from './components/Auth/ResetPassword';
+import DetalleLote from "./components/lotes/DetalleLote";
+
 
 
 function AppContent() {
@@ -61,6 +63,7 @@ function AppContent() {
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/calculadora" element={<Calculadora />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/lote/:loteId" element={<DetalleLote />} />
           <Route
             path="/usuarios"
             element={

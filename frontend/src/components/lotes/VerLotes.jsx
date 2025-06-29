@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../axiosconfig";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaPen, FaTrash } from "react-icons/fa";
 import ModalCrearLote from "./ModalCrearLote";
 import ModalEditarLote from "./ModalEditarLote";
 import "./Lotes.css";
+import { Link } from "react-router-dom";
+
 
 const VerLotes = ({ campoId }) => {
   const [lotes, setLotes] = useState([]);
@@ -56,7 +58,9 @@ const VerLotes = ({ campoId }) => {
   return (
     <div className="container-fluid" style={{ backgroundColor: "#e8fdf0", minHeight: "100vh", padding: "20px" }}>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="m-0 fw-bold">Campo: {campoNombre}</h2> {/* ✅ cambio aquí */}
+        <h2 className="m-0 fw-bold" style={{ color: "#025940" }}>
+          Campo: {campoNombre}
+        </h2>
         <button className="btn btn-outline-success" onClick={() => setShowCrear(true)}>
           + Agregar Lote
         </button>
@@ -66,10 +70,11 @@ const VerLotes = ({ campoId }) => {
         <div className="container mt-4">
           <div className="row">
             {lotes.map((lote) => (
-              <div
+              <Link
                 key={lote.id}
-                className="card m-3 p-0 shadow"
-                style={{ width: "18rem", cursor: "default" }}
+                to={`/lote/${lote.id}`}
+                className="card m-3 p-0 shadow text-decoration-none"
+                style={{ width: "18rem", cursor: "pointer", color: "inherit" }}
               >
                 <div className="card-header bg-success text-white text-center fw-bold">
                   <div className="card-body">
@@ -79,8 +84,9 @@ const VerLotes = ({ campoId }) => {
                     </p>
                     <div className="d-flex justify-content-around mt-2">
                       <button className="btn btn-outline-primary" onClick={() => handleEditar(lote)}>
-                        <FaEdit />
+                        <FaPen />
                       </button>
+
                       <button className="btn btn-outline-danger" onClick={() => handleDelete(lote.id)}>
                         <FaTrash />
                       </button>
@@ -88,15 +94,30 @@ const VerLotes = ({ campoId }) => {
                   </div>
 
                   {lote.imagen_satelital && (
-                    <img
-                      src={lote.imagen_satelital}
-                      alt={`Imagen del lote ${lote.nombre}`}
-                      className="card-img-bottom"
-                      style={{ height: "200px", objectFit: "cover", borderTop: "1px solid #ccc" }}
-                    />
+                    <div className="imagen-lote-wrapper">
+                      <img
+                        src={lote.imagen_satelital}
+                        alt={`Imagen del lote ${lote.nombre}`}
+                        className="imagen-lote"
+                      />
+                      <div className="overlay-lote"></div>
+                        <div className="iconos-flotantes-verticales">
+                          <FaPen
+                            className="icono-lote"
+                            onClick={() => handleEditar(lote)}
+                            title="Editar"
+                          />
+                          <FaTrash
+                            className="icono-lote eliminar"
+                            onClick={() => handleDelete(lote.id)}
+                            title="Eliminar"
+                          />
+                        </div>
+                    </div>
                   )}
+
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

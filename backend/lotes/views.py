@@ -4,6 +4,8 @@ from rest_framework import viewsets
 from rest_framework.permissions import AllowAny   # <-- agregalo
 from .models import Lote
 from .serializers import LoteSerializer
+from .models import Siembra
+from .serializers import SiembraSerializer
 
 class LoteViewSet(viewsets.ModelViewSet):
     queryset = Lote.objects.all()
@@ -15,3 +17,8 @@ class LoteViewSet(viewsets.ModelViewSet):
         lotes = Lote.objects.filter(campo_id=campo_id)
         serializer = self.get_serializer(lotes, many=True)
         return Response(serializer.data)
+    
+class SiembraViewSet(viewsets.ModelViewSet):
+    queryset = Siembra.objects.all()
+    serializer_class = SiembraSerializer
+    
