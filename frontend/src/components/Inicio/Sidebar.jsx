@@ -11,6 +11,7 @@ import {
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
 import { useUser } from "../../UserContext";
+import { FaStackOverflow } from "react-icons/fa";
 
 function SidebarItem({ icon, label, isOpen, to }) {
   const location = useLocation();
@@ -26,7 +27,11 @@ function SidebarItem({ icon, label, isOpen, to }) {
     ${active ? "active bg-white bg-opacity-25" : ""}`}
       >
         {icon}
-        {isOpen && <span style={{fontSize: "1.15rem", fontWeight: "400" }}>{label}</span>}
+        {isOpen && (
+          <span style={{ fontSize: "1.15rem", fontWeight: "400" }}>
+            {label}
+          </span>
+        )}
       </Link>
     </li>
   );
@@ -116,6 +121,12 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             label="Reportes"
             isOpen={isOpen}
             to="/reportes"
+          />
+          <SidebarItem
+            icon={<FaStackOverflow size={18} />}
+            label="Productos"
+            isOpen={isOpen}
+            to="/productos"
           />
           <SidebarItem
             icon={<FlaskConical size={18} />}
