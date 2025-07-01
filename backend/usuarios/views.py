@@ -4,16 +4,18 @@ from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django.conf import settings 
-
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
-from rest_framework_simplejwt.views import TokenObtainPairView
-
+from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from .models import Usuario
 from .serializers import UsuarioSerializer, CustomTokenObtainPairSerializer
+
+from rest_framework import viewsets, status
+from rest_framework.decorators import action, api_view
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+
 
 
 class UsuarioViewSet(viewsets.ModelViewSet):
@@ -50,6 +52,27 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+User = get_user_model()
+
+@api_view(['POST'])
+def enviar_notificacion(request):
+    try:
+        user_id = request.data.get("user_id")
+        user = User.objects.get(id=user_id)
+
+        send_mail(
+            subject="Aviso de deuda pendiente",
+            message="Estimado, nos ponemos en contacto con usted desde Terrax para informarle que tiene una deuda pendiente. Ponerse en contacto con los administradores. Muchas gracias. Saludos",
+            from_email="noreply@terrax.com",  # o el que esté en tus settings
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+
+        return Response({"mensaje": "Notificación enviada con éxito"}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        print("Error al enviar notificación:", e)
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class PasswordResetRequestAPIView(APIView):
     """
