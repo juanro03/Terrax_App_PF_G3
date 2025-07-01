@@ -20,9 +20,10 @@ const opciones = {
     "ACONDICIONADOR DE AGUA",
     "CORRECTOR DE PH",
     "CAPTURADOR DE CATIONES",
+    "OTROS",
   ],
   FERTILIZANTES: [
-    "NITRGENO",
+    "NITROGENO",
     "FOSFORO",
     "POTASIO",
     "AZUFRE",
@@ -84,7 +85,6 @@ const ProductosForm = () => {
   const navigate = useNavigate();
   const [categoriaSeleccionada, setCategoriaSeleccionada] =
     useState("COADYUVANTES");
-
   const [formData, setFormData] = useState({
     nombre: "",
     tipo: "",
@@ -92,9 +92,14 @@ const ProductosForm = () => {
     variedad: "",
     diasMadurez: "",
   });
+  const [inputOtroTipo, setInputOtroTipo] = useState("");
 
   const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "tipo" && value !== "OTROS") {
+      setInputOtroTipo(""); // limpiar si no es OTROS
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -102,11 +107,13 @@ const ProductosForm = () => {
     try {
       const token = localStorage.getItem("accessToken");
 
-      // Armamos payload completo siempre
       const payload = {
         categoria: categoriaSeleccionada,
         nombre: formData.nombre || null,
-        tipo: formData.tipo || null,
+        tipo:
+          formData.tipo === "OTROS" && inputOtroTipo
+            ? inputOtroTipo
+            : formData.tipo || null,
         cultivo: formData.cultivo || null,
         variedad: formData.variedad || null,
         dias_madurez: formData.diasMadurez || null,
@@ -121,8 +128,6 @@ const ProductosForm = () => {
       });
 
       alert("Producto agregado con éxito");
-
-      // Reset form
       setFormData({
         nombre: "",
         tipo: "",
@@ -130,6 +135,7 @@ const ProductosForm = () => {
         variedad: "",
         diasMadurez: "",
       });
+      setInputOtroTipo("");
     } catch (error) {
       console.error(
         "Error al guardar producto:",
@@ -138,6 +144,7 @@ const ProductosForm = () => {
       alert("Error al guardar producto. Revisá consola.");
     }
   };
+
   const renderInputs = () => {
     if (categoriaSeleccionada === "SEMILLAS") {
       return (
@@ -224,6 +231,16 @@ const ProductosForm = () => {
               </option>
             ))}
           </Form.Select>
+          {formData.tipo === "OTROS" && (
+            <Form.Control
+              type="text"
+              placeholder="Especifique otro tipo"
+              value={inputOtroTipo}
+              onChange={(e) => setInputOtroTipo(e.target.value)}
+              className="mt-2"
+              style={inputStyle}
+            />
+          )}
         </Col>
       </>
     );
@@ -334,7 +351,9 @@ const ProductosForm = () => {
             ) : (
               <>
                 <Col>{formData.nombre}</Col>
-                <Col>{formData.tipo}</Col>
+                <Col>
+                  {formData.tipo === "OTROS" ? inputOtroTipo : formData.tipo}
+                </Col>
               </>
             )}
           </Row>
