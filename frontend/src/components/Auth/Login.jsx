@@ -3,12 +3,12 @@ import { Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import RecuperarContraseña from "./RecuperarContraseña";
+import ForgetPassword from "./ForgetPassword";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showRecupContraseña, setRecupContraseña] = useState(false);
+  const [showForgetPassword, setForgetPassoword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -80,7 +80,7 @@ const Login = () => {
               <div className="d-flex justify-content-between mb-3">
                 <Form.Check type="checkbox" label="Recordar contraseña" />
                 <a href="#" className="text-decoration-none text-white"
-                onClick={() => setRecupContraseña(true)}>
+                onClick={() => setForgetPassoword(true)}>
                   ¿Olvidaste tu contraseña?
                 </a>
               </div>
@@ -93,7 +93,7 @@ const Login = () => {
                 Iniciar
               </Button>
             </Form>
-            <RecuperarContraseña show={showRecupContraseña} onHide={() => setRecupContraseña(false)} />
+            <ForgetPassword show={showForgetPassword} onHide={() => setForgetPassoword(false)} />
           </div>
         </div>
       </div>

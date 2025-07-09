@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import axios from "../../axiosconfig";
-import MapaLote from "./MapaLote"; 
+import MapaLote from "./MapaLote";
+import * as turf from "@turf/turf";
 
 const ModalCrearLote = ({ show, onHide, onSuccess, campoId }) => {
   const [form, setForm] = useState({
@@ -14,6 +15,7 @@ const ModalCrearLote = ({ show, onHide, onSuccess, campoId }) => {
   const [coordenadas, setCoordenadas] = useState(null);
   const [imagenAutoGenerada, setImagenAutoGenerada] = useState(null);
   const [centroMapa, setCentroMapa] = useState([-31.41, -64.19]); // Coordenada por defecto (Córdoba)
+
   useEffect(() => {
     if (campoId) {
       axios.get(`http://127.0.0.1:8000/api/campos/${campoId}/`).then((res) => {
@@ -35,7 +37,6 @@ const ModalCrearLote = ({ show, onHide, onSuccess, campoId }) => {
     }
   }, [campoId]);
 
-
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "imagen_satelital") {
@@ -48,18 +49,20 @@ const ModalCrearLote = ({ show, onHide, onSuccess, campoId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!coordenadas) {
-      alert("Debes seleccionar el área del lote en el mapa.");
+    const areaValue = parseFloat(form.area);
+    if (isNaN(areaValue) || !isFinite(areaValue)) {
+      alert("Error: el área calculada no es válida.");
       return;
     }
 
     const formData = new FormData();
-
     formData.append("nombre", form.nombre);
-    formData.append("area", form.area);
-    formData.append("imagen_satelital", imagenAutoGenerada ?? form.imagen_satelital);
+    formData.append("area", areaValue); // Ya validado como número real
+    formData.append(
+      "imagen_satelital",
+      imagenAutoGenerada ?? form.imagen_satelital
+    );
     formData.append("observacion", form.observacion);
-    //formData.append("campo", campoId); 
     formData.append("campo", parseInt(campoId, 10));
     formData.append("coordenadas", JSON.stringify(coordenadas));
 
@@ -68,13 +71,10 @@ const ModalCrearLote = ({ show, onHide, onSuccess, campoId }) => {
       onSuccess();
       onHide();
     } catch (error) {
-      if (error.response) {
-        //console.error("Detalles del error:", error.response.data);
-        alert("Error al crear lote: " + JSON.stringify(error.response.data, null, 2));
-      } else {
-        console.error("Error inesperado:", error);
-        alert("Error inesperado al crear lote.");
-      }
+      console.error("Error al crear lote:", error);
+      alert(
+        "Ocurrió un error al crear el lote. Verificá la consola para más detalles."
+      );
     }
   };
 
@@ -97,17 +97,6 @@ const ModalCrearLote = ({ show, onHide, onSuccess, campoId }) => {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Área (ha)</Form.Label>
-            <Form.Control
-              type="number"
-              name="area"
-              value={form.area}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
             <Form.Label>Observaciones</Form.Label>
             <Form.Control
               as="textarea"
@@ -118,26 +107,68 @@ const ModalCrearLote = ({ show, onHide, onSuccess, campoId }) => {
             />
           </Form.Group>
 
-          {/* CAMPO DEL MAPA */}
           <Form.Group className="mb-3">
-          <Form.Label>Seleccionar lote en el mapa</Form.Label>
-          <MapaLote
-            onPoligonoCreado={(coords, imagenBlob) => {
-              console.log("imagenBlob:", imagenBlob);
-              console.log("Es un File?", imagenBlob instanceof File);
-              setCoordenadas(coords);
-              setImagenAutoGenerada(imagenBlob);
-            }}
-            centroInicial={centroMapa}
-          />
+            <Form.Label>Área estimada (ha)</Form.Label>
+            <Form.Control type="text" value={form.area} readOnly />
+          </Form.Group>
 
-          {!coordenadas && (
-            <div className="text-danger mt-2">
-              * Este campo es obligatorio
-            </div>
-          )}
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Seleccionar lote en el mapa</Form.Label>
+            <MapaLote
+              onPoligonoCreado={(coords, imagenBlob) => {
+                console.log("Coords recibidas:", coords);
+                coords.forEach((p, i) => console.log(`Punto ${i}:`, p));
 
+                if (!Array.isArray(coords)) {
+                  alert("Error interno: las coordenadas no son válidas.");
+                  return;
+                }
+
+                setCoordenadas(coords);
+                setImagenAutoGenerada(imagenBlob);
+
+                try {
+                  // 🔄 transformar cada { lat, lng } => [lng, lat]
+                  const transformed = coords.map((point) => {
+                    if (point.lat !== undefined && point.lng !== undefined) {
+                      return [point.lng, point.lat]; // GeoJSON usa [lon, lat]
+                    } else {
+                      throw new Error("Formato de punto inválido");
+                    }
+                  });
+
+                  // Asegurar cierre del polígono
+                  const first = transformed[0];
+                  const last = transformed[transformed.length - 1];
+                  if (first[0] !== last[0] || first[1] !== last[1]) {
+                    transformed.push(first);
+                  }
+
+                  const polygon = turf.polygon([transformed]);
+                  const areaHa = turf.area(polygon) / 10000;
+
+                  if (isNaN(areaHa) || !isFinite(areaHa)) {
+                    throw new Error("Área inválida");
+                  }
+
+                  setForm((prevForm) => ({
+                    ...prevForm,
+                    area: areaHa.toFixed(2),
+                  }));
+                } catch (err) {
+                  console.error("Error calculando el área:", err);
+                  alert("Error: el área calculada no es válida.");
+                }
+              }}
+              centroInicial={centroMapa}
+            />
+
+            {!coordenadas && (
+              <div className="text-danger mt-2">
+                * Este campo es obligatorio
+              </div>
+            )}
+          </Form.Group>
 
           <div className="d-flex justify-content-end">
             <Button variant="secondary" onClick={onHide} className="me-2">

@@ -1,12 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import UsuarioViewSet
-from .views import enviar_notificacion
+from .views import ProductoViewSet
 
 router = DefaultRouter()
-router.register(r'usuarios', UsuarioViewSet)
+router.register(r'', ProductoViewSet)  # endpoint base: /api/productos/
 
 urlpatterns = [
     path('', include(router.urls)),
-    path("notificar/", enviar_notificacion),
 ]
