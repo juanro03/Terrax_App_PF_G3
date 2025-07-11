@@ -7,7 +7,7 @@ import "./Lotes.css";
 
 const VerLotes = ({ campoId }) => {
   const [lotes, setLotes] = useState([]);
-  const [campoNombre, setCampoNombre] = useState(""); // ✅ nuevo estado
+  const [campoNombre, setCampoNombre] = useState("");
   const [showCrear, setShowCrear] = useState(false);
   const [showEditar, setShowEditar] = useState(false);
   const [loteSeleccionado, setLoteSeleccionado] = useState(null);
@@ -20,7 +20,7 @@ const VerLotes = ({ campoId }) => {
   const fetchCampoNombre = async () => {
     try {
       const res = await axios.get(`http://127.0.0.1:8000/api/campos/${campoId}/`);
-      setCampoNombre(res.data.nombre); // ✅ campo.nombre esperado desde backend
+      setCampoNombre(res.data.nombre); 
     } catch (error) {
       console.error("Error al obtener el nombre del campo:", error);
       setCampoNombre(`ID ${campoId}`);

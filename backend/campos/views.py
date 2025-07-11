@@ -1,18 +1,24 @@
 from rest_framework import viewsets
 from .models import Campo
 from .serializers import CampoSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 class CampoViewSet(viewsets.ModelViewSet):
     queryset = Campo.objects.all()
     serializer_class = CampoSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]  #permiso abierto para pruebas (IsAuthenticated para pedir autenticacion)
 
     def get_queryset(self):
         user = self.request.user
-        if user.rol == 'admin':
+        # Si no está autenticado, devolver todos para pruebas
+        if not user.is_authenticated:
             return Campo.objects.all()
+
+        # Si está autenticado y es admin
+        if hasattr(user, 'rol') and user.rol == 'admin':
+            return Campo.objects.all()
+
         return Campo.objects.filter(propietario=user)
 
     def perform_create(self, serializer):

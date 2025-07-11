@@ -8,7 +8,7 @@ from .serializers import LoteSerializer
 class LoteViewSet(viewsets.ModelViewSet):
     queryset = Lote.objects.all()
     serializer_class = LoteSerializer
-    permission_classes = [AllowAny]  # <-- permiso abierto para pruebas
+    permission_classes = [AllowAny]  #permiso abierto para pruebas (IsAuthenticated para pedir autenticacion)
     
     @action(detail=False, methods=['get'], url_path='por-campo/(?P<campo_id>[^/.]+)')
     def obtener_lotes_por_campo(self, request, campo_id=None):

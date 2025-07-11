@@ -8,7 +8,7 @@ export function UserProvider({ children }) {
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    console.log("token de acceso: ", token)
+    
     if (!token) return;
 
     try {
