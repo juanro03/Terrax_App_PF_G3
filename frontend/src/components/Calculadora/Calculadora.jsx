@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Card, Button, Table, Form, Row, Col, Alert } from "react-bootstrap";
+import { Trash2 } from "lucide-react";
 import { Plus } from "lucide-react";
 import axios from "axios";
 
@@ -172,6 +173,10 @@ function Calculadora() {
       { id: Date.now(), productId: "", area: 0, dose: 0 },
     ]);
 
+  const removeRow = (id) => {
+    setRows((prev) => prev.filter((r) => r.id !== id));
+  };
+
   const resetCalculator = () => {
     setSelectedLoteId("");
     setCantHa(0);
@@ -182,22 +187,36 @@ function Calculadora() {
   const totals = useMemo(() => {
     const totalProduct = rows.reduce((sum, r) => {
       const selectedProduct = PRODUCTS.find((p) => p.id === r.productId);
+      if (!selectedProduct) return sum;
+
       const dose = parseFloat(
-        selectedProduct?.range
+        selectedProduct.range
           ?.match(/[\d.,]+(?=\s*(L|ml|kg)?\/?ha?$)?/g)
           ?.at(-1)
           ?.replace(",", ".") || "0"
       );
-      return sum + cantHa * dose;
+
+      let doseMl = 0;
+      switch (selectedProduct.unit.toLowerCase()) {
+        case "l":
+          doseMl = dose * 1000;
+          break;
+        case "ml":
+          doseMl = dose;
+          break;
+        case "kg":
+          doseMl = dose * 1000; // solo si estás cómodo con esta conversión
+          break;
+        default:
+          doseMl = 0;
+      }
+
+      return sum + cantHa * doseMl;
     }, 0);
 
-    const water = tankVolume - totalProduct;
+    const water = tankVolume - totalProduct / 1000; // pasás el total de producto de mL a L para comparar con el tanque
     return { totalProduct, water, overflow: water < 0 };
   }, [rows, tankVolume, cantHa]);
-
-  const selectedFirstProduct = PRODUCTS.find(
-    (p) => p.id === rows[0]?.productId
-  );
 
   return (
     <Card className="shadow m-4 mx-auto" style={{ maxWidth: "960px" }}>
@@ -207,7 +226,7 @@ function Calculadora() {
         <Row className="gy-2 align-items-end mb-1">
           <Col md={4}>
             <Form.Group controlId="selectLote" className="mb-0">
-              <Form.Label className="text-dark">Seleccionar Lote</Form.Label>
+              <Form.Label className="text-dark">Seleccionar lote</Form.Label>
               <Form.Control
                 as="select"
                 value={selectedLoteId}
@@ -267,6 +286,7 @@ function Calculadora() {
                 <th className="text-end text-center">Ficha Técnica</th>
                 <th className="text-end text-center">Dosis Máxima</th>
                 <th className="text-end text-center">Producto Máximo</th>
+                <th className="text-center">Eliminar</th>
               </tr>
             </thead>
             <tbody>
@@ -327,12 +347,35 @@ function Calculadora() {
                             ?.at(-1)
                             ?.replace(",", ".") || "0"
                         );
-                        return (
-                          (cantHa * dose).toFixed(2) +
-                          " " +
-                          (selectedProduct?.unit || "")
-                        );
+
+                        let doseMl = 0;
+                        switch (selectedProduct?.unit.toLowerCase()) {
+                          case "l":
+                            doseMl = dose * 1000;
+                            break;
+                          case "ml":
+                            doseMl = dose;
+                            break;
+                          case "kg":
+                            doseMl = dose * 1000; // aproximado
+                            break;
+                          default:
+                            doseMl = 0;
+                        }
+
+                        return (cantHa * doseMl).toFixed(2) + " mL";
                       })()}
+                    </td>
+
+                    <td className="text-center">
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => removeRow(row.id)}
+                        title="Eliminar producto"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
                     </td>
                   </tr>
                 );
@@ -355,9 +398,7 @@ function Calculadora() {
           <Col md={4}>
             <Card bg="success" text="white">
               <Card.Body className="text-center">
-                <small>
-                  Total producto ({selectedFirstProduct?.unit ?? "u"})
-                </small>
+                <small>Total producto (mL)</small>
                 <h3 className="fw-bold mb-0 mt-1">
                   {totals.totalProduct.toFixed(2)}
                 </h3>
