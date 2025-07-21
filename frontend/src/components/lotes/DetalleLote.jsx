@@ -1,11 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from 'axios';
+import { useParams, useNavigate } from "react-router-dom";
+import dayjs from 'dayjs';
+import "./DetalleLote.css";
 
 
 
 const DetalleLote = () => {
   const [estado, setEstado] = useState("barbecho");
   const [unidadDensidad, setUnidadDensidad] = useState("Kg/Ha");
+  const { loteId } = useParams();
+  const [cosecha, setCosecha] = useState({
+    fecha: '',
+    rinde: '',
+    archivo: null,
+  });
+  const navigate = useNavigate();
 
   const [siembra, setSiembra] = useState({
     fecha: "",
@@ -14,8 +24,17 @@ const DetalleLote = () => {
     densidad: "",
     unidad: "Kg/Ha",
     ventanaCosecha: "",
+    ventanaCosechaISO: "", // 👉 NUEVO
     analisisSuelo: null
   });
+  const [mostrarCobertura, setMostrarCobertura] = useState(false);
+  const [cobertura, setCobertura] = useState({
+    fecha: '',
+    cultivo: '',
+    variedad: '',
+    densidad: ''
+  });
+  const coberturaYaCargada = Boolean(cobertura?.fecha); // <-- Acá va
 
   const handleSiembraChange = (e) => {
     const { name, value, files } = e.target;
@@ -24,6 +43,96 @@ const DetalleLote = () => {
       [name]: files ? files[0] : value
     }));
   };
+  const [semillas, setSemillas] = useState([]);
+  const token = localStorage.getItem("accessToken");
+  useEffect(() => {
+    const obtenerSemillas = async () => {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/productos/?categoria=SEMILLAS", {
+          headers: {
+            Authorization: `Bearer ${token}`, // si usás JWT
+          },
+        });
+        setSemillas(response.data);
+      } catch (error) {
+        console.error("Error al obtener las semillas:", error);
+      }
+    };
+
+    obtenerSemillas();
+  }, []);
+  useEffect(() => {
+    if (siembra.fecha && siembra.cultivo && siembra.variedad && semillas.length > 0) {
+      const semilla = semillas.find(
+        s => s.cultivo === siembra.cultivo && s.variedad === siembra.variedad
+      );
+
+      if (semilla) {
+        const dias = parseInt(semilla.dias_madurez);
+        if (!isNaN(dias)) {
+          const fechaSiembra = new Date(siembra.fecha);
+          fechaSiembra.setDate(fechaSiembra.getDate() + dias);
+          const cosecha = dayjs(fechaSiembra).format("DD/MM/YYYY");
+          const cosechaISO = dayjs(fechaSiembra).format("YYYY-MM-DD");
+
+          setSiembra(prev => ({
+            ...prev,
+            ventanaCosecha: cosecha,
+            ventanaCosechaISO: cosechaISO  // 👉 NUEVO
+          }));
+        }
+      }
+    }
+  }, [siembra.fecha, siembra.cultivo, siembra.variedad, semillas]);
+  // En useEffect (al cargar el componente)
+  useEffect(() => {
+    const obtenerSiembra = async () => {
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/api/siembras/por-lote/${loteId}`);
+        const siembraData = response.data;
+
+        setSiembra({
+          ...siembraData,
+          ventanaCosechaISO: siembraData.ventana_cosecha // <--- asegurate de guardar este campo en ISO
+        });
+
+        setEstado("cultivado");
+      } catch (error) {
+        console.log("No hay siembra registrada aún.");
+      }
+    };
+
+    obtenerSiembra();
+  }, [loteId]);
+
+  useEffect(() => {
+    const obtenerCobertura = async () => {
+      try {
+        const res = await axios.get(`http://localhost:8000/api/coberturas/por-lote/${loteId}/`);
+        setCobertura(res.data);
+        setMostrarCobertura(true);
+      } catch (error) {
+        console.log("No hay cobertura registrada.");
+      }
+    };
+
+    obtenerCobertura();
+  }, [loteId]);
+  const guardarCobertura = async () => {
+    try {
+      const coberturaConLote = { ...cobertura, lote: loteId };
+
+      if (cobertura.id) {
+        await axios.put(`http://localhost:8000/api/coberturas/${cobertura.id}/`, coberturaConLote);
+      } else {
+        await axios.post(`http://localhost:8000/api/coberturas/`, coberturaConLote);
+      }
+
+      alert("Cobertura guardada correctamente");
+    } catch (error) {
+      console.error("Error al guardar cobertura:", error);
+    }
+  };
 
   const guardarSiembra = async () => {
     const formData = new FormData();
@@ -31,15 +140,25 @@ const DetalleLote = () => {
     formData.append("cultivo", siembra.cultivo);
     formData.append("variedad", siembra.variedad);
     formData.append("densidad", siembra.densidad);
-    formData.append("unidad", siembra.unidad);
-    formData.append("ventana_cosecha", siembra.ventanaCosecha);
-    formData.append("lote", 1); // ⚠️ reemplazá con el ID real del lote
+    formData.append("unidad_densidad", siembra.unidad);
+    formData.append("ventana_cosecha", siembra.ventanaCosechaISO || siembra.ventanaCosecha);
+    formData.append("lote", loteId);
+
     if (siembra.analisisSuelo) {
       formData.append("analisis_suelo", siembra.analisisSuelo);
     }
 
+    const url = siembra.id
+      ? `http://127.0.0.1:8000/api/siembras/${siembra.id}/`
+      : "http://127.0.0.1:8000/api/siembras/";
+
+    const method = siembra.id ? "put" : "post";
+
     try {
-      await axios.post("http://127.0.0.1:8000/api/siembras/", formData, {
+      await axios({
+        method,
+        url,
+        data: formData,
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -47,19 +166,104 @@ const DetalleLote = () => {
       alert("Siembra guardada correctamente");
       setEstado("cultivado");
     } catch (error) {
-      console.error("Error al guardar siembra:", error);
-      alert("Error al guardar siembra");
+      if (error.response) {
+        console.log("Backend error data:", error.response.data);
+      } else {
+        console.log("Other error:", error.message);
+      }
+    }
+  };
+  const handleCosechaChange = (e) => {
+    const { name, value, files } = e.target;
+    setCosecha((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value
+    }));
+  };
+  const finalizarCampania = async () => {
+    try {
+      // Validar que la fecha de cosecha > ventana de cosecha
+      const fechaCosecha = new Date(cosecha.fecha);
+      const ventanaCosecha = new Date(siembra.ventanaCosechaISO); // <-- esta debe estar en formato YYYY-MM-DD
+
+      if (fechaCosecha < ventanaCosecha) {
+        alert("La fecha de cosecha debe ser posterior a la ventana estimada de cosecha.");
+        return;
+      }
+
+      // Validar rinde obligatorio
+      if (!cosecha.rinde || cosecha.rinde.trim() === "") {
+        alert("El campo 'Rinde' es obligatorio.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("fecha", cosecha.fecha);
+      // Validar formato del rinde: ejemplo 3,45
+      const rindeSoloNumero = cosecha.rinde.trim();
+      const rindeRegex = /^\d{1,3}(,\d{1,2})?$/;
+
+      if (!rindeRegex.test(rindeSoloNumero)) {
+        alert("El rinde debe tener el formato 'n,nn'. Ejemplo: 3,45");
+        return;
+      }
+
+      const rindeFinal = `${rindeSoloNumero} tn/ha`; // Le agregamos unidad
+
+      formData.append("rinde", rindeFinal);
+      formData.append("lote", loteId);
+      if (cosecha.archivo) {
+        formData.append("archivo_rendimiento", cosecha.archivo);
+      }
+
+      await axios.post("http://localhost:8000/api/cosechas/", formData);
+      await axios.post(`http://localhost:8000/api/siembras/finalizar/${loteId}/`);
+
+      // Reset
+      setEstado("barbecho");
+      setSiembra({
+        fecha: "",
+        cultivo: "",
+        variedad: "",
+        densidad: "",
+        unidad: "Kg/Ha",
+        ventanaCosecha: "",
+        analisisSuelo: null
+      });
+      setMostrarCobertura(false);
+      setCosecha({
+        fecha: "",
+        rinde: "",
+        archivo: null
+      });
+      setCobertura({
+        fecha: '',
+        cultivo: '',
+        variedad: '',
+        densidad: ''
+      });
+
+      alert("Cosecha registrada y campaña finalizada.");
+    } catch (error) {
+      console.error("Error al finalizar campaña:", error);
+      alert("Ocurrió un error al finalizar la campaña.");
     }
   };
 
-
+  
   return (
     <div className="container-fluid p-4" style={{ backgroundColor: "#f0fdf4" }}>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="fw-bold text-success">Campo: La Josefina &gt; Lote 1</h4>
         <div>
           <button className="btn btn-success me-2">Actual</button>
-          <button className="btn btn-outline-success me-2">Historico</button>
+          <button
+            className="btn btn-outline-success me-2"
+            onClick={() => navigate(`/lotes/${loteId}/historial`)}
+          >
+            Historial
+          </button>
+
           <button className="btn btn-outline-success">Reportes</button>
         </div>
       </div>
@@ -74,17 +278,22 @@ const DetalleLote = () => {
               <div className="btn-group" role="group">
                 <button
                   className={`btn ${estado === 'barbecho' ? 'btn-success' : 'btn-outline-success'}`}
+                  disabled={estado === 'cultivado'} // si está cultivado, no dejar volver a barbecho
+                  style={{ cursor: estado === 'cultivado' ? 'not-allowed' : 'pointer' }}
                   onClick={() => setEstado("barbecho")}
                 >
                   Barbecho
                 </button>
                 <button
                   className={`btn ${estado === 'cultivado' ? 'btn-success' : 'btn-outline-success'}`}
+                  disabled={estado === 'barbecho'} // si está en barbecho, no dejar marcar cultivado (opcional)
+                  style={{ cursor: estado === 'barbecho' ? 'not-allowed' : 'pointer' }}
                   onClick={() => setEstado("cultivado")}
                 >
                   Cultivado
                 </button>
               </div>
+
             </div>
 
             {/* Siembra */}
@@ -97,11 +306,40 @@ const DetalleLote = () => {
                 </div>
                 <div className="mb-2">
                   <label className="form-label">Cultivo</label>
-                  <input type="text" name="cultivo" className="form-control" value={siembra.cultivo} onChange={handleSiembraChange} />
+                  <select
+                    name="cultivo"
+                    className="form-control"
+                    value={siembra.cultivo}
+                    onChange={handleSiembraChange}
+                  >
+                    <option value="">Seleccionar cultivo</option>
+                    {[...new Set(semillas.map((s) => s.cultivo))].map((cultivo, index) => (
+                      <option key={index} value={cultivo}>
+                        {cultivo}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
                 <div className="mb-2">
                   <label className="form-label">Variedad</label>
-                  <input type="text" name="variedad" className="form-control" value={siembra.variedad} onChange={handleSiembraChange} />
+                  <select
+                    name="variedad"
+                    className="form-control"
+                    value={siembra.variedad}
+                    onChange={handleSiembraChange}
+                    disabled={!siembra.cultivo}
+                  >
+                    <option value="">Seleccionar variedad</option>
+                    {[...new Set(semillas
+                      .filter((s) => s.cultivo === siembra.cultivo)
+                      .map((s) => s.variedad))].map((variedad, index) => (
+                        <option key={index} value={variedad}>
+                          {variedad}
+                        </option>
+                    ))}
+
+                  </select>
                 </div>
 
                 {/* Densidad con unidad */}
@@ -140,18 +378,51 @@ const DetalleLote = () => {
                         </button>
                     </div>
                 </div>
-
-
-
-
                 <div className="mb-2">
                   <label className="form-label">Ventana Cosecha</label>
-                  <input type="text" name="ventanaCosecha" className="form-control" value={siembra.ventanaCosecha} onChange={handleSiembraChange} />
+                  <input type="text" name="ventanaCosecha" className="form-control" value={siembra.ventanaCosecha} readOnly />
                 </div>
                 <div className="mb-2">
                   <label className="form-label">Último análisis de suelo</label>
-                  <input type="file" name="analisisSuelo" className="form-control" onChange={handleSiembraChange} />
+
+                  {estado === "cultivado" && siembra.analisis_suelo ? (
+                    <>
+                      <div className="form-control bg-light text-muted">
+                        No se puede cambiar el archivo porque el lote ya está cultivado.
+                      </div>
+                    </>
+                  ) : (
+                    <input
+                      type="file"
+                      name="analisisSuelo"
+                      className="form-control mb-2"
+                      onChange={handleSiembraChange}
+                    />
+                  )}
+
+                  {siembra.analisis_suelo && (
+                    <div className="d-flex align-items-start gap-3 mt-2 p-2 rounded" style={{ backgroundColor: "#f8f9fa", border: "1px solid #dee2e6" }}>
+                      <img
+                        src={siembra.analisis_suelo}
+                        alt="Análisis de suelo"
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          objectFit: "cover",
+                          borderRadius: "10px",
+                          border: "1px solid #ccc"
+                        }}
+                      />
+                      <div className="flex-grow-1">
+                        <small className="text-muted">Archivo cargado</small>
+                        <p className="mb-0 text-truncate" title={siembra.analisis_suelo}>
+                          {siembra.analisis_suelo.split("/").pop()}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
+
               </div>
 
               <button className="btn btn-success w-100 mt-3" onClick={guardarSiembra}>
@@ -160,55 +431,141 @@ const DetalleLote = () => {
             </div>
           </div>
         </div>
-
         {/* Columna derecha */}
-        <div className="col-md-6 d-flex flex-column justify-content-between">
-          {/* Cobertura */}
-          <div className="card p-3 shadow-sm mb-4" style={{ borderRadius: "15px" }}>
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="fw-bold">Cobertura</h5>
-              <button className="btn btn-outline-danger">Fin de Cobertura</button>
-            </div>
-            <div className="mb-2">
-              <label className="form-label">Fecha</label>
-              <input type="date" className="form-control" />
-            </div>
-            <div className="mb-2">
-              <label className="form-label">Cultivo</label>
-              <input type="text" className="form-control" />
-            </div>
-            <div className="mb-2">
-              <label className="form-label">Variedad</label>
-              <input type="text" className="form-control" />
-            </div>
-            <div className="mb-2">
-              <label className="form-label">Densidad</label>
-              <input type="text" className="form-control" />
-            </div>
-          </div>
-
+        <div className="col-md-6">         
           {/* Cosecha */}
-          <div className="card p-3 shadow-sm" style={{ borderRadius: "15px" }}>
+          <div className="card p-3 shadow-sm mb-3" style={{ borderRadius: "15px" }}>
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h5 className="fw-bold">Cosecha</h5>
-              <button className="btn btn-danger">Finalizar Campaña</button>
+              <button className="btn btn-danger" onClick={finalizarCampania}>
+                Finalizar Campaña
+              </button>
             </div>
             <div className="mb-2">
               <label className="form-label">Fecha</label>
-              <input type="date" className="form-control" />
+              <input
+                type="date"
+                name="fecha"
+                className="form-control"
+                value={cosecha.fecha}
+                onChange={handleCosechaChange}
+              />
             </div>
             <div className="mb-2">
               <label className="form-label">Rinde</label>
-              <input type="text" className="form-control" />
+              <div className="input-group">
+                <input
+                  type="text"
+                  name="rinde"
+                  className="form-control"
+                  value={cosecha.rinde || ""}
+                  onChange={(e) =>
+                    setCosecha((prev) => ({ ...prev, rinde: e.target.value }))
+                  }
+                  style={{ height: "48px" }}
+                />
+                <span
+                  className="input-group-text text-white"
+                  style={{
+                    height: "48px",
+                    backgroundColor: "#198754", // verde bootstrap
+                    border: "1px solid #198754",
+                  }}
+                >
+                  Tn/Ha
+                </span>
+              </div>
             </div>
+
             <div className="mb-2">
               <label className="form-label">Archivo de Rendimiento</label>
-              <input type="file" className="form-control" />
+              <input
+                type="file"
+                name="archivo"
+                className="form-control"
+                onChange={handleCosechaChange}
+              />
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+
+          {/* Botón Agregar Cobertura */}
+          {!mostrarCobertura && (
+            <button
+              className="btn btn-outline-success w-100 mb-3"
+              onClick={() => setMostrarCobertura(true)}
+            >
+              Agregar Cobertura
+            </button>
+          )}
+
+          {/* Formulario Cobertura */}
+          {mostrarCobertura && (
+            <div className="card p-3 shadow-sm" style={{ borderRadius: "15px" }}>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h5 className="fw-bold mb-0">Cobertura</h5>
+                <button
+                  className="btn-close"
+                  aria-label="Cerrar"
+                  onClick={() => setMostrarCobertura(false)}
+                />
+              </div>
+              <div className="mb-2">
+                <label className="form-label">Fecha</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={cobertura?.fecha || ""}
+                  onChange={(e) =>
+                    setCobertura({ ...cobertura, fecha: e.target.value })
+                  }
+                />
+              </div>
+              <div className="mb-2">
+                <label className="form-label">Cultivo</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={cobertura?.cultivo || ""}
+                  onChange={(e) =>
+                    setCobertura({ ...cobertura, cultivo: e.target.value })
+                  }
+                />
+              </div>
+              <div className="mb-2">
+                <label className="form-label">Variedad</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={cobertura?.variedad || ""}
+                  onChange={(e) =>
+                    setCobertura({ ...cobertura, variedad: e.target.value })
+                  }
+                />
+              </div>
+              <div className="mb-2">
+                <label className="form-label">Densidad</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={cobertura?.densidad || ""}
+                  onChange={(e) =>
+                    setCobertura({ ...cobertura, densidad: e.target.value })
+                  }
+                />
+              </div>
+              <div className="text-end">
+                <button
+                  className="btn btn-success text-white"
+                  onClick={guardarCobertura}
+                >
+                  Guardar Cobertura
+                </button>
+              </div>
+            </div>
+          )}     
+        </div>   {/* Fin de la columna derecha */}
+      </div>     {/* Fin del row */}
+    </div>       
   );
 };
 
