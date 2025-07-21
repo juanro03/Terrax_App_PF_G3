@@ -39,6 +39,16 @@ const Calculadora = () => {
     setProductos((prev) => prev.filter((p) => p.id !== id));
   };
 
+  // Limpiar todos los registros
+  const limpiarRegistros = () => {
+    setHectareas(0);
+    setLtsPorHa(0);
+    setTamanoTanque(0);
+    setProductos([
+      { id: Date.now(), envase: "", producto: "", dosis: "", unidad: "L" },
+    ]);
+  };
+
   const actualizarProducto = (id, campo, valor) => {
     setProductos((prev) =>
       prev.map((p) => (p.id === id ? { ...p, [campo]: valor } : p))
@@ -55,6 +65,17 @@ const Calculadora = () => {
     const bidones = parseFloat(totalCampo) / parseFloat(envase);
     return isNaN(bidones) ? "—" : bidones.toFixed(1);
   };
+
+  // ** NUEVOS CÁLCULOS PARA AGUA EN TANQUE **
+  const fracVol = litrosTotales % tamanoTanque;
+  const sumaProdCompleto = productos.reduce((sum, p) => {
+    const v = (parseFloat(p.dosis) * tamanoTanque) / (ltsPorHa || 1);
+    return sum + (isNaN(v) ? 0 : v);
+  }, 0);
+  const sumaProdFraccionado = productos.reduce((sum, p) => {
+    const v = (parseFloat(p.dosis) * fracVol) / (ltsPorHa || 1);
+    return sum + (isNaN(v) ? 0 : v);
+  }, 0);
 
   return (
     <Card
@@ -313,7 +334,17 @@ const Calculadora = () => {
             {/* Totales finales */}
             <Row className="mb-4">
               <Col>
-                <h5>Total producto puro</h5>
+                <h5>Resultados</h5>
+                <div
+                  className="text-center text-black fw-bold py-2"
+                  style={{
+                    backgroundColor: "#c5ffd0",
+                    borderRadius: "4px 4px 0 0",
+                  }}
+                >
+                  Total producto puro por tanque{" "}
+                  <i className="bi bi-arrow-down-circle" />
+                </div>
                 <Table size="sm" bordered className="text-center">
                   <thead className="bg-danger text-white">
                     <tr>
@@ -348,6 +379,50 @@ const Calculadora = () => {
                     </tr>
                   </tbody>
                 </Table>
+              </Col>
+            </Row>
+            <Row className="mb-4">
+              <Col>
+                <div
+                  className="text-center text-white fw-bold py-2"
+                  style={{
+                    backgroundColor: "#0047AB",
+                    borderRadius: "4px 4px 0 0",
+                  }}
+                >
+                  Total de agua en el tanque{" "}
+                  <i className="bi bi-arrow-down-circle" />
+                </div>
+                <Table
+                  bordered
+                  className="text-center"
+                  style={{
+                    backgroundColor: "#0066FF",
+                    color: "white",
+                    marginBottom: 0,
+                  }}
+                >
+                  <tbody>
+                    <tr>
+                      {/* Agua necesaria para llenar un tanque completo */}
+                      <td style={{ fontWeight: "bold", fontSize: "1.1rem" }}>
+                        {(tamanoTanque - sumaProdCompleto).toFixed(2)} Lts
+                      </td>
+                      {/* Agua restante en el tanque fraccionado */}
+                      <td style={{ fontWeight: "bold", fontSize: "1.1rem" }}>
+                        {(fracVol - sumaProdFraccionado).toFixed(2)} Lts
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+            {/* Botón Limpiar registros */}
+            <Row className="mb-4">
+              <Col className="text-end">
+                <Button variant="" onClick={limpiarRegistros}>
+                  Limpiar registros
+                </Button>
               </Col>
             </Row>
           </Tab>
@@ -537,18 +612,18 @@ const Calculadora = () => {
                   className="w-100 d-flex align-items-center justify-content-center"
                   onClick={() => window.print()}
                 >
-                  <i className="bi bi-file-pdf me-2"></i>
-                  Generar receta en PDF
+                  Generar Receta
+                  <i class="bi bi-filetype-pdf"></i>
                 </Button>
               </Col>
               <Col className="text-end">
                 <Button
-                  variant="primary"
+                  variant="success"
                   className="w-100 d-flex align-items-center justify-content-center"
                   onClick={() => window.print()}
                 >
+                  Limpiar sólidos
                   <i class="bi bi-backspace"></i>
-                  Limpiar
                 </Button>
               </Col>
             </Row>
