@@ -9,6 +9,9 @@ from usuarios.views import (
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 from usuarios.views import enviar_notificacion
+from lotes.views import FinalizarCampaniaView
+
+
 
 
 urlpatterns = [
@@ -29,6 +32,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("usuarios.urls")),
     path('api/productos/', include('productos.urls')),  
+    path('siembras/finalizar/<int:lote_id>/', FinalizarCampaniaView.as_view(), name='finalizar-campania'),
 ] 
 
 # Agrega soporte para archivos MEDIA en desarrollo
