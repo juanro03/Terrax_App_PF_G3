@@ -3,6 +3,8 @@ import React from "react";
 import Carrusel from "./Carrusel";
 import WeatherWidget from "./WeatherWidget";
 
+
+
 import { Container, Row, Col, Button, Card, Accordion } from "react-bootstrap";
 import {
   Chart as ChartJS,
@@ -14,7 +16,7 @@ import {
   Legend,
   Title,
 } from "chart.js";
-import { Line } from "react-chartjs-2";
+
 
 // Registrar componentes de Chart.js
 ChartJS.register(
@@ -34,45 +36,8 @@ const Inicio = () => {
     return null;
   }
 
-  // Datos de ejemplo para la gráfica de NDVI
-  const ndviData = {
-    labels: ["Enero", "Febrero", "Marzo", "Abril", "Mayo"],
-    datasets: [
-      {
-        label: "Índice NDVI Promedio",
-        data: [0.45, 0.52, 0.61, 0.57, 0.49],
-        borderColor: "#28a745",
-        backgroundColor: "rgba(40, 167, 69, 0.2)",
-        tension: 0.3,
-      },
-    ],
-  };
 
-  const ndviOptions = {
-    responsive: true,
-    plugins: {
-      title: {
-        display: true,
-        text: "Evolución NDVI (últimos 5 meses)",
-        color: "#333333",
-      },
-      legend: {
-        labels: {
-          color: "#333333",
-        },
-      },
-    },
-    scales: {
-      x: {
-        ticks: { color: "#333333" },
-        grid: { color: "#dddddd" },
-      },
-      y: {
-        ticks: { color: "#333333" },
-        grid: { color: "#dddddd" },
-      },
-    },
-  };
+
 
   return (
     <div style={{ backgroundColor: "transparent", minHeight: "100vh" }}>
@@ -112,14 +77,8 @@ const Inicio = () => {
             <WeatherWidget />
           </Col>
 
-          {/* 3.2) Gráfica de NDVI */}
-          <Col md={6}>
-            <Card className="shadow-sm">
-              <Card.Body>
-                <Line options={ndviOptions} data={ndviData} />
-              </Card.Body>
-            </Card>
-          </Col>
+        
+
 
           {/* 3.3) Tarjetas rápidas (Mis Campos, Calendario, Reportes) */}
           <Col md={4}>

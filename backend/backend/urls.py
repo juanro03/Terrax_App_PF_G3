@@ -9,7 +9,7 @@ from usuarios.views import (
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 from usuarios.views import enviar_notificacion
-
+from .views import cotizacion_dolar
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,8 +27,8 @@ urlpatterns = [
     path('api/auth/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
 
     path("admin/", admin.site.urls),
-    path("api/", include("usuarios.urls")),
-    path('api/productos/', include('productos.urls')),  
+    path('api/productos/', include('productos.urls')),
+    path('cotizacion-dolar/', cotizacion_dolar, name='cotizacion-dolar'), 
 ] 
 
 # Agrega soporte para archivos MEDIA en desarrollo
