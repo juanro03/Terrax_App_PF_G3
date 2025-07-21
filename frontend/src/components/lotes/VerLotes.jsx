@@ -69,35 +69,48 @@ const VerLotes = ({ campoId }) => {
               <div
                 key={lote.id}
                 className="card m-3 p-0 shadow"
-                style={{ width: "18rem", cursor: "default" }}
+                style={{ width: "16rem", cursor: "default" }}
               >
                 <div className="card-header bg-success text-white text-center fw-bold">
-                  <div className="card-body">
-                    <h5>{lote.nombre}</h5>
-                    <p className="card-text">
-                      Área: {lote.area} ha
-                    </p>
-                    <div className="d-flex justify-content-around mt-2">
-                      <button className="btn btn-outline-primary" onClick={() => handleEditar(lote)}>
-                        <FaEdit />
-                      </button>
-                      <button className="btn btn-outline-danger" onClick={() => handleDelete(lote.id)}>
-                        <FaTrash />
-                      </button>
-                    </div>
-                  </div>
+                  {lote.nombre}
+                </div>
 
-                  {lote.imagen_satelital && (
-                    <img
-                      src={lote.imagen_satelital}
-                      alt={`Imagen del lote ${lote.nombre}`}
-                      className="card-img-bottom"
-                      style={{ height: "200px", objectFit: "cover", borderTop: "1px solid #ccc" }}
-                    />
-                  )}
+                {/* Imagen sin bordes redondeados */}
+                {lote.imagen_satelital && (
+                  <img
+                    src={lote.imagen_satelital}
+                    alt={`Imagen del lote ${lote.nombre}`}
+                    className="card-img-bottom"
+                    style={{
+                      height: "180px",
+                      objectFit: "cover",
+                      borderTop: "1px solid #ccc",
+                      borderRadius: "0", // sin bordes redondeados
+                    }}
+                  />
+                )}
+                <div
+                  className="card-body text-center"
+                  style={{ padding: "12px", backgroundColor: "#fff" }}
+                >
+                  <p className="card-text text-dark m-0" style={{ fontSize: "14px" }}>
+                    Área: {lote.area} ha
+                  </p>
+                </div>
+                <div
+                    className="card-footer d-flex justify-content-center gap-4"
+                    style={{ backgroundColor: "#f8f9fa", padding: "10px" }}
+                  >
+                  <button className="btn btn-outline-primary" onClick={() => handleEditar(lote)}>
+                    <FaEdit />
+                  </button>
+                  <button className="btn btn-outline-danger" onClick={() => handleDelete(lote.id)}>
+                    <FaTrash />
+                  </button>
                 </div>
               </div>
             ))}
+
           </div>
         </div>
       </div>

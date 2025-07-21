@@ -162,3 +162,21 @@ input[type="file"]::file-selector-button:hover {
 .card.bg-verde {
   background-color: #198754; /* mismo verde que .bg-success */
 }
+.card {
+  border-radius: 16px;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: scale(1.02);
+}
+
+.card-title {
+  font-weight: 700;
+  color: #117256;
+}
+
+.card-text {
+  color: #117256;
+  text-align: center;
+}

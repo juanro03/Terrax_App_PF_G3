@@ -117,58 +117,66 @@ const VerCampos = () => {
               .map((campo) => (
                 <div
                   key={campo.id}
-                  className="card m-3 p-0 shadow campo-card bg-verde"
-                  style={{ width: "18rem", cursor: "pointer" }}
+                  className="card m-3 p-0 shadow"
+                  style={{
+                    width: "16rem",
+                    borderRadius: "16px",
+                    overflow: "hidden",
+                    cursor: "pointer",
+                  }}
                   onClick={() => navigate(`/campos/${campo.id}/lotes`)}
                 >
+                  {/* Encabezado */}
                   <div className="card-header bg-success text-white text-center fw-bold">
                     {campo.nombre}
                   </div>
-                  <div className="card-body text-center">
-                    <p
-                      className="card-text mb-1"
-                      style={{ fontSize: "15px", color: "#ffffff" }}
-                    >
-                      {campo.provincia}, {campo.localidad}
+
+                  {/* Imagen sin bordes redondeados */}
+                  <img
+                    src={campo.imagen_satelital}
+                    alt={`Imagen del campo ${campo.nombre}`}
+                    className="card-img-top"
+                    style={{ height: "180px", objectFit: "cover", borderRadius: "0" }}
+                  />
+
+                  {/* Localidad solamente */}
+                  <div
+                    className="card-body text-center"
+                    style={{ padding: "12px", backgroundColor: "#fff" }}
+                  >
+                    <p className="card-text text-dark m-0" style={{ fontSize: "14px" }}>
+                      {campo.localidad}, {campo.provincia}
                     </p>
                   </div>
 
-                  {campo.imagen_satelital && (
-                    <div className="imagen-container">
-                      <img
-                        src={campo.imagen_satelital}
-                        alt={`Imagen del campo ${campo.nombre}`}
-                        className="card-img-bottom"
-                        style={{
-                          height: "200px",
-                          objectFit: "cover",
-                          borderTop: "1px solid #ccc",
-                          width: "100%",
-                        }}
-                      />
-                      <div className="botones-overlay">
-                        <button
-                          className="btn btn-outline-primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditar(campo);
-                          }}
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          className="btn btn-outline-danger"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(campo.id);
-                          }}
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  {/* Botones */}
+                  {/* Footer con fondo gris y botones más separados */}
+                  <div
+                    className="card-footer d-flex justify-content-center gap-4"
+                    style={{ backgroundColor: "#f8f9fa", padding: "10px" }}
+                  >
+                    <button
+                      className="btn btn-outline-primary btn-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditar(campo);
+                      }}
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      className="btn btn-outline-danger btn-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(campo.id);
+                      }}
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+
                 </div>
+
               ))}
           </div>
         </div>
