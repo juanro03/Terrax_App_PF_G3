@@ -26,8 +26,7 @@ urlpatterns = [
     path('api/', include('lotes.urls')),
     path('api/auth/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     path('api/', include('reportes.urls')),
-    path("api/", include("usuarios.urls")),
-    path('api/productos/', include('productos.urls')),  
+    path('api/productos/', include('productos.urls')), 
 ] 
 
 # Agrega soporte para archivos MEDIA en desarrollo

@@ -14,6 +14,8 @@ from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import IsAuthenticated
+
 
 
 
@@ -142,3 +144,10 @@ class PasswordResetConfirmAPIView(APIView):
         user.set_password(pw1)
         user.save()
         return Response({"detail": "Contraseña actualizada con éxito."}, status=status.HTTP_200_OK)
+    
+class UsuarioActualAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UsuarioSerializer(request.user)
+        return Response(serializer.data)

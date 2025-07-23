@@ -11,11 +11,12 @@ class ReporteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = super().get_queryset()
         user = self.request.user
 
-        # Solo ve sus propios reportes
-        queryset = queryset.filter(productor=user)
+        if user.rol == 'admin':
+            return Reporte.objects.all()
+
+        queryset = Reporte.objects.filter(productor=user)
 
         # Filtro opcional por campo y lote
         campo_id = self.request.query_params.get('campo')
@@ -26,19 +27,29 @@ class ReporteViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(lote_id=lote_id)
 
         return queryset
+
     
     def perform_create(self, serializer):
         user = self.request.user
+
+        if not user.rol == 'admin':
+            raise ValidationError("Solo los administradores pueden crear reportes.")
+
         campo = serializer.validated_data['campo']
         lote = serializer.validated_data['lote']
+        productor = serializer.validated_data['productor']
 
-        # Validar que el campo le pertenezca al usuario
-        if campo.propietario != user:
-            raise ValidationError("Este campo no pertenece al usuario autenticado.")
-
-        # Validar que el lote esté dentro del campo
+        if campo.propietario != productor:
+            raise ValidationError("El campo no pertenece al productor indicado.")
         if lote.campo != campo:
-            raise ValidationError("Este lote no pertenece al campo seleccionado.")
+            raise ValidationError("El lote no pertenece al campo indicado.")
 
-        serializer.save(productor=user)
+        serializer.save()
 
+    def destroy(self, request, *args, **kwargs):
+            user = request.user
+
+            if user.rol != 'admin':
+                raise ValidationError("Solo los administradores pueden eliminar reportes.")
+
+            return super().destroy(request, *args, **kwargs)

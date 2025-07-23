@@ -8,9 +8,10 @@ class Reporte(models.Model):
     campo = models.ForeignKey(Campo, on_delete=models.CASCADE)
     lote = models.ForeignKey(Lote, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=255)
+    tipo_reporte = models.CharField(max_length=50)
     observaciones = models.TextField(blank=True)
     archivo_pdf = models.FileField(upload_to='reportes/')
-    fecha_subida = models.DateTimeField(auto_now_add=True)
+    fecha_reporte = models.DateTimeField(auto_now_add=False)
 
     def __str__(self):
         return f"{self.nombre} ({self.lote})"
