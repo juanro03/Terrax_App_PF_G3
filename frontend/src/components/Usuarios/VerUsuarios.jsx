@@ -24,7 +24,7 @@ const VerUsuarios = () => {
   const [showNotificarModal, setShowNotificarModal] = useState(false);
   const [usuarioParaNotificar, setUsuarioParaNotificar] = useState(null);
 
-
+  
   useEffect(() => {
     fetchUsuarios();
   }, []);

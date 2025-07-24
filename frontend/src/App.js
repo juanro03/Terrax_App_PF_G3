@@ -23,6 +23,7 @@ import "leaflet-draw";
 import VerLotesWrapper from "./components/lotes/VerLotesWrapper";
 import ResetPassword from './components/Auth/ResetPassword';
 import ProductosForm from "./components/Productos/ProductosForm";
+import Reportes from "./components/Reportes/reportes.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -72,6 +73,7 @@ function AppContent() {
           <Route path="/productos" element={<ProductosInicio />} />
           <Route path="/productos/agregar" element={<ProductosForm />} />
           <Route path="/productos/ver" element={<ProductosLista />} />
+          <Route path="/reportes" element={<Reportes />} />
           <Route
             path="/usuarios"
             element={

@@ -1,0 +1,45 @@
+# === Node.js / React ===
+frontend/node_modules/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Build de React / Vite
+frontend/build/
+frontend/dist/
+.vite/
+
+# === Python / Django ===
+venv/
+backend/venv/
+.env
+.env.*
+*.sqlite3
+*.db
+*.log
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Migraciones de Django (ignorar todas excepto __init__.py)
+**/migrations/
+!**/migrations/__init__.py
+
+# === Archivos multimedia ===
+backend/media/
+
+# === Coverage y testing ===
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# === Configuraciones de IDEs ===
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# === Archivos de sistema operativo ===
+.DS_Store
+Thumbs.db
