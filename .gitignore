@@ -21,9 +21,6 @@ __pycache__/
 *.py[cod]
 *.pyo
 
-# Migraciones de Django (ignorar todas excepto __init__.py)
-**/migrations/
-!**/migrations/__init__.py
 
 # === Archivos multimedia ===
 backend/media/
