@@ -9,6 +9,9 @@ from usuarios.views import (
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 from usuarios.views import enviar_notificacion
+from lotes.views import FinalizarCampaniaView
+
+
 
 
 urlpatterns = [
@@ -25,8 +28,12 @@ urlpatterns = [
     path('api/', include('campos.urls')),
     path('api/', include('lotes.urls')),
     path('api/auth/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+
+    path("admin/", admin.site.urls),
+    path("api/", include("usuarios.urls")),
+    path('api/productos/', include('productos.urls')),  
+    path('siembras/finalizar/<int:lote_id>/', FinalizarCampaniaView.as_view(), name='finalizar-campania'),
     path('api/', include('reportes.urls')),
-    path('api/productos/', include('productos.urls')), 
 ] 
 
 # Agrega soporte para archivos MEDIA en desarrollo
