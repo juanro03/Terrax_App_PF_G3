@@ -14,6 +14,23 @@ import { Plus, Trash2 } from "lucide-react";
 
 const UNIDADES = ["L", "ml", "cc"];
 
+const suggestedLabels = [
+  "Velocidad viento (km/h)",
+  "Dirección viento",
+  "Humedad (%)",
+  "Temperatura (°C)",
+  "Fecha",
+  "Hora recomendada",
+];
+const realLabels = [
+  "Velocidad viento (km/h)",
+  "Dirección viento",
+  "Humedad (%)",
+  "Temperatura (°C)",
+  "Fecha",
+  "Hora real",
+];
+
 const Calculadora = () => {
   const [hectareas, setHectareas] = useState(0);
   const [ltsPorHa, setLtsPorHa] = useState(0);
@@ -22,6 +39,11 @@ const Calculadora = () => {
   const [productos, setProductos] = useState([
     { id: Date.now(), envase: "", producto: "", dosis: "", unidad: "L" },
   ]);
+  const [observacionesTexto, setObservacionesTexto] = useState("");
+  const [suggestedValues, setSuggestedValues] = useState(
+    suggestedLabels.map(() => "")
+  );
+  const [realValues, setRealValues] = useState(realLabels.map(() => ""));
 
   useEffect(() => {
     const total = parseFloat(hectareas) * parseFloat(ltsPorHa);
@@ -66,6 +88,12 @@ const Calculadora = () => {
     return isNaN(bidones) ? "—" : bidones.toFixed(1);
   };
 
+  const limpiarObservaciones = () => {
+    setObservacionesTexto("");
+    setSuggestedValues(suggestedLabels.map(() => ""));
+    setRealValues(realLabels.map(() => ""));
+  };
+
   // ** NUEVOS CÁLCULOS PARA AGUA EN TANQUE **
   const fracVol = litrosTotales % tamanoTanque;
   const sumaProdCompleto = productos.reduce((sum, p) => {
@@ -80,7 +108,11 @@ const Calculadora = () => {
   return (
     <Card
       className="mx-auto my-4 shadow-sm"
-      style={{ maxWidth: "1200px", width: "100%" }}
+      style={{
+        maxWidth: "1180px",
+        width: "100%",
+        backgroundColor: "#DFF5E1",
+      }}
     >
       <Card.Body>
         <Card.Title>Calculadora de Caldos</Card.Title>
@@ -132,7 +164,7 @@ const Calculadora = () => {
               <Col md={6}>
                 <h5>Productos utilizados</h5>
                 <Table size="sm" bordered hover>
-                  <thead className="table-light">
+                  <thead className="thead-terrax">
                     <tr>
                       <th>Envase (L)</th>
                       <th>Producto</th>
@@ -243,7 +275,7 @@ const Calculadora = () => {
               <Col md={6}>
                 <h5>Tanques requeridos</h5>
                 <Table size="sm" bordered className="text-center">
-                  <thead className="table-warning">
+                  <thead className="table-success">
                     <tr>
                       <th>Completos</th>
                       <th>Fraccionado</th>
@@ -260,7 +292,7 @@ const Calculadora = () => {
               <Col md={6}>
                 <h5>Litros por tanque</h5>
                 <Table size="sm" bordered className="text-center">
-                  <thead className="table-warning">
+                  <thead className="table-success">
                     <tr>
                       <th>Por tanque</th>
                       <th>Fraccionado</th>
@@ -281,7 +313,7 @@ const Calculadora = () => {
               <Col md={6}>
                 <h5>Por tanque completo</h5>
                 <Table size="sm" bordered className="text-center">
-                  <thead className="table-warning">
+                  <thead className="table-success">
                     <tr>
                       <th>Producto</th>
                       <th>Cantidad</th>
@@ -306,7 +338,7 @@ const Calculadora = () => {
               <Col md={6}>
                 <h5>Por tanque fraccionado</h5>
                 <Table size="sm" bordered className="text-center">
-                  <thead className="table-warning">
+                  <thead className="table-success">
                     <tr>
                       <th>Producto</th>
                       <th>Cantidad</th>
@@ -336,13 +368,13 @@ const Calculadora = () => {
               <Col>
                 <h5>Resultados</h5>
                 <div
-                  className="text-center text-black fw-bold py-2"
+                  className="text-center text-black py-2"
                   style={{
-                    backgroundColor: "#c5ffd0",
+                    backgroundColor: "#cfd0cfff",
                     borderRadius: "4px 4px 0 0",
                   }}
                 >
-                  Total producto puro por tanque{" "}
+                  Total de producto puro por tanque{" "}
                   <i className="bi bi-arrow-down-circle" />
                 </div>
                 <Table size="sm" bordered className="text-center">
@@ -384,9 +416,9 @@ const Calculadora = () => {
             <Row className="mb-4">
               <Col>
                 <div
-                  className="text-center text-white fw-bold py-2"
+                  className="text-center text-black py-2"
                   style={{
-                    backgroundColor: "#0047AB",
+                    backgroundColor: "#7f9eb2ff",
                     borderRadius: "4px 4px 0 0",
                   }}
                 >
@@ -420,7 +452,7 @@ const Calculadora = () => {
             {/* Botón Limpiar registros */}
             <Row className="mb-4">
               <Col className="text-end">
-                <Button variant="" onClick={limpiarRegistros}>
+                <Button variant="success" onClick={limpiarRegistros}>
                   Limpiar registros
                 </Button>
               </Col>
@@ -541,89 +573,95 @@ const Calculadora = () => {
               </Col>
             </Row>
           </Tab>
+          {/* Líquidos y otros tabs... */}
           <Tab eventKey="observaciones" title="Observaciones">
-            {/* Observaciones libre */}
-            <Row className="mb-4">
-              <Col>
-                <h5>Observaciones</h5>
+            <Card className="mb-4 rounded-xl shadow-sm">
+              <Card.Body>
+                <h5 className="mb-3">Observaciones</h5>
                 <Form.Control
                   as="textarea"
                   rows={4}
                   placeholder="Escriba observaciones..."
+                  value={observacionesTexto}
+                  onChange={(e) => setObservacionesTexto(e.target.value)}
+                  className="shadow-sm rounded"
                 />
-              </Col>
+              </Card.Body>
+            </Card>
+
+            <Row className="gx-4 gy-4 mb-4">
+              {[
+                { title: "Condiciones sugeridas", labels: suggestedLabels },
+                { title: "Condiciones reales", labels: realLabels },
+              ].map(({ title, labels }) => (
+                <Col md={6} key={title}>
+                  <Card className="condiciones-card rounded-xl shadow-sm h-100">
+                    <Card.Header className="bg-verde-claro">
+                      <h6 className="mb-0">{title}</h6>
+                    </Card.Header>
+                    <Card.Body className="p-2">
+                      <Table
+                        size="sm"
+                        borderless
+                        className="condiciones-table mb-0"
+                      >
+                        <tbody>
+                          {labels.map((label, idx) => (
+                            <tr key={label}>
+                              <td
+                                className="fw-semibold text-terrax-oscuro"
+                                style={{ width: "60%" }}
+                              >
+                                {label}
+                              </td>
+                              <td>
+                                <Form.Control
+                                  size="sm"
+                                  className="shadow-sm rounded"
+                                  value={
+                                    title === "Condiciones sugeridas"
+                                      ? suggestedValues[idx]
+                                      : realValues[idx]
+                                  }
+                                  onChange={(e) => {
+                                    if (title === "Condiciones sugeridas") {
+                                      const vals = [...suggestedValues];
+                                      vals[idx] = e.target.value;
+                                      setSuggestedValues(vals);
+                                    } else {
+                                      const vals = [...realValues];
+                                      vals[idx] = e.target.value;
+                                      setRealValues(vals);
+                                    }
+                                  }}
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))}
             </Row>
-            {/* Condiciones pulverizado */}
-            <Row className="gy-4">
+
+            <Row className="gx-3">
               <Col md={6}>
-                <h5>Condiciones sugeridas</h5>
-                <Table size="sm" bordered>
-                  <tbody>
-                    {[
-                      "Velocidad viento (km/h)",
-                      "Dirección viento",
-                      "Humedad (%)",
-                      "Temperatura (°C)",
-                      "Fecha",
-                      "Hora recomendada",
-                    ].map((l) => (
-                      <tr key={l}>
-                        <td>
-                          <strong>{l}</strong>
-                        </td>
-                        <td>
-                          <Form.Control size="sm" />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </Col>
-              <Col md={6}>
-                <h5>Condiciones reales</h5>
-                <Table size="sm" bordered>
-                  <tbody>
-                    {[
-                      "Velocidad viento (km/h)",
-                      "Dirección viento",
-                      "Humedad (%)",
-                      "Temperatura (°C)",
-                      "Fecha",
-                      "Hora recomendada",
-                    ].map((l) => (
-                      <tr key={l}>
-                        <td>
-                          <strong>{l}</strong>
-                        </td>
-                        <td>
-                          <Form.Control size="sm" />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </Col>
-            </Row>
-            {/* Botón generación PDF */}
-            <Row className="mt-3">
-              <Col className="text-end">
                 <Button
-                  variant="primary"
-                  className="w-100 d-flex align-items-center justify-content-center"
+                  className="btn-terrax-light w-100 d-flex align-items-center justify-content-center"
                   onClick={() => window.print()}
                 >
-                  Generar Receta
-                  <i class="bi bi-filetype-pdf"></i>
+                  <i className="bi bi-filetype-pdf me-2" /> Generar Receta
                 </Button>
               </Col>
-              <Col className="text-end">
+              <Col md={6}>
                 <Button
                   variant="success"
                   className="w-100 d-flex align-items-center justify-content-center"
-                  onClick={() => window.print()}
+                  onClick={limpiarObservaciones}
                 >
-                  Limpiar sólidos
-                  <i class="bi bi-backspace"></i>
+                  <i className="bi bi-backspace me-2" /> Limpiar
                 </Button>
               </Col>
             </Row>
