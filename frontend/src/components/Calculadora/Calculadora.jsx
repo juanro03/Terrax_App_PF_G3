@@ -1,434 +1,637 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Card, Button, Table, Form, Row, Col, Alert } from "react-bootstrap";
-import { Trash2 } from "lucide-react";
-import { Plus } from "lucide-react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import {
+  Card,
+  Row,
+  Col,
+  Form,
+  Table,
+  Tabs,
+  Tab,
+  Button,
+} from "react-bootstrap";
+import { Plus, Trash2 } from "lucide-react";
 
-const PRODUCTS = [
-  {
-    id: "fipronil",
-    name: "Fipronil",
-    unit: "L",
-    range: "0.1 – 0.2 L/ha",
-    category: "insecticida",
-  },
-  {
-    id: "clorpirifos",
-    name: "Clorpirifos",
-    unit: "L",
-    range: "0.3 – 0.6 L/ha",
-    category: "insecticida",
-  },
-  {
-    id: "glifosato",
-    name: "Glifosato",
-    unit: "L",
-    range: "0.1 – 0.2 L/ha",
-    category: "herbicida",
-  },
-  {
-    id: "acido-24d",
-    name: "Ácido 2,4‑D",
-    unit: "L",
-    range: "30 L",
-    category: "herbicida",
-  },
-  {
-    id: "atrazina",
-    name: "Atrazina",
-    unit: "L",
-    range: "3 L",
-    category: "herbicida",
-  },
-  {
-    id: "diclosulam",
-    name: "Diclosulam",
-    unit: "L",
-    range: "30 L",
-    category: "herbicida",
-  },
-  {
-    id: "cletodim",
-    name: "Cletodim",
-    unit: "L",
-    range: "0.5 – 1 L/ha",
-    category: "herbicida",
-  },
-  {
-    id: "haloxifop",
-    name: "Haloxifop",
-    unit: "L",
-    range: "0.5 – 1.5 L/ha",
-    category: "herbicida",
-  },
-  {
-    id: "paraquat",
-    name: "Paraquat",
-    unit: "L",
-    range: "2.5 L/ha",
-    category: "herbicida",
-  },
-  {
-    id: "cipermetrina",
-    name: "Cipermetrina",
-    unit: "mL",
-    range: "20 – 75 mL",
-    category: "insecticida",
-  },
-  {
-    id: "imidacloprid",
-    name: "Imidacloprid",
-    unit: "mL",
-    range: "100 – 300 mL/ha",
-    category: "insecticida",
-  },
-  {
-    id: "rynaxypyr",
-    name: "Rynaxypyr",
-    unit: "L",
-    range: "0.1 – 0.2 L/ha",
-    category: "insecticida",
-  },
-  {
-    id: "flubendiamida",
-    name: "Flubendiamida",
-    unit: "L",
-    range: "0.2 – 0.3 L/ha",
-    category: "insecticida",
-  },
-  {
-    id: "azoxistrobina",
-    name: "Azoxistrobina‑Ciproconazol",
-    unit: "L",
-    range: "0.2 – 0.3 L/ha",
-    category: "fungicida",
-  },
-  {
-    id: "benomil",
-    name: "Benomil",
-    unit: "kg",
-    range: "0.5 – 1 kg/ha",
-    category: "fungicida",
-  },
-  {
-    id: "carbendazim",
-    name: "Carbendazim",
-    unit: "L",
-    range: "1 – 2 L/ha",
-    category: "fungicida",
-  },
-];
+const UNIDADES = ["L", "ml", "cc"];
 
-const DEFAULT_ROWS = [
-  { id: 1, productId: "", area: 0, dose: 0 },
-  { id: 2, productId: "", area: 0, dose: 0 },
-  { id: 3, productId: "", area: 0, dose: 0 },
-];
-
-function Calculadora() {
-  const [lotes, setLotes] = useState([]);
-  const [selectedLoteId, setSelectedLoteId] = useState("");
-  const [cantHa, setCantHa] = useState(0);
-  const [tankVolume, setTankVolume] = useState(1000);
-  const [rows, setRows] = useState(DEFAULT_ROWS);
+const Calculadora = () => {
+  const [hectareas, setHectareas] = useState(0);
+  const [ltsPorHa, setLtsPorHa] = useState(0);
+  const [tamanoTanque, setTamanoTanque] = useState(0);
+  const [litrosTotales, setLitrosTotales] = useState(0);
+  const [productos, setProductos] = useState([
+    { id: Date.now(), envase: "", producto: "", dosis: "", unidad: "L" },
+  ]);
 
   useEffect(() => {
-    async function fetchLotes() {
-      try {
-        const res = await axios.get("http://localhost:8000/api/lotes/");
-        setLotes(res.data);
-      } catch (err) {
-        console.error("Error al obtener lotes:", err);
-      }
-    }
+    const total = parseFloat(hectareas) * parseFloat(ltsPorHa);
+    setLitrosTotales(isNaN(total) ? 0 : total);
+  }, [hectareas, ltsPorHa]);
 
-    fetchLotes();
-  }, []);
-
-  useEffect(() => {
-    async function fetchLoteDetails() {
-      try {
-        if (selectedLoteId) {
-          const res = await axios.get(
-            `http://localhost:8000/api/lotes/${selectedLoteId}/`
-          );
-          setCantHa(res.data.area);
-        }
-      } catch (err) {
-        console.error("Error al obtener hectáreas:", err);
-      }
-    }
-
-    fetchLoteDetails();
-  }, [selectedLoteId]);
-
-  const updateRow = (id, field, value) =>
-    setRows((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, [field]: value } : r))
-    );
-
-  const addRow = () =>
-    setRows((prev) => [
+  const agregarProducto = () => {
+    setProductos((prev) => [
       ...prev,
-      { id: Date.now(), productId: "", area: 0, dose: 0 },
+      { id: Date.now(), envase: "", producto: "", dosis: "", unidad: "L" },
     ]);
-
-  const removeRow = (id) => {
-    setRows((prev) => prev.filter((r) => r.id !== id));
   };
 
-  const resetCalculator = () => {
-    setSelectedLoteId("");
-    setCantHa(0);
-    setTankVolume(1000);
-    setRows(DEFAULT_ROWS);
+  const eliminarProducto = (id) => {
+    setProductos((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const totals = useMemo(() => {
-    const totalProduct = rows.reduce((sum, r) => {
-      const selectedProduct = PRODUCTS.find((p) => p.id === r.productId);
-      if (!selectedProduct) return sum;
+  // Limpiar todos los registros
+  const limpiarRegistros = () => {
+    setHectareas(0);
+    setLtsPorHa(0);
+    setTamanoTanque(0);
+    setProductos([
+      { id: Date.now(), envase: "", producto: "", dosis: "", unidad: "L" },
+    ]);
+  };
 
-      const dose = parseFloat(
-        selectedProduct.range
-          ?.match(/[\d.,]+(?=\s*(L|ml|kg)?\/?ha?$)?/g)
-          ?.at(-1)
-          ?.replace(",", ".") || "0"
-      );
+  const actualizarProducto = (id, campo, valor) => {
+    setProductos((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, [campo]: valor } : p))
+    );
+  };
 
-      let doseMl = 0;
-      switch (selectedProduct.unit.toLowerCase()) {
-        case "l":
-          doseMl = dose * 1000;
-          break;
-        case "ml":
-          doseMl = dose;
-          break;
-        case "kg":
-          doseMl = dose * 1000; // solo si estás cómodo con esta conversión
-          break;
-        default:
-          doseMl = 0;
-      }
+  const calcularTotalCampo = (dosis) => {
+    const total = parseFloat(dosis) * parseFloat(hectareas);
+    return isNaN(total) ? 0 : total;
+  };
 
-      return sum + cantHa * doseMl;
-    }, 0);
+  const calcularBidones = (totalCampo, envase) => {
+    if (!envase || parseFloat(envase) === 0) return "—";
+    const bidones = parseFloat(totalCampo) / parseFloat(envase);
+    return isNaN(bidones) ? "—" : bidones.toFixed(1);
+  };
 
-    const water = tankVolume - totalProduct / 1000; // pasás el total de producto de mL a L para comparar con el tanque
-    return { totalProduct, water, overflow: water < 0 };
-  }, [rows, tankVolume, cantHa]);
+  // ** NUEVOS CÁLCULOS PARA AGUA EN TANQUE **
+  const fracVol = litrosTotales % tamanoTanque;
+  const sumaProdCompleto = productos.reduce((sum, p) => {
+    const v = (parseFloat(p.dosis) * tamanoTanque) / (ltsPorHa || 1);
+    return sum + (isNaN(v) ? 0 : v);
+  }, 0);
+  const sumaProdFraccionado = productos.reduce((sum, p) => {
+    const v = (parseFloat(p.dosis) * fracVol) / (ltsPorHa || 1);
+    return sum + (isNaN(v) ? 0 : v);
+  }, 0);
 
   return (
-    <Card className="shadow m-4 mx-auto" style={{ maxWidth: "960px" }}>
+    <Card
+      className="mx-auto my-4 shadow-sm"
+      style={{ maxWidth: "1200px", width: "100%" }}
+    >
       <Card.Body>
-        <Card.Title className="h4 mb-3">Calculadora de Caldo</Card.Title>
+        <Card.Title>Calculadora de Caldos</Card.Title>
 
-        <Row className="gy-2 align-items-end mb-1">
-          <Col md={4}>
-            <Form.Group controlId="selectLote" className="mb-0">
-              <Form.Label className="text-dark">Seleccionar lote</Form.Label>
-              <Form.Control
-                as="select"
-                value={selectedLoteId}
-                onChange={(e) => setSelectedLoteId(e.target.value)}
-                className="bg-light"
-              >
-                <option value="">Seleccione un lote</option>
-                {lotes.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.nombre}
-                  </option>
-                ))}
-              </Form.Control>
-            </Form.Group>
-            {lotes.length === 0 && (
-              <Form.Text muted className="mt-1 d-block">
-                No hay lotes disponibles.
-              </Form.Text>
-            )}
-          </Col>
-
-          <Col md={4}>
-            <Form.Group controlId="cantHa" className="mb-0">
-              <Form.Label className="text-dark">
-                Cantidad de Hectáreas
-              </Form.Label>
-              <Form.Control
-                type="number"
-                value={cantHa}
-                readOnly
-                className="bg-light"
-              />
-            </Form.Group>
-          </Col>
-
-          <Col md={4}>
-            <Form.Group controlId="tankVol" className="mb-0">
-              <Form.Label className="text-dark">
-                Volumen del Tanque (L)
-              </Form.Label>
-              <Form.Control
-                type="number"
-                min={1}
-                value={tankVolume}
-                onChange={(e) => setTankVolume(Number(e.target.value))}
-                className="bg-light"
-              />
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <div className="table-responsive mt-4">
-          <Table bordered hover>
-            <thead className="table-light">
-              <tr className="text-center">
-                <th>Productos a aplicar</th>
-                <th className="text-end text-center">Ficha Técnica</th>
-                <th className="text-end text-center">Dosis Máxima</th>
-                <th className="text-end text-center">Producto Máximo</th>
-                <th className="text-center">Eliminar</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => {
-                const selectedProduct = PRODUCTS.find(
-                  (p) => p.id === row.productId
-                );
-                return (
-                  <tr key={row.id}>
-                    <td>
-                      <Form.Select
-                        value={row.productId}
-                        onChange={(e) =>
-                          updateRow(row.id, "productId", e.target.value)
-                        }
-                      >
-                        <option value="">Seleccionar producto</option>
-                        {PRODUCTS.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.name}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </td>
-
-                    <td className="text-end">
-                      <Form.Control
-                        type="text"
-                        value={selectedProduct?.range || ""}
-                        readOnly
-                        className="bg-light text-end"
-                      />
-                    </td>
-
-                    <td className="text-end">
-                      <Form.Control
-                        type="number"
-                        readOnly
-                        value={
-                          selectedProduct
-                            ? parseFloat(
-                                selectedProduct.range
-                                  ?.match(/[\d.,]+(?=\s*(L|ml|kg)?\/?ha?$)?/g)
-                                  ?.at(-1)
-                                  ?.replace(",", ".") || 0
-                              ).toFixed(2)
-                            : "0.00"
-                        }
-                        className="bg-light text-end"
-                      />
-                    </td>
-
-                    <td className="text-end align-middle fw-medium">
-                      {(() => {
-                        const dose = parseFloat(
-                          selectedProduct?.range
-                            ?.match(/[\d.,]+(?=\s*(L|ml|kg)?\/?ha?$)?/g)
-                            ?.at(-1)
-                            ?.replace(",", ".") || "0"
-                        );
-
-                        let doseMl = 0;
-                        switch (selectedProduct?.unit.toLowerCase()) {
-                          case "l":
-                            doseMl = dose * 1000;
-                            break;
-                          case "ml":
-                            doseMl = dose;
-                            break;
-                          case "kg":
-                            doseMl = dose * 1000; // aproximado
-                            break;
-                          default:
-                            doseMl = 0;
-                        }
-
-                        return (cantHa * doseMl).toFixed(2) + " mL";
-                      })()}
-                    </td>
-
-                    <td className="text-center">
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => removeRow(row.id)}
-                        title="Eliminar producto"
-                      >
-                        <Trash2 size={16} />
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Table>
-        </div>
-
-        <div className="d-flex gap-2 mt-3">
-          <Button variant="secondary" onClick={addRow}>
-            <Plus size={18} /> Agregar
-          </Button>
-
-          <Button variant="outline-danger" onClick={resetCalculator}>
-            Limpiar calculadora
-          </Button>
-        </div>
-
-        <Row className="mt-4 gy-3">
-          <Col md={4}>
-            <Card bg="success" text="white">
-              <Card.Body className="text-center">
-                <small>Total producto (mL)</small>
-                <h3 className="fw-bold mb-0 mt-1">
-                  {totals.totalProduct.toFixed(2)}
-                </h3>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          <Col md={4}>
-            <Card bg={totals.overflow ? "danger" : "primary"} text="white">
-              <Card.Body className="text-center">
-                <small>Agua necesaria (L)</small>
-                <h3 className="fw-bold mb-0 mt-1">{totals.water.toFixed(0)}</h3>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          {totals.overflow && (
+        {/* Campos principales */}
+        <Form>
+          <Row className="g-3 mb-4">
             <Col md={4}>
-              <Alert
-                variant="danger"
-                className="h-100 d-flex align-items-center justify-content-center"
-              >
-                ¡El tanque es demasiado pequeño!
-              </Alert>
+              <Form.Label>Total de hectáreas</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="150"
+                value={hectareas}
+                onChange={(e) => setHectareas(+e.target.value)}
+              />
             </Col>
-          )}
-        </Row>
+            <Col md={4}>
+              <Form.Label>Lts/Ha de caldo</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="10"
+                value={ltsPorHa}
+                onChange={(e) => setLtsPorHa(+e.target.value)}
+              />
+            </Col>
+            <Col md={4}>
+              <Form.Label>Tamaño del tanque (L)</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="400"
+                value={tamanoTanque}
+                onChange={(e) => setTamanoTanque(+e.target.value)}
+              />
+            </Col>
+          </Row>
+          <Row className="mb-4">
+            <Col md={4}>
+              <Form.Label>Litros totales de caldo</Form.Label>
+              <Form.Control readOnly value={litrosTotales.toFixed(0)} />
+            </Col>
+          </Row>
+        </Form>
+
+        {/* Pestañas */}
+        <Tabs defaultActiveKey="liquidos" className="mb-3">
+          <Tab eventKey="liquidos" title="Líquidos">
+            {/* Productos utilizados */}
+            <Row className="mb-4">
+              <Col md={6}>
+                <h5>Productos utilizados</h5>
+                <Table size="sm" bordered hover>
+                  <thead className="table-light">
+                    <tr>
+                      <th>Envase (L)</th>
+                      <th>Producto</th>
+                      <th>Dosis</th>
+                      <th>Unidad</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productos.map((p) => (
+                      <tr key={p.id}>
+                        <td>
+                          <Form.Control
+                            type="number"
+                            size="sm"
+                            value={p.envase}
+                            onChange={(e) =>
+                              actualizarProducto(p.id, "envase", e.target.value)
+                            }
+                          />
+                        </td>
+                        <td>
+                          <Form.Control
+                            type="text"
+                            size="sm"
+                            value={p.producto}
+                            onChange={(e) =>
+                              actualizarProducto(
+                                p.id,
+                                "producto",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td>
+                          <Form.Control
+                            type="number"
+                            size="sm"
+                            value={p.dosis}
+                            onChange={(e) =>
+                              actualizarProducto(p.id, "dosis", e.target.value)
+                            }
+                          />
+                        </td>
+                        <td>
+                          <Form.Select
+                            size="sm"
+                            value={p.unidad}
+                            onChange={(e) =>
+                              actualizarProducto(p.id, "unidad", e.target.value)
+                            }
+                          >
+                            {UNIDADES.map((u) => (
+                              <option key={u} value={u}>
+                                {u}
+                              </option>
+                            ))}
+                          </Form.Select>
+                        </td>
+                        <td className="text-center">
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => eliminarProducto(p.id)}
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+                <Button variant="success" size="sm" onClick={agregarProducto}>
+                  <Plus size={14} /> Agregar producto
+                </Button>
+              </Col>
+
+              {/* Resumen automático */}
+              <Col md={6}>
+                <h5>Resumen automático</h5>
+                <Table size="sm" bordered className="text-center">
+                  <thead className="table-success">
+                    <tr>
+                      <th>Producto</th>
+                      <th>Total campo</th>
+                      <th>Bidones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productos.map((p) => {
+                      const total = calcularTotalCampo(p.dosis);
+                      return (
+                        <tr key={p.id}>
+                          <td>{p.producto || "—"}</td>
+                          <td>{total.toFixed(1)} L</td>
+                          <td>{calcularBidones(total, p.envase)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+
+            {/* Tanques requeridos y litros */}
+            <Row className="mb-4">
+              <Col md={6}>
+                <h5>Tanques requeridos</h5>
+                <Table size="sm" bordered className="text-center">
+                  <thead className="table-warning">
+                    <tr>
+                      <th>Completos</th>
+                      <th>Fraccionado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{Math.floor(litrosTotales / tamanoTanque)}</td>
+                      <td>{((litrosTotales / tamanoTanque) % 1).toFixed(2)}</td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+              <Col md={6}>
+                <h5>Litros por tanque</h5>
+                <Table size="sm" bordered className="text-center">
+                  <thead className="table-warning">
+                    <tr>
+                      <th>Por tanque</th>
+                      <th>Fraccionado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{tamanoTanque} L</td>
+                      <td>{(litrosTotales % tamanoTanque).toFixed(0)} L</td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+
+            {/* Cantidades por tanque */}
+            <Row className="mb-4">
+              <Col md={6}>
+                <h5>Por tanque completo</h5>
+                <Table size="sm" bordered className="text-center">
+                  <thead className="table-warning">
+                    <tr>
+                      <th>Producto</th>
+                      <th>Cantidad</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productos.map((p) => {
+                      const val =
+                        (parseFloat(p.dosis) * tamanoTanque) / (ltsPorHa || 1);
+                      return (
+                        <tr key={p.id}>
+                          <td>{p.producto || "—"}</td>
+                          <td>
+                            {isNaN(val) ? "—" : `${val.toFixed(2)} ${p.unidad}`}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </Table>
+              </Col>
+              <Col md={6}>
+                <h5>Por tanque fraccionado</h5>
+                <Table size="sm" bordered className="text-center">
+                  <thead className="table-warning">
+                    <tr>
+                      <th>Producto</th>
+                      <th>Cantidad</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productos.map((p) => {
+                      const frac = litrosTotales % tamanoTanque;
+                      const val =
+                        (parseFloat(p.dosis) * frac) / (ltsPorHa || 1);
+                      return (
+                        <tr key={p.id}>
+                          <td>{p.producto || "—"}</td>
+                          <td>
+                            {isNaN(val) ? "—" : `${val.toFixed(2)} ${p.unidad}`}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+
+            {/* Totales finales */}
+            <Row className="mb-4">
+              <Col>
+                <h5>Resultados</h5>
+                <div
+                  className="text-center text-black fw-bold py-2"
+                  style={{
+                    backgroundColor: "#c5ffd0",
+                    borderRadius: "4px 4px 0 0",
+                  }}
+                >
+                  Total producto puro por tanque{" "}
+                  <i className="bi bi-arrow-down-circle" />
+                </div>
+                <Table size="sm" bordered className="text-center">
+                  <thead className="bg-danger text-white">
+                    <tr>
+                      <th>Completo</th>
+                      <th>Fraccionado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        {productos
+                          .reduce((s, p) => {
+                            const v =
+                              (parseFloat(p.dosis) * tamanoTanque) /
+                              (ltsPorHa || 1);
+                            return s + (isNaN(v) ? 0 : v);
+                          }, 0)
+                          .toFixed(2)}{" "}
+                        L
+                      </td>
+                      <td>
+                        {productos
+                          .reduce((s, p) => {
+                            const frac = litrosTotales % tamanoTanque;
+                            const v =
+                              (parseFloat(p.dosis) * frac) / (ltsPorHa || 1);
+                            return s + (isNaN(v) ? 0 : v);
+                          }, 0)
+                          .toFixed(2)}{" "}
+                        L
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+            <Row className="mb-4">
+              <Col>
+                <div
+                  className="text-center text-white fw-bold py-2"
+                  style={{
+                    backgroundColor: "#0047AB",
+                    borderRadius: "4px 4px 0 0",
+                  }}
+                >
+                  Total de agua en el tanque{" "}
+                  <i className="bi bi-arrow-down-circle" />
+                </div>
+                <Table
+                  bordered
+                  className="text-center"
+                  style={{
+                    backgroundColor: "#0066FF",
+                    color: "white",
+                    marginBottom: 0,
+                  }}
+                >
+                  <tbody>
+                    <tr>
+                      {/* Agua necesaria para llenar un tanque completo */}
+                      <td style={{ fontWeight: "bold", fontSize: "1.1rem" }}>
+                        {(tamanoTanque - sumaProdCompleto).toFixed(2)} Lts
+                      </td>
+                      {/* Agua restante en el tanque fraccionado */}
+                      <td style={{ fontWeight: "bold", fontSize: "1.1rem" }}>
+                        {(fracVol - sumaProdFraccionado).toFixed(2)} Lts
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+            {/* Botón Limpiar registros */}
+            <Row className="mb-4">
+              <Col className="text-end">
+                <Button variant="" onClick={limpiarRegistros}>
+                  Limpiar registros
+                </Button>
+              </Col>
+            </Row>
+          </Tab>
+          <Tab eventKey="solidos" title="Sólidos">
+            {/* Sólidos */}
+            <Row className="mb-4">
+              <Col md={6}>
+                <h5>Insumos sólidos</h5>
+                <Table size="sm" bordered className="text-center">
+                  <thead className="bg-light">
+                    <tr>
+                      <th>Bolsa (Kg)</th>
+                      <th>Producto</th>
+                      <th>Dosis</th>
+                      <th>Unidad</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productos.map((p) => (
+                      <tr key={p.id}>
+                        <td>
+                          <Form.Control
+                            size="sm"
+                            type="number"
+                            value={p.envase}
+                            onChange={(e) =>
+                              actualizarProducto(p.id, "envase", e.target.value)
+                            }
+                          />
+                        </td>
+                        <td>
+                          <Form.Control
+                            size="sm"
+                            type="text"
+                            value={p.producto}
+                            onChange={(e) =>
+                              actualizarProducto(
+                                p.id,
+                                "producto",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td>
+                          <Form.Control
+                            size="sm"
+                            type="number"
+                            value={p.dosis}
+                            onChange={(e) =>
+                              actualizarProducto(p.id, "dosis", e.target.value)
+                            }
+                          />
+                        </td>
+                        <td>
+                          <Form.Select
+                            size="sm"
+                            value={p.unidad}
+                            onChange={(e) =>
+                              actualizarProducto(p.id, "unidad", e.target.value)
+                            }
+                          >
+                            <option>Kg/ha</option>
+                            <option>g/ha</option>
+                          </Form.Select>
+                        </td>
+                        <td className="text-center">
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => eliminarProducto(p.id)}
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+                <Button variant="success" size="sm" onClick={agregarProducto}>
+                  <Plus size={14} /> Agregar línea
+                </Button>
+              </Col>
+              <Col md={6}>
+                <h5>Resumen Sólidos</h5>
+                <Table size="sm" bordered className="text-center">
+                  <thead className="table-success">
+                    <tr>
+                      <th>Producto</th>
+                      <th>Total (Kg)</th>
+                      <th>Bolsas</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productos.map((p) => (
+                      <tr key={p.id}>
+                        <td>{p.producto || "—"}</td>
+                        <td>
+                          {(
+                            parseFloat(p.dosis) * parseFloat(hectareas) || 0
+                          ).toFixed(1)}
+                        </td>
+                        <td>
+                          {p.envase
+                            ? (
+                                (parseFloat(p.dosis) * parseFloat(hectareas)) /
+                                parseFloat(p.envase)
+                              ).toFixed(1)
+                            : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+          </Tab>
+          <Tab eventKey="observaciones" title="Observaciones">
+            {/* Observaciones libre */}
+            <Row className="mb-4">
+              <Col>
+                <h5>Observaciones</h5>
+                <Form.Control
+                  as="textarea"
+                  rows={4}
+                  placeholder="Escriba observaciones..."
+                />
+              </Col>
+            </Row>
+            {/* Condiciones pulverizado */}
+            <Row className="gy-4">
+              <Col md={6}>
+                <h5>Condiciones sugeridas</h5>
+                <Table size="sm" bordered>
+                  <tbody>
+                    {[
+                      "Velocidad viento (km/h)",
+                      "Dirección viento",
+                      "Humedad (%)",
+                      "Temperatura (°C)",
+                      "Fecha",
+                      "Hora recomendada",
+                    ].map((l) => (
+                      <tr key={l}>
+                        <td>
+                          <strong>{l}</strong>
+                        </td>
+                        <td>
+                          <Form.Control size="sm" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </Col>
+              <Col md={6}>
+                <h5>Condiciones reales</h5>
+                <Table size="sm" bordered>
+                  <tbody>
+                    {[
+                      "Velocidad viento (km/h)",
+                      "Dirección viento",
+                      "Humedad (%)",
+                      "Temperatura (°C)",
+                      "Fecha",
+                      "Hora recomendada",
+                    ].map((l) => (
+                      <tr key={l}>
+                        <td>
+                          <strong>{l}</strong>
+                        </td>
+                        <td>
+                          <Form.Control size="sm" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+            {/* Botón generación PDF */}
+            <Row className="mt-3">
+              <Col className="text-end">
+                <Button
+                  variant="primary"
+                  className="w-100 d-flex align-items-center justify-content-center"
+                  onClick={() => window.print()}
+                >
+                  Generar Receta
+                  <i class="bi bi-filetype-pdf"></i>
+                </Button>
+              </Col>
+              <Col className="text-end">
+                <Button
+                  variant="success"
+                  className="w-100 d-flex align-items-center justify-content-center"
+                  onClick={() => window.print()}
+                >
+                  Limpiar sólidos
+                  <i class="bi bi-backspace"></i>
+                </Button>
+              </Col>
+            </Row>
+          </Tab>
+        </Tabs>
       </Card.Body>
     </Card>
   );
-}
+};
 
 export default Calculadora;

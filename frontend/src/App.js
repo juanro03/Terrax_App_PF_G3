@@ -21,7 +21,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-draw";
 import VerLotesWrapper from "./components/lotes/VerLotesWrapper";
-import ResetPassword from './components/Auth/ResetPassword';
+import ResetPassword from "./components/Auth/ResetPassword";
 import DetalleLote from "./components/lotes/DetalleLote";
 import ProductosForm from "./components/Productos/ProductosForm";
 import Reportes from "./components/Reportes/reportes.jsx";
@@ -57,10 +57,11 @@ function AppContent() {
       <div
         className="flex-grow-1"
         style={{
-          overflowY: "auto",
           marginLeft: contentMarginLeft,
           width: "100%",
           backgroundColor: "#effeee",
+          minHeight: "100vh", // mantiene altura mínima
+          overflowX: "hidden", // evita scroll horizontal
         }}
       >
         <Routes location={location}>
@@ -73,7 +74,10 @@ function AppContent() {
           <Route path="/calculadora" element={<Calculadora />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/lote/:loteId" element={<DetalleLote />} />
-          <Route path="/lotes/:loteId/historial" element={<HistorialCampania />} />
+          <Route
+            path="/lotes/:loteId/historial"
+            element={<HistorialCampania />}
+          />
           <Route path="/productos" element={<ProductosInicio />} />
           <Route path="/productos/agregar" element={<ProductosForm />} />
           <Route path="/productos/ver" element={<ProductosLista />} />

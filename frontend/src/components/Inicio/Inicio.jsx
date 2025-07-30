@@ -75,7 +75,7 @@ const Inicio = () => {
   };
 
   return (
-    <div style={{ backgroundColor: "transparent", minHeight: "100vh" }}>
+    <div >
       {/* 1) Hero / Cabecera */}
       <section
         style={{
@@ -95,7 +95,7 @@ const Inicio = () => {
         </Container>
       </section>
 
-      {/* 2) Carrusel */}
+      {/* 2) Carrusel 
       <Container fluid className="ps-2">
         <Row className="justify-content-center">
           <Col lg={10}>
@@ -103,6 +103,8 @@ const Inicio = () => {
           </Col>
         </Row>
       </Container>
+      */}
+
 
       {/* 3) Widgets y Tarjetas informativas */}
       <Container style={{ padding: "2rem 0" }}>
@@ -162,7 +164,7 @@ const Inicio = () => {
             </Card>
           </Col>
 
-          {/* 3.4) Sección de novedades con Accordion */}
+          {/* 3.4) Sección de novedades con Accordion 
           <Col md={12}>
             <Card className="shadow-sm">
               <Card.Header style={{ backgroundColor: "#ffffff" }}>
@@ -200,6 +202,7 @@ const Inicio = () => {
               </Card.Body>
             </Card>
           </Col>
+          */}
         </Row>
       </Container>
 
