@@ -12,6 +12,15 @@ import {
 } from "react-bootstrap";
 import { Plus, Trash2 } from "lucide-react";
 
+// PALETA Y CONSTANTES
+const verde = "#198754";
+const verdeClaro = "#e9fbe5";
+const verdeOscuro = "#155a36";
+const grisClaro = "#f3f6f5";
+const blanco = "#fff";
+const grisOscuro = "#424242";
+const azulSuave = "#e6f1fb";
+
 const UNIDADES = ["L", "ml", "cc"];
 
 const suggestedLabels = [
@@ -39,6 +48,15 @@ const Calculadora = () => {
   const [productos, setProductos] = useState([
     { id: Date.now(), envase: "", producto: "", dosis: "", unidad: "L" },
   ]);
+  const [productosSolidos, setProductosSolidos] = useState([
+    {
+      id: Date.now() + 1,
+      envase: "",
+      producto: "",
+      dosis: "",
+      unidad: "Kg/ha",
+    },
+  ]);
   const [observacionesTexto, setObservacionesTexto] = useState("");
   const [suggestedValues, setSuggestedValues] = useState(
     suggestedLabels.map(() => "")
@@ -50,18 +68,21 @@ const Calculadora = () => {
     setLitrosTotales(isNaN(total) ? 0 : total);
   }, [hectareas, ltsPorHa]);
 
+  // --- LÍQUIDOS ---
   const agregarProducto = () => {
     setProductos((prev) => [
       ...prev,
       { id: Date.now(), envase: "", producto: "", dosis: "", unidad: "L" },
     ]);
   };
-
   const eliminarProducto = (id) => {
     setProductos((prev) => prev.filter((p) => p.id !== id));
   };
-
-  // Limpiar todos los registros
+  const actualizarProducto = (id, campo, valor) => {
+    setProductos((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, [campo]: valor } : p))
+    );
+  };
   const limpiarRegistros = () => {
     setHectareas(0);
     setLtsPorHa(0);
@@ -69,32 +90,50 @@ const Calculadora = () => {
     setProductos([
       { id: Date.now(), envase: "", producto: "", dosis: "", unidad: "L" },
     ]);
+    setProductosSolidos([
+      {
+        id: Date.now() + 1,
+        envase: "",
+        producto: "",
+        dosis: "",
+        unidad: "Kg/ha",
+      },
+    ]);
   };
-
-  const actualizarProducto = (id, campo, valor) => {
-    setProductos((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, [campo]: valor } : p))
-    );
-  };
-
   const calcularTotalCampo = (dosis) => {
     const total = parseFloat(dosis) * parseFloat(hectareas);
     return isNaN(total) ? 0 : total;
   };
-
   const calcularBidones = (totalCampo, envase) => {
     if (!envase || parseFloat(envase) === 0) return "—";
     const bidones = parseFloat(totalCampo) / parseFloat(envase);
     return isNaN(bidones) ? "—" : bidones.toFixed(1);
   };
 
+  // --- SÓLIDOS ---
+  const agregarProductoSolido = () => {
+    setProductosSolidos((prev) => [
+      ...prev,
+      { id: Date.now(), envase: "", producto: "", dosis: "", unidad: "Kg/ha" },
+    ]);
+  };
+  const eliminarProductoSolido = (id) => {
+    setProductosSolidos((prev) => prev.filter((p) => p.id !== id));
+  };
+  const actualizarProductoSolido = (id, campo, valor) => {
+    setProductosSolidos((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, [campo]: valor } : p))
+    );
+  };
+
+  // --- OBSERVACIONES ---
   const limpiarObservaciones = () => {
     setObservacionesTexto("");
     setSuggestedValues(suggestedLabels.map(() => ""));
     setRealValues(realLabels.map(() => ""));
   };
 
-  // ** NUEVOS CÁLCULOS PARA AGUA EN TANQUE **
+  // --- CÁLCULOS ---
   const fracVol = litrosTotales % tamanoTanque;
   const sumaProdCompleto = productos.reduce((sum, p) => {
     const v = (parseFloat(p.dosis) * tamanoTanque) / (ltsPorHa || 1);
@@ -105,67 +144,106 @@ const Calculadora = () => {
     return sum + (isNaN(v) ? 0 : v);
   }, 0);
 
+  // --- UI ---
   return (
     <Card
-      className="mx-auto my-4 shadow-sm"
+      className="mx-auto my-5 shadow"
       style={{
-        maxWidth: "1180px",
-        width: "100%",
-        backgroundColor: "#DFF5E1",
+        maxWidth: "1160px",
+        background: blanco,
+        borderRadius: "1.4rem",
+        border: "none",
       }}
     >
       <Card.Body>
-        <Card.Title>Calculadora de Caldos</Card.Title>
-
-        {/* Campos principales */}
+        <Card.Title className="fw-bold mb-4" style={{ color: verdeOscuro }}>
+          Calculadora de Caldos
+        </Card.Title>
+        {/* FORM PRINCIPAL */}
         <Form>
           <Row className="g-3 mb-4">
             <Col md={4}>
-              <Form.Label>Total de hectáreas</Form.Label>
+              <Form.Label
+                className="fw-semibold"
+                style={{ color: verdeOscuro }}
+              >
+                Total de hectáreas
+              </Form.Label>
               <Form.Control
                 type="number"
                 placeholder="150"
                 value={hectareas}
+                min={0}
                 onChange={(e) => setHectareas(+e.target.value)}
+                className="input-terrax"
               />
             </Col>
             <Col md={4}>
-              <Form.Label>Lts/Ha de caldo</Form.Label>
+              <Form.Label
+                className="fw-semibold"
+                style={{ color: verdeOscuro }}
+              >
+                Lts/Ha de caldo
+              </Form.Label>
               <Form.Control
                 type="number"
                 placeholder="10"
                 value={ltsPorHa}
+                min={0}
                 onChange={(e) => setLtsPorHa(+e.target.value)}
+                className="input-terrax"
               />
             </Col>
             <Col md={4}>
-              <Form.Label>Tamaño del tanque (L)</Form.Label>
+              <Form.Label
+                className="fw-semibold"
+                style={{ color: verdeOscuro }}
+              >
+                Tamaño del tanque (L)
+              </Form.Label>
               <Form.Control
                 type="number"
                 placeholder="400"
                 value={tamanoTanque}
+                min={0}
                 onChange={(e) => setTamanoTanque(+e.target.value)}
+                className="input-terrax"
               />
             </Col>
           </Row>
-          <Row className="mb-4">
+          <Row className="mb-3">
             <Col md={4}>
-              <Form.Label>Litros totales de caldo</Form.Label>
-              <Form.Control readOnly value={litrosTotales.toFixed(0)} />
+              <Form.Label
+                className="fw-semibold"
+                style={{ color: verdeOscuro }}
+              >
+                Litros totales de caldo
+              </Form.Label>
+              <Form.Control
+                readOnly
+                value={litrosTotales.toFixed(0)}
+                className="input-terrax"
+                style={{ background: grisClaro, color: grisOscuro }}
+              />
             </Col>
           </Row>
         </Form>
-
-        {/* Pestañas */}
-        <Tabs defaultActiveKey="liquidos" className="mb-3">
+        {/* TABS */}
+        <Tabs defaultActiveKey="liquidos" className="mb-3 tab-terrax">
+          {/* TAB LÍQUIDOS */}
           <Tab eventKey="liquidos" title="Líquidos">
-            {/* Productos utilizados */}
             <Row className="mb-4">
               <Col md={6}>
-                <h5>Productos utilizados</h5>
-                <Table size="sm" bordered hover>
-                  <thead className="thead-terrax">
-                    <tr>
+                <h5 className="mb-2" style={{ color: verdeOscuro }}>
+                  Productos utilizados
+                </h5>
+                <Table
+                  size="sm"
+                  bordered
+                  className="table-terrax encabezado-claro"
+                >
+                  <thead>
+                    <tr style={{ background: verde, color: blanco }}>
                       <th>Envase (L)</th>
                       <th>Producto</th>
                       <th>Dosis</th>
@@ -184,6 +262,7 @@ const Calculadora = () => {
                             onChange={(e) =>
                               actualizarProducto(p.id, "envase", e.target.value)
                             }
+                            className="input-terrax"
                           />
                         </td>
                         <td>
@@ -198,6 +277,7 @@ const Calculadora = () => {
                                 e.target.value
                               )
                             }
+                            className="input-terrax"
                           />
                         </td>
                         <td>
@@ -208,6 +288,7 @@ const Calculadora = () => {
                             onChange={(e) =>
                               actualizarProducto(p.id, "dosis", e.target.value)
                             }
+                            className="input-terrax"
                           />
                         </td>
                         <td>
@@ -217,6 +298,7 @@ const Calculadora = () => {
                             onChange={(e) =>
                               actualizarProducto(p.id, "unidad", e.target.value)
                             }
+                            className="input-terrax"
                           >
                             {UNIDADES.map((u) => (
                               <option key={u} value={u}>
@@ -225,7 +307,7 @@ const Calculadora = () => {
                             ))}
                           </Form.Select>
                         </td>
-                        <td className="text-center">
+                        <td>
                           <Button
                             variant="outline-danger"
                             size="sm"
@@ -238,17 +320,26 @@ const Calculadora = () => {
                     ))}
                   </tbody>
                 </Table>
-                <Button variant="success" size="sm" onClick={agregarProducto}>
+                <Button
+                  variant="success"
+                  size="sm"
+                  onClick={agregarProducto}
+                  className="mt-2 rounded-pill px-3"
+                >
                   <Plus size={14} /> Agregar producto
                 </Button>
               </Col>
-
-              {/* Resumen automático */}
               <Col md={6}>
-                <h5>Resumen automático</h5>
-                <Table size="sm" bordered className="text-center">
-                  <thead className="table-success">
-                    <tr>
+                <h5 className="mb-2" style={{ color: verdeOscuro }}>
+                  Resumen automático
+                </h5>
+                <Table
+                  size="sm"
+                  bordered
+                  className="table-terrax encabezado-claro"
+                >
+                  <thead>
+                    <tr style={{ background: verde, color: blanco }}>
                       <th>Producto</th>
                       <th>Total campo</th>
                       <th>Bidones</th>
@@ -270,30 +361,50 @@ const Calculadora = () => {
               </Col>
             </Row>
 
-            {/* Tanques requeridos y litros */}
+            {/* TANQUES REQUERIDOS */}
             <Row className="mb-4">
               <Col md={6}>
-                <h5>Tanques requeridos</h5>
-                <Table size="sm" bordered className="text-center">
-                  <thead className="table-success">
-                    <tr>
+                <h5 className="mb-2" style={{ color: verdeOscuro }}>
+                  Tanques requeridos
+                </h5>
+                <Table
+                  size="sm"
+                  bordered
+                  className="table-terrax encabezado-claro"
+                >
+                  <thead>
+                    <tr style={{ background: verde, color: blanco }}>
                       <th>Completos</th>
                       <th>Fraccionado</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td>{Math.floor(litrosTotales / tamanoTanque)}</td>
-                      <td>{((litrosTotales / tamanoTanque) % 1).toFixed(2)}</td>
+                      <td>
+                        {tamanoTanque > 0
+                          ? Math.floor(litrosTotales / tamanoTanque)
+                          : "—"}
+                      </td>
+                      <td>
+                        {tamanoTanque > 0
+                          ? ((litrosTotales / tamanoTanque) % 1).toFixed(2)
+                          : "—"}
+                      </td>
                     </tr>
                   </tbody>
                 </Table>
               </Col>
               <Col md={6}>
-                <h5>Litros por tanque</h5>
-                <Table size="sm" bordered className="text-center">
-                  <thead className="table-success">
-                    <tr>
+                <h5 className="mb-2" style={{ color: verdeOscuro }}>
+                  Litros por tanque
+                </h5>
+                <Table
+                  size="sm"
+                  bordered
+                  className="table-terrax encabezado-claro"
+                >
+                  <thead>
+                    <tr style={{ background: verde, color: blanco }}>
                       <th>Por tanque</th>
                       <th>Fraccionado</th>
                     </tr>
@@ -301,20 +412,31 @@ const Calculadora = () => {
                   <tbody>
                     <tr>
                       <td>{tamanoTanque} L</td>
-                      <td>{(litrosTotales % tamanoTanque).toFixed(0)} L</td>
+                      <td>
+                        {tamanoTanque > 0
+                          ? (litrosTotales % tamanoTanque).toFixed(0)
+                          : "—"}{" "}
+                        L
+                      </td>
                     </tr>
                   </tbody>
                 </Table>
               </Col>
             </Row>
 
-            {/* Cantidades por tanque */}
+            {/* CANTIDADES POR TANQUE */}
             <Row className="mb-4">
               <Col md={6}>
-                <h5>Por tanque completo</h5>
-                <Table size="sm" bordered className="text-center">
-                  <thead className="table-success">
-                    <tr>
+                <h5 className="mb-2" style={{ color: verdeOscuro }}>
+                  Por tanque completo
+                </h5>
+                <Table
+                  size="sm"
+                  bordered
+                  className="table-terrax encabezado-claro"
+                >
+                  <thead>
+                    <tr style={{ background: verde, color: blanco }}>
                       <th>Producto</th>
                       <th>Cantidad</th>
                     </tr>
@@ -336,10 +458,16 @@ const Calculadora = () => {
                 </Table>
               </Col>
               <Col md={6}>
-                <h5>Por tanque fraccionado</h5>
-                <Table size="sm" bordered className="text-center">
-                  <thead className="table-success">
-                    <tr>
+                <h5 className="mb-2" style={{ color: verdeOscuro }}>
+                  Por tanque fraccionado
+                </h5>
+                <Table
+                  size="sm"
+                  bordered
+                  className="table-terrax encabezado-claro"
+                >
+                  <thead>
+                    <tr style={{ background: verde, color: blanco }}>
                       <th>Producto</th>
                       <th>Cantidad</th>
                     </tr>
@@ -363,23 +491,19 @@ const Calculadora = () => {
               </Col>
             </Row>
 
-            {/* Totales finales */}
+            {/* TOTALES DE PRODUCTO PURO */}
             <Row className="mb-4">
               <Col>
-                <h5>Resultados</h5>
-                <div
-                  className="text-center text-black py-2"
-                  style={{
-                    backgroundColor: "#cfd0cfff",
-                    borderRadius: "4px 4px 0 0",
-                  }}
+                <h5 className="mb-2" style={{ color: verdeOscuro }}>
+                  Total de producto puro por tanque
+                </h5>
+                <Table
+                  size="sm"
+                  bordered
+                  className="table-terrax encabezado-claro text-center"
                 >
-                  Total de producto puro por tanque{" "}
-                  <i className="bi bi-arrow-down-circle" />
-                </div>
-                <Table size="sm" bordered className="text-center">
-                  <thead className="bg-danger text-white">
-                    <tr>
+                  <thead>
+                    <tr style={{ background: verde, color: blanco }}>
                       <th>Completo</th>
                       <th>Fraccionado</th>
                     </tr>
@@ -413,34 +537,29 @@ const Calculadora = () => {
                 </Table>
               </Col>
             </Row>
+
+            {/* AGUA EN EL TANQUE */}
             <Row className="mb-4">
               <Col>
-                <div
-                  className="text-center text-black py-2"
-                  style={{
-                    backgroundColor: "#7f9eb2ff",
-                    borderRadius: "4px 4px 0 0",
-                  }}
-                >
-                  Total de agua en el tanque{" "}
-                  <i className="bi bi-arrow-down-circle" />
-                </div>
+                <h5 className="mb-2" style={{ color: verdeOscuro }}>
+                  Total de agua en el tanque
+                </h5>
                 <Table
+                  size="sm"
                   bordered
-                  className="text-center"
-                  style={{
-                    backgroundColor: "#0066FF",
-                    color: "white",
-                    marginBottom: 0,
-                  }}
+                  className="table-terrax encabezado-claro text-center"
                 >
+                  <thead>
+                    <tr style={{ background: verde, color: blanco }}>
+                      <th>Completo</th>
+                      <th>Fraccionado</th>
+                    </tr>
+                  </thead>
                   <tbody>
                     <tr>
-                      {/* Agua necesaria para llenar un tanque completo */}
                       <td style={{ fontWeight: "bold", fontSize: "1.1rem" }}>
                         {(tamanoTanque - sumaProdCompleto).toFixed(2)} Lts
                       </td>
-                      {/* Agua restante en el tanque fraccionado */}
                       <td style={{ fontWeight: "bold", fontSize: "1.1rem" }}>
                         {(fracVol - sumaProdFraccionado).toFixed(2)} Lts
                       </td>
@@ -449,23 +568,39 @@ const Calculadora = () => {
                 </Table>
               </Col>
             </Row>
+
             {/* Botón Limpiar registros */}
-            <Row className="mb-4">
+            <Row>
               <Col className="text-end">
-                <Button variant="success" onClick={limpiarRegistros}>
+                <Button
+                  variant="outline-success"
+                  className="rounded-pill px-4 shadow-sm"
+                  onClick={limpiarRegistros}
+                  style={{
+                    fontWeight: "bold",
+                    borderColor: verde,
+                  }}
+                >
                   Limpiar registros
                 </Button>
               </Col>
             </Row>
           </Tab>
+
+          {/* TAB SÓLIDOS */}
           <Tab eventKey="solidos" title="Sólidos">
-            {/* Sólidos */}
             <Row className="mb-4">
               <Col md={6}>
-                <h5>Insumos sólidos</h5>
-                <Table size="sm" bordered className="text-center">
-                  <thead className="bg-light">
-                    <tr>
+                <h5 className="mb-2" style={{ color: verdeOscuro }}>
+                  Insumos sólidos
+                </h5>
+                <Table
+                  size="sm"
+                  bordered
+                  className="table-terrax encabezado-claro"
+                >
+                  <thead>
+                    <tr style={{ background: verde, color: blanco }}>
                       <th>Bolsa (Kg)</th>
                       <th>Producto</th>
                       <th>Dosis</th>
@@ -474,7 +609,7 @@ const Calculadora = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {productos.map((p) => (
+                    {productosSolidos.map((p) => (
                       <tr key={p.id}>
                         <td>
                           <Form.Control
@@ -482,8 +617,13 @@ const Calculadora = () => {
                             type="number"
                             value={p.envase}
                             onChange={(e) =>
-                              actualizarProducto(p.id, "envase", e.target.value)
+                              actualizarProductoSolido(
+                                p.id,
+                                "envase",
+                                e.target.value
+                              )
                             }
+                            className="input-terrax"
                           />
                         </td>
                         <td>
@@ -492,12 +632,13 @@ const Calculadora = () => {
                             type="text"
                             value={p.producto}
                             onChange={(e) =>
-                              actualizarProducto(
+                              actualizarProductoSolido(
                                 p.id,
                                 "producto",
                                 e.target.value
                               )
                             }
+                            className="input-terrax"
                           />
                         </td>
                         <td>
@@ -506,8 +647,13 @@ const Calculadora = () => {
                             type="number"
                             value={p.dosis}
                             onChange={(e) =>
-                              actualizarProducto(p.id, "dosis", e.target.value)
+                              actualizarProductoSolido(
+                                p.id,
+                                "dosis",
+                                e.target.value
+                              )
                             }
+                            className="input-terrax"
                           />
                         </td>
                         <td>
@@ -515,18 +661,23 @@ const Calculadora = () => {
                             size="sm"
                             value={p.unidad}
                             onChange={(e) =>
-                              actualizarProducto(p.id, "unidad", e.target.value)
+                              actualizarProductoSolido(
+                                p.id,
+                                "unidad",
+                                e.target.value
+                              )
                             }
+                            className="input-terrax"
                           >
                             <option>Kg/ha</option>
                             <option>g/ha</option>
                           </Form.Select>
                         </td>
-                        <td className="text-center">
+                        <td>
                           <Button
                             variant="outline-danger"
                             size="sm"
-                            onClick={() => eliminarProducto(p.id)}
+                            onClick={() => eliminarProductoSolido(p.id)}
                           >
                             <Trash2 size={16} />
                           </Button>
@@ -535,22 +686,33 @@ const Calculadora = () => {
                     ))}
                   </tbody>
                 </Table>
-                <Button variant="success" size="sm" onClick={agregarProducto}>
+                <Button
+                  variant="success"
+                  size="sm"
+                  onClick={agregarProductoSolido}
+                  className="mt-2 rounded-pill px-3"
+                >
                   <Plus size={14} /> Agregar línea
                 </Button>
               </Col>
               <Col md={6}>
-                <h5>Resumen Sólidos</h5>
-                <Table size="sm" bordered className="text-center">
-                  <thead className="table-success">
-                    <tr>
+                <h5 className="mb-2" style={{ color: verdeOscuro }}>
+                  Resumen sólidos
+                </h5>
+                <Table
+                  size="sm"
+                  bordered
+                  className="table-terrax encabezado-claro"
+                >
+                  <thead>
+                    <tr style={{ background: verde, color: blanco }}>
                       <th>Producto</th>
                       <th>Total (Kg)</th>
                       <th>Bolsas</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {productos.map((p) => (
+                    {productosSolidos.map((p) => (
                       <tr key={p.id}>
                         <td>{p.producto || "—"}</td>
                         <td>
@@ -572,31 +734,57 @@ const Calculadora = () => {
                 </Table>
               </Col>
             </Row>
+            <Row>
+              <Col className="text-end">
+                <Button
+                  variant="outline-success"
+                  className="rounded-pill px-4 shadow-sm"
+                  onClick={limpiarRegistros}
+                  style={{
+                    fontWeight: "bold",
+                    borderColor: verde,
+                  }}
+                >
+                  Limpiar registros
+                </Button>
+              </Col>
+            </Row>
           </Tab>
-          {/* Líquidos y otros tabs... */}
+
+          {/* TAB OBSERVACIONES */}
           <Tab eventKey="observaciones" title="Observaciones">
             <Card className="mb-4 rounded-xl shadow-sm">
               <Card.Body>
-                <h5 className="mb-3">Observaciones</h5>
+                <h5 className="mb-3" style={{ color: verdeOscuro }}>
+                  Observaciones
+                </h5>
                 <Form.Control
                   as="textarea"
                   rows={4}
                   placeholder="Escriba observaciones..."
                   value={observacionesTexto}
                   onChange={(e) => setObservacionesTexto(e.target.value)}
-                  className="shadow-sm rounded"
+                  className="shadow-sm rounded input-terrax"
                 />
               </Card.Body>
             </Card>
-
             <Row className="gx-4 gy-4 mb-4">
               {[
                 { title: "Condiciones sugeridas", labels: suggestedLabels },
                 { title: "Condiciones reales", labels: realLabels },
-              ].map(({ title, labels }) => (
+              ].map(({ title, labels }, j) => (
                 <Col md={6} key={title}>
                   <Card className="condiciones-card rounded-xl shadow-sm h-100">
-                    <Card.Header className="bg-verde-claro">
+                    <Card.Header
+                      style={{
+                        background: verdeClaro,
+                        color: verdeOscuro,
+                        fontWeight: 600,
+                        borderTopLeftRadius: "1rem",
+                        borderTopRightRadius: "1rem",
+                        borderBottom: "none",
+                      }}
+                    >
                       <h6 className="mb-0">{title}</h6>
                     </Card.Header>
                     <Card.Body className="p-2">
@@ -609,15 +797,19 @@ const Calculadora = () => {
                           {labels.map((label, idx) => (
                             <tr key={label}>
                               <td
-                                className="fw-semibold text-terrax-oscuro"
-                                style={{ width: "60%" }}
+                                className="fw-semibold"
+                                style={{
+                                  width: "58%",
+                                  color: verdeOscuro,
+                                  background: "#f7faf9",
+                                }}
                               >
                                 {label}
                               </td>
                               <td>
                                 <Form.Control
                                   size="sm"
-                                  className="shadow-sm rounded"
+                                  className="shadow-sm rounded input-terrax"
                                   value={
                                     title === "Condiciones sugeridas"
                                       ? suggestedValues[idx]
@@ -645,11 +837,16 @@ const Calculadora = () => {
                 </Col>
               ))}
             </Row>
-
             <Row className="gx-3">
               <Col md={6}>
                 <Button
-                  className="btn-terrax-light w-100 d-flex align-items-center justify-content-center"
+                  className="btn-terrax-light w-100 d-flex align-items-center justify-content-center rounded-pill"
+                  style={{
+                    background: "#e9fbe5",
+                    color: verdeOscuro,
+                    border: `1px solid ${verde}`,
+                    fontWeight: "bold",
+                  }}
                   onClick={() => window.print()}
                 >
                   <i className="bi bi-filetype-pdf me-2" /> Generar Receta
@@ -657,8 +854,12 @@ const Calculadora = () => {
               </Col>
               <Col md={6}>
                 <Button
-                  variant="success"
-                  className="w-100 d-flex align-items-center justify-content-center"
+                  variant="outline-success"
+                  className="w-100 d-flex align-items-center justify-content-center rounded-pill"
+                  style={{
+                    fontWeight: "bold",
+                    borderColor: verde,
+                  }}
                   onClick={limpiarObservaciones}
                 >
                   <i className="bi bi-backspace me-2" /> Limpiar
