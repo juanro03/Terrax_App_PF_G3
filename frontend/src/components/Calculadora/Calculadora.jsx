@@ -19,9 +19,14 @@ const verdeOscuro = "#155a36";
 const grisClaro = "#f3f6f5";
 const blanco = "#fff";
 const grisOscuro = "#424242";
-const azulSuave = "#e6f1fb";
 
 const UNIDADES = ["L", "ml", "cc"];
+
+const UNIDAD_A_LITROS = {
+  L: 1,
+  ml: 0.001,
+  cc: 0.001,
+};
 
 const suggestedLabels = [
   "Velocidad viento (km/h)",
@@ -770,9 +775,19 @@ const Calculadora = () => {
             </Card>
             <Row className="gx-4 gy-4 mb-4">
               {[
-                { title: "Condiciones sugeridas", labels: suggestedLabels },
-                { title: "Condiciones reales", labels: realLabels },
-              ].map(({ title, labels }, j) => (
+                {
+                  title: "Condiciones sugeridas",
+                  labels: suggestedLabels,
+                  values: suggestedValues,
+                  setValues: setSuggestedValues,
+                },
+                {
+                  title: "Condiciones reales",
+                  labels: realLabels,
+                  values: realValues,
+                  setValues: setRealValues,
+                },
+              ].map(({ title, labels, values, setValues }) => (
                 <Col md={6} key={title}>
                   <Card className="condiciones-card rounded-xl shadow-sm h-100">
                     <Card.Header
@@ -794,42 +809,81 @@ const Calculadora = () => {
                         className="condiciones-table mb-0"
                       >
                         <tbody>
-                          {labels.map((label, idx) => (
-                            <tr key={label}>
-                              <td
-                                className="fw-semibold"
-                                style={{
-                                  width: "58%",
-                                  color: verdeOscuro,
-                                  background: "#f7faf9",
-                                }}
-                              >
-                                {label}
-                              </td>
-                              <td>
-                                <Form.Control
-                                  size="sm"
-                                  className="shadow-sm rounded input-terrax"
-                                  value={
-                                    title === "Condiciones sugeridas"
-                                      ? suggestedValues[idx]
-                                      : realValues[idx]
-                                  }
-                                  onChange={(e) => {
-                                    if (title === "Condiciones sugeridas") {
-                                      const vals = [...suggestedValues];
-                                      vals[idx] = e.target.value;
-                                      setSuggestedValues(vals);
-                                    } else {
-                                      const vals = [...realValues];
-                                      vals[idx] = e.target.value;
-                                      setRealValues(vals);
-                                    }
+                          {labels.map((label, idx) => {
+                            // Determinar tipo de campo y validación
+                            let type = "number";
+                            let min = 1;
+                            let isInvalid = false;
+                            let helper = "";
+
+                            // CAMPO: Dirección viento (texto)
+                            if (label.toLowerCase().includes("dirección")) {
+                              type = "text";
+                              min = undefined;
+                            }
+
+                            // CAMPO: Fecha (calendario)
+                            if (label.toLowerCase().includes("fecha")) {
+                              type = "date";
+                              min = undefined;
+                            }
+
+                            // CAMPO: Hora (hora)
+                            if (label.toLowerCase().includes("hora")) {
+                              type = "time";
+                              min = undefined;
+                            }
+
+                            // Validación de solo números positivos para los que correspondan
+                            if (
+                              type === "number" &&
+                              values[idx] !== "" &&
+                              (isNaN(Number(values[idx])) ||
+                                Number(values[idx]) <= 0)
+                            ) {
+                              isInvalid = true;
+                              helper = "Solo números mayores a cero";
+                            }
+
+                            return (
+                              <tr key={label}>
+                                <td
+                                  className="fw-semibold"
+                                  style={{
+                                    width: "58%",
+                                    color: verdeOscuro,
+                                    background: "#f7faf9",
                                   }}
-                                />
-                              </td>
-                            </tr>
-                          ))}
+                                >
+                                  {label}
+                                </td>
+                                <td>
+                                  <Form.Control
+                                    size="sm"
+                                    className={`shadow-sm rounded input-terrax ${
+                                      isInvalid ? "is-invalid" : ""
+                                    }`}
+                                    type={type}
+                                    min={min}
+                                    value={values[idx]}
+                                    onChange={(e) => {
+                                      const vals = [...values];
+                                      vals[idx] = e.target.value;
+                                      setValues(vals);
+                                    }}
+                                  />
+                                  {isInvalid && (
+                                    <div
+                                      className="invalid-feedback"
+                                      style={{ display: "block" }}
+                                    >
+                                      {helper}
+                                    </div>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </Table>
                     </Card.Body>
