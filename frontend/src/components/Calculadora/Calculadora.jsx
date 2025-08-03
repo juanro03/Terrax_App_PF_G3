@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import html2pdf from "html2pdf.js";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import {
   Card,
@@ -9,6 +10,7 @@ import {
   Tabs,
   Tab,
   Button,
+  Modal,
 } from "react-bootstrap";
 import { Plus, Trash2 } from "lucide-react";
 
@@ -21,12 +23,6 @@ const blanco = "#fff";
 const grisOscuro = "#424242";
 
 const UNIDADES = ["L", "ml", "cc"];
-
-const UNIDAD_A_LITROS = {
-  L: 1,
-  ml: 0.001,
-  cc: 0.001,
-};
 
 const suggestedLabels = [
   "Velocidad viento (km/h)",
@@ -45,14 +41,301 @@ const realLabels = [
   "Hora real",
 ];
 
+// Acción para exportar a PDF el contenido del modal
+
 const Calculadora = () => {
   const [hectareas, setHectareas] = useState(0);
+  const [showResumen, setShowResumen] = useState(false);
+  const resumenRef = useRef();
   const [ltsPorHa, setLtsPorHa] = useState(0);
   const [tamanoTanque, setTamanoTanque] = useState(0);
   const [litrosTotales, setLitrosTotales] = useState(0);
   const [productos, setProductos] = useState([
     { id: Date.now(), envase: "", producto: "", dosis: "", unidad: "L" },
   ]);
+  const handleDescargarPDF = () => {
+    const opt = {
+      margin: 0.5,
+      filename: "receta-terrax.pdf",
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+    };
+    html2pdf().from(resumenRef.current).set(opt).save();
+  };
+
+  const getResumenText = () => {
+    return (
+      <div id="resumen-receta-pdf">
+        <h3 style={{ color: verdeOscuro }}>
+          Resumen de Receta para Aplicación en Campo
+        </h3>
+        <hr />
+        <h5 style={{ color: verdeOscuro }}>Entradas de la Calculadora</h5>
+        <ul>
+          <li>
+            <b>Total de hectáreas:</b> {hectareas} ha
+          </li>
+          <li>
+            <b>Lts/ha de caldo:</b> {ltsPorHa} L
+          </li>
+          <li>
+            <b>Tamaño del tanque:</b> {tamanoTanque} L
+          </li>
+          <li>
+            <b>Litros totales de caldo:</b> {litrosTotales.toFixed(0)} L
+          </li>
+        </ul>
+        {/* --- RESULTADOS DE LA CALCULADORA --- */}
+        <h5 style={{ color: verdeOscuro, marginTop: 24 }}>
+          Tanques requeridos
+        </h5>
+        <Table size="sm" bordered>
+          <thead>
+            <tr style={{ background: verdeClaro, color: verdeOscuro }}>
+              <th>Completos</th>
+              <th>Fraccionado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                {tamanoTanque > 0
+                  ? Math.floor(litrosTotales / tamanoTanque)
+                  : "—"}
+              </td>
+              <td>
+                {tamanoTanque > 0
+                  ? ((litrosTotales / tamanoTanque) % 1).toFixed(2)
+                  : "—"}
+              </td>
+            </tr>
+          </tbody>
+        </Table>
+
+        <h5 style={{ color: verdeOscuro, marginTop: 24 }}>Litros por tanque</h5>
+        <Table size="sm" bordered>
+          <thead>
+            <tr style={{ background: verdeClaro, color: verdeOscuro }}>
+              <th>Por tanque</th>
+              <th>Fraccionado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{tamanoTanque} L</td>
+              <td>
+                {tamanoTanque > 0
+                  ? (litrosTotales % tamanoTanque).toFixed(0)
+                  : "—"}{" "}
+                L
+              </td>
+            </tr>
+          </tbody>
+        </Table>
+
+        <h5 style={{ color: verdeOscuro, marginTop: 24 }}>
+          Por tanque completo
+        </h5>
+        <Table size="sm" bordered>
+          <thead>
+            <tr style={{ background: verdeClaro, color: verdeOscuro }}>
+              <th>Producto</th>
+              <th>Cantidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            {productos.map((p) => {
+              const val =
+                (parseFloat(p.dosis) * tamanoTanque) / (ltsPorHa || 1);
+              return (
+                <tr key={p.id}>
+                  <td>{p.producto || "—"}</td>
+                  <td>{isNaN(val) ? "—" : `${val.toFixed(2)} ${p.unidad}`}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </Table>
+
+        <h5 style={{ color: verdeOscuro, marginTop: 24 }}>
+          Por tanque fraccionado
+        </h5>
+        <Table size="sm" bordered>
+          <thead>
+            <tr style={{ background: verdeClaro, color: verdeOscuro }}>
+              <th>Producto</th>
+              <th>Cantidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            {productos.map((p) => {
+              const frac = litrosTotales % tamanoTanque;
+              const val = (parseFloat(p.dosis) * frac) / (ltsPorHa || 1);
+              return (
+                <tr key={p.id}>
+                  <td>{p.producto || "—"}</td>
+                  <td>{isNaN(val) ? "—" : `${val.toFixed(2)} ${p.unidad}`}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </Table>
+
+        <h5 style={{ color: verdeOscuro, marginTop: 24 }}>
+          Total de producto puro por tanque
+        </h5>
+        <Table size="sm" bordered>
+          <thead>
+            <tr style={{ background: verdeClaro, color: verdeOscuro }}>
+              <th>Completo</th>
+              <th>Fraccionado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                {productos
+                  .reduce((s, p) => {
+                    const v =
+                      (parseFloat(p.dosis) * tamanoTanque) / (ltsPorHa || 1);
+                    return s + (isNaN(v) ? 0 : v);
+                  }, 0)
+                  .toFixed(2)}{" "}
+                L
+              </td>
+              <td>
+                {productos
+                  .reduce((s, p) => {
+                    const frac = litrosTotales % tamanoTanque;
+                    const v = (parseFloat(p.dosis) * frac) / (ltsPorHa || 1);
+                    return s + (isNaN(v) ? 0 : v);
+                  }, 0)
+                  .toFixed(2)}{" "}
+                L
+              </td>
+            </tr>
+          </tbody>
+        </Table>
+
+        <h5 style={{ color: verdeOscuro, marginTop: 24 }}>
+          Total de agua en el tanque
+        </h5>
+        <Table size="sm" bordered>
+          <thead>
+            <tr style={{ background: verdeClaro, color: verdeOscuro }}>
+              <th>Completo</th>
+              <th>Fraccionado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style={{ fontWeight: "bold", fontSize: "1.1rem" }}>
+                {(tamanoTanque - sumaProdCompleto).toFixed(2)} Lts
+              </td>
+              <td style={{ fontWeight: "bold", fontSize: "1.1rem" }}>
+                {(fracVol - sumaProdFraccionado).toFixed(2)} Lts
+              </td>
+            </tr>
+          </tbody>
+        </Table>
+        <h5 style={{ color: verdeOscuro }}>Productos Líquidos</h5>
+        <Table size="sm" bordered>
+          <thead>
+            <tr style={{ background: verde, color: blanco }}>
+              <th>Producto</th>
+              <th>Dosis</th>
+              <th>Unidad</th>
+              <th>Total campo</th>
+              <th>Bidones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {productos.map((p) => {
+              const total = calcularTotalCampo(p.dosis);
+              return (
+                <tr key={p.id}>
+                  <td>{p.producto || "—"}</td>
+                  <td>{p.dosis}</td>
+                  <td>{p.unidad}</td>
+                  <td>{total.toFixed(1)} L</td>
+                  <td>{calcularBidones(total, p.envase)}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </Table>
+        <h5 style={{ color: verdeOscuro }}>Productos Sólidos</h5>
+        <Table size="sm" bordered>
+          <thead>
+            <tr style={{ background: verde, color: blanco }}>
+              <th>Producto</th>
+              <th>Dosis</th>
+              <th>Unidad</th>
+              <th>Total campo</th>
+              <th>Bolsas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {productosSolidos.map((p) => (
+              <tr key={p.id}>
+                <td>{p.producto || "—"}</td>
+                <td>{p.dosis}</td>
+                <td>{p.unidad}</td>
+                <td>
+                  {(parseFloat(p.dosis) * parseFloat(hectareas) || 0).toFixed(
+                    1
+                  )}
+                </td>
+                <td>
+                  {p.envase
+                    ? (
+                        (parseFloat(p.dosis) * parseFloat(hectareas)) /
+                        parseFloat(p.envase)
+                      ).toFixed(1)
+                    : "—"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+        <h5 style={{ color: verdeOscuro }}>Observaciones del usuario</h5>
+        <p>{observacionesTexto || <i>No se ingresaron observaciones.</i>}</p>
+        <h5 style={{ color: verdeOscuro }}>Condiciones sugeridas</h5>
+        <ul>
+          {suggestedLabels.map((label, idx) =>
+            suggestedValues[idx] ? (
+              <li key={label}>
+                <b>{label}:</b> {suggestedValues[idx]}
+              </li>
+            ) : null
+          )}
+        </ul>
+        <h5 style={{ color: verdeOscuro }}>Condiciones reales</h5>
+        <ul>
+          {realLabels.map((label, idx) =>
+            realValues[idx] ? (
+              <li key={label}>
+                <b>{label}:</b> {realValues[idx]}
+              </li>
+            ) : null
+          )}
+        </ul>
+        <hr />
+        <p>
+          <b>Explicación:</b>
+          <br />
+          Esta receta resume todos los insumos y condiciones que usted debe
+          considerar para aplicar el caldo correctamente en su campo. Verifique
+          las dosis, cantidades totales, fraccionamientos y condiciones
+          climáticas antes de la aplicación. <br />
+          <b>Importante:</b> Siga siempre las recomendaciones de seguridad y
+          consulte a su asesor agronómico.
+        </p>
+      </div>
+    );
+  };
+
   const [productosSolidos, setProductosSolidos] = useState([
     {
       id: Date.now() + 1,
@@ -901,7 +1184,7 @@ const Calculadora = () => {
                     border: `1px solid ${verde}`,
                     fontWeight: "bold",
                   }}
-                  onClick={() => window.print()}
+                  onClick={() => setShowResumen(true)}
                 >
                   <i className="bi bi-filetype-pdf me-2" /> Generar Receta
                 </Button>
@@ -920,6 +1203,40 @@ const Calculadora = () => {
                 </Button>
               </Col>
             </Row>
+            {/* MODAL DE RESUMEN */}
+            <Modal
+              show={showResumen}
+              onHide={() => setShowResumen(false)}
+              size="lg"
+              centered
+            >
+              <Modal.Header closeButton style={{ background: verdeClaro }}>
+                <Modal.Title style={{ color: verdeOscuro }}>
+                  Resumen de Receta Generada
+                </Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                {/* Poner el resumen en un ref, para html2pdf */}
+                <div ref={resumenRef}>{getResumenText()}</div>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button
+                  variant="success"
+                  className="rounded-pill"
+                  onClick={handleDescargarPDF}
+                >
+                  <i className="bi bi-download me-2" /> Descargar PDF
+                </Button>
+                <Button
+                  variant="outline-secondary"
+                  className="rounded-pill"
+                  onClick={() => setShowResumen(false)}
+                >
+                  Cerrar
+                </Button>
+              </Modal.Footer>
+            </Modal>
+            ;
           </Tab>
         </Tabs>
       </Card.Body>

@@ -17,6 +17,7 @@
     "dayjs": "^1.11.13",
     "framer-motion": "^12.18.1",
     "html2canvas": "^1.4.1",
+    "html2pdf.js": "^0.10.3",
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
     "leaflet-image": "^0.4.0",
