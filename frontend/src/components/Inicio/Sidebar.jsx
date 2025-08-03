@@ -12,6 +12,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
 import { useUser } from "../../UserContext";
 import { FaStackOverflow } from "react-icons/fa";
+import { Tractor, Sprout, Wheat } from "lucide-react";
 
 function SidebarItem({ icon, label, isOpen, to }) {
   const location = useLocation();
@@ -114,6 +115,14 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               label="Mis campos"
               isOpen={isOpen}
               to="/VerCampos"
+            />
+          )}
+          {usuario.rol === "productor" && (
+            <SidebarItem
+              icon={<Sprout size={18} />}
+              label="Tareas Agrícolas"
+              isOpen={isOpen}
+              to="/tareas"
             />
           )}
           <SidebarItem

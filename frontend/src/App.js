@@ -25,6 +25,7 @@ import ResetPassword from "./components/Auth/ResetPassword";
 import DetalleLote from "./components/lotes/DetalleLote";
 import ProductosForm from "./components/Productos/ProductosForm";
 import HistorialCampania from "./components/lotes/HistorialCampania";
+import TareasAgricolas from "./components/TareasAgricolas/TareasAgricolas";
 
 function AppContent() {
   const location = useLocation();
@@ -67,6 +68,7 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Login />} />
           <Route path="/inicio" element={<Inicio />} />
+          <Route path="/tareas" element={<TareasAgricolas />} />
           <Route path="/vercampos" element={<VerCampos />} />
           <Route path="/campos/:campoId/lotes" element={<VerLotesWrapper />} />
           <Route path="/perfil" element={<Perfil />} />
@@ -80,7 +82,6 @@ function AppContent() {
           <Route path="/productos" element={<ProductosInicio />} />
           <Route path="/productos/agregar" element={<ProductosForm />} />
           <Route path="/productos/ver" element={<ProductosLista />} />
-
           <Route
             path="/usuarios"
             element={
