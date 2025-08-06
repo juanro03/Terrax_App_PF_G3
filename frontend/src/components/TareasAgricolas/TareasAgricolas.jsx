@@ -388,6 +388,18 @@ export default function ActividadesAgricolas() {
                   </option>
                 ))}
               </Form.Select>
+              {/* Mensaje si no hay lotes */}
+              {campo && lotes.length === 0 && (
+                <div
+                  style={{
+                    color: "#d9534f",
+                    marginTop: "6px",
+                    fontSize: "0.95rem",
+                  }}
+                >
+                  No hay lotes asociados a este campo.
+                </div>
+              )}
             </Col>
             <Col md={4}>
               <Form.Label
@@ -404,6 +416,7 @@ export default function ActividadesAgricolas() {
                 }}
                 required
                 className="input-terrax"
+                disabled={lotes.length === 0} // <-- Deshabilita si no hay lotes
               >
                 <option value="">Seleccione actividad</option>
                 {actividades.map((a) => (
