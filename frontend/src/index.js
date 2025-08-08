@@ -8,6 +8,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { BrowserRouter } from "react-router-dom";
 import { UserProvider } from "./UserContext";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import 'react-datepicker/dist/react-datepicker.css';
 
 
 

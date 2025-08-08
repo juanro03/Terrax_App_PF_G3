@@ -5,6 +5,7 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import ModalCrearCampo from "./ModalCrearCampo";
 import ModalEditarCampo from "./ModalEditarCampo";
 import { useNavigate } from "react-router-dom";
+import SolicitarServicio from "./SolicitarServicio";
 
 const VerCampos = () => {
   const [campos, setCampos] = useState([]);
@@ -13,6 +14,7 @@ const VerCampos = () => {
   const [campoSeleccionado, setCampoSeleccionado] = useState(null);
   const [filtroTexto, setFiltroTexto] = useState("");
   const navigate = useNavigate();
+  const [mostrarModal, setMostrarModal] = useState(false);
 
   useEffect(() => {
     fetchCampos();
@@ -174,14 +176,21 @@ const VerCampos = () => {
                       <FaTrash />
                     </button>
                   </div>
-
                 </div>
-
+                
               ))}
+              {/* Botón para solicitar servicio */}
+<div className="mt-4 text-center">
+  <button className="btn btn-success" onClick={() => setMostrarModal(true)}>
+    Solicitar Servicio
+  </button>
+</div>
+
+{mostrarModal && <SolicitarServicio onClose={() => setMostrarModal(false)} />}
           </div>
         </div>
       </div>
-
+              
       <ModalCrearCampo
         show={showCrear}
         onHide={() => setShowCrear(false)}
@@ -195,6 +204,7 @@ const VerCampos = () => {
           onSuccess={fetchCampos}
         />
       )}
+      
     </div>
   );
 };

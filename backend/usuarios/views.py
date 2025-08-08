@@ -8,6 +8,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from .models import Usuario
 from .serializers import UsuarioSerializer, CustomTokenObtainPairSerializer
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view
@@ -15,9 +17,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
-
-
-
 
 
 class UsuarioViewSet(viewsets.ModelViewSet):
@@ -151,3 +150,4 @@ class UsuarioActualAPIView(APIView):
     def get(self, request):
         serializer = UsuarioSerializer(request.user)
         return Response(serializer.data)
+    
