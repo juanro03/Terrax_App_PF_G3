@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Card, Row, Col, Form, Button, Table } from "react-bootstrap";
+import {
+  Card,
+  Row,
+  Col,
+  Form,
+  Button,
+  Table,
+  ButtonGroup,
+} from "react-bootstrap";
 import axios from "../../axiosconfig";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
@@ -15,7 +23,6 @@ const actividades = [
   "Fertilización",
   "Manejo de suelo",
   "Riego",
-  "Pulverización",
   "Aplicación Fitosanitaria",
 ];
 
@@ -26,6 +33,8 @@ export default function ActividadesAgricolas() {
   const [campos, setCampos] = useState([]);
   const [lotes, setLotes] = useState([]);
   const [rows, setRows] = useState([]);
+  // Vista para Fertilización: 'variable' (primera tabla) o 'fija' (segunda)
+  const [fertVista, setFertVista] = useState("variable");
 
   useEffect(() => {
     axios
@@ -44,12 +53,27 @@ export default function ActividadesAgricolas() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({ campo, lote, actividad, rows });
+    console.log({ campo, lote, actividad, fertVista, rows });
+    // Para enviar archivos: usar FormData (multipart)
+    // const fd = new FormData();
+    // fd.append("campo", campo);
+    // fd.append("lote", lote);
+    // fd.append("actividad", actividad);
+    // fd.append("fertVista", fertVista);
+    // rows.forEach((r, idx) => {
+    //   Object.entries(r).forEach(([k, v]) => {
+    //     if (v !== undefined && v !== null) fd.append(`rows[${idx}][${k}]`, v);
+    //   });
+    // });
+    // await axios.post("/api/actividades/", fd, {
+    //   headers: { "Content-Type": "multipart/form-data" },
+    // });
   };
 
   const limpiarRows = () => setRows([]);
 
   const addRow = () => {
+    // Base
     let nuevaFila = {
       lote,
       fecha: "",
@@ -58,15 +82,34 @@ export default function ActividadesAgricolas() {
     };
 
     if (actividad === "Fertilización") {
-      nuevaFila = {
-        ...nuevaFila,
-        tipoFertilizante: "",
-        numZonas: "",
-        tipoCultivo: "",
-        variedad: "",
-        productoApp: "",
-        cantidad: "",
-      };
+      if (fertVista === "variable") {
+        // Dosis Variable (con archivo)
+        nuevaFila = {
+          ...nuevaFila,
+          tipoFertilizante: "",
+          de: "",
+          productoAplicar: "",
+          concentracion: "",
+          fabricante: "",
+          litrosPorHa: "",
+          hectareasAplicadas: "",
+          mapaAdjunto: null, // SOLO en variable
+          observaciones: "",
+        };
+      } else {
+        // Dosis Fija (sin archivo)
+        nuevaFila = {
+          ...nuevaFila,
+          tipoFertilizante: "",
+          de: "",
+          productoAplicar: "",
+          concentracion: "",
+          fabricante: "",
+          litrosPorHa: "",
+          hectareasAplicadas: "",
+          observaciones: "",
+        };
+      }
     } else if (actividad === "Aplicación Fitosanitaria") {
       nuevaFila = {
         ...nuevaFila,
@@ -92,121 +135,162 @@ export default function ActividadesAgricolas() {
   const eliminarRow = (idx) =>
     setRows((prev) => prev.filter((_, i) => i !== idx));
 
+  // Encabezados de tabla
   const renderHeaders = () => {
-    switch (actividad) {
-      case "Fertilización":
-        return [
-          "Lote",
-          "Fecha",
-          "Tipo Fertilizante",
-          "Zonas",
-          "Tipo Cultivo",
-          "Variedad",
-          "Producto",
-          "Maquinaria",
-          "Cantidad",
-          "Mapa",
-          "",
-        ];
-      case "Aplicación Fitosanitaria":
-        return [
-          "Lote",
-          "Fecha",
-          "% Afectado",
-          "Plaga",
-          "Estado Fenológico",
-          "Producto",
-          "Maquinaria",
-          "Mapa",
-          "Observaciones",
-          "",
-        ];
-      default:
-        return ["Lote", "Fecha", "Maquinaria", "Mapa", "Observaciones", ""];
+    if (actividad === "Fertilización") {
+      const comunes = ["ID Lote", "Fecha"];
+      const base = [
+        "Tipo de fertilizante",
+        "De",
+        "Producto a aplicar",
+        "Concentración",
+        "Fabricante",
+        "L/Kg por Ha",
+        "Ha aplicadas",
+      ];
+      const extraVar = fertVista === "variable" ? ["Mapa adjunto"] : [];
+      return [...comunes, ...base, ...extraVar, "Observaciones", ""];
     }
+
+    if (actividad === "Aplicación Fitosanitaria") {
+      return [
+        "Lote",
+        "Fecha",
+        "% Afectado",
+        "Plaga",
+        "Estado Fenológico",
+        "Producto",
+        "Maquinaria",
+        "Mapa",
+        "Observaciones",
+        "",
+      ];
+    }
+
+    return ["Lote", "Fecha", "Maquinaria", "Mapa", "Observaciones", ""];
   };
 
+  // Celdas de fila
   const renderCells = (r, i) => {
-    const base = [
+    const idCol = <td key="index">{i + 1}</td>;
+    const fechaCol = (
       <td key="fecha">
         <Form.Control
           size="sm"
           type="date"
-          value={r.fecha}
+          value={r.fecha || ""}
           onChange={(e) => updateRow(i, "fecha", e.target.value)}
           className="input-terrax"
         />
-      </td>,
-    ];
+      </td>
+    );
 
     if (actividad === "Fertilización") {
-      return [
-        <td key="index">{i + 1}</td>,
-        ...base,
-        <td>
+      // Columnas comunes a ambas vistas
+      const comunes = [
+        idCol,
+        fechaCol,
+        <td key="tipoFert">
           <Form.Control
             size="sm"
-            value={r.tipoFertilizante}
+            value={r.tipoFertilizante || ""}
             onChange={(e) => updateRow(i, "tipoFertilizante", e.target.value)}
             className="input-terrax"
           />
         </td>,
-        <td>
+        <td key="de">
           <Form.Control
             size="sm"
-            type="number"
-            value={r.numZonas}
-            onChange={(e) => updateRow(i, "numZonas", e.target.value)}
+            value={r.de || ""}
+            onChange={(e) => updateRow(i, "de", e.target.value)}
             className="input-terrax"
           />
         </td>,
-        <td>
+        <td key="productoAplicar">
           <Form.Control
             size="sm"
-            value={r.tipoCultivo}
-            onChange={(e) => updateRow(i, "tipoCultivo", e.target.value)}
+            value={r.productoAplicar || ""}
+            onChange={(e) => updateRow(i, "productoAplicar", e.target.value)}
             className="input-terrax"
           />
         </td>,
-        <td>
+        <td key="concentracion">
           <Form.Control
             size="sm"
-            value={r.variedad}
-            onChange={(e) => updateRow(i, "variedad", e.target.value)}
+            value={r.concentracion || ""}
+            onChange={(e) => updateRow(i, "concentracion", e.target.value)}
             className="input-terrax"
           />
         </td>,
-        <td>
+        <td key="fabricante">
           <Form.Control
             size="sm"
-            value={r.productoApp}
-            onChange={(e) => updateRow(i, "productoApp", e.target.value)}
+            value={r.fabricante || ""}
+            onChange={(e) => updateRow(i, "fabricante", e.target.value)}
             className="input-terrax"
           />
         </td>,
-        <td>
+        <td key="litrosPorHa">
           <Form.Control
             size="sm"
-            value={r.maquinaria}
-            onChange={(e) => updateRow(i, "maquinaria", e.target.value)}
+            value={r.litrosPorHa || ""}
+            onChange={(e) => updateRow(i, "litrosPorHa", e.target.value)}
             className="input-terrax"
           />
         </td>,
-        <td>
+        <td key="hectareasAplicadas">
           <Form.Control
             size="sm"
-            value={r.cantidad}
-            onChange={(e) => updateRow(i, "cantidad", e.target.value)}
+            value={r.hectareasAplicadas || ""}
+            onChange={(e) => updateRow(i, "hectareasAplicadas", e.target.value)}
             className="input-terrax"
           />
         </td>,
-        <td className="text-center">
-          <Form.Check
-            checked={r.mapa}
-            onChange={(e) => updateRow(i, "mapa", e.target.checked)}
+      ];
+
+      // Solo en Dosis Variable: Mapa adjunto (input chico)
+      const mapaAdjunto =
+        fertVista === "variable"
+          ? [
+              <td key="mapaAdjunto">
+                <Form.Control
+                  size="sm"
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  style={{
+                    padding: "3px 4px",
+                    fontSize: "0.7rem",
+                    height: "25px",
+                  }}
+                  onChange={(e) =>
+                    updateRow(
+                      i,
+                      "mapaAdjunto",
+                      e.target.files && e.target.files[0]
+                        ? e.target.files[0]
+                        : null
+                    )
+                  }
+                />
+                {r.mapaAdjunto && (
+                  <small className="text-muted">{r.mapaAdjunto.name}</small>
+                )}
+              </td>,
+            ]
+          : [];
+
+      return [
+        ...comunes,
+        ...mapaAdjunto,
+        <td key="observaciones">
+          <Form.Control
+            size="sm"
+            value={r.observaciones || ""}
+            onChange={(e) => updateRow(i, "observaciones", e.target.value)}
+            className="input-terrax"
           />
         </td>,
-        <td className="text-center">
+        <td key="acciones" className="text-center">
           <Button
             variant="outline-danger"
             size="sm"
@@ -221,11 +305,11 @@ export default function ActividadesAgricolas() {
     if (actividad === "Aplicación Fitosanitaria") {
       return [
         <td>{i + 1}</td>,
-        ...base,
+        fechaCol,
         <td>
           <Form.Control
             size="sm"
-            value={r.porcentaje}
+            value={r.porcentaje || ""}
             onChange={(e) => updateRow(i, "porcentaje", e.target.value)}
             className="input-terrax"
           />
@@ -233,7 +317,7 @@ export default function ActividadesAgricolas() {
         <td>
           <Form.Control
             size="sm"
-            value={r.plaga}
+            value={r.plaga || ""}
             onChange={(e) => updateRow(i, "plaga", e.target.value)}
             className="input-terrax"
           />
@@ -241,7 +325,7 @@ export default function ActividadesAgricolas() {
         <td>
           <Form.Control
             size="sm"
-            value={r.estadoFen}
+            value={r.estadoFen || ""}
             onChange={(e) => updateRow(i, "estadoFen", e.target.value)}
             className="input-terrax"
           />
@@ -249,7 +333,7 @@ export default function ActividadesAgricolas() {
         <td>
           <Form.Control
             size="sm"
-            value={r.producto}
+            value={r.producto || ""}
             onChange={(e) => updateRow(i, "producto", e.target.value)}
             className="input-terrax"
           />
@@ -257,21 +341,21 @@ export default function ActividadesAgricolas() {
         <td>
           <Form.Control
             size="sm"
-            value={r.maquinaria}
+            value={r.maquinaria || ""}
             onChange={(e) => updateRow(i, "maquinaria", e.target.value)}
             className="input-terrax"
           />
         </td>,
         <td className="text-center">
           <Form.Check
-            checked={r.mapa}
+            checked={!!r.mapa}
             onChange={(e) => updateRow(i, "mapa", e.target.checked)}
           />
         </td>,
         <td>
           <Form.Control
             size="sm"
-            value={r.observaciones}
+            value={r.observaciones || ""}
             onChange={(e) => updateRow(i, "observaciones", e.target.value)}
             className="input-terrax"
           />
@@ -288,28 +372,28 @@ export default function ActividadesAgricolas() {
       ];
     }
 
-    // Default para las otras actividades
+    // Default
     return [
       <td>{i + 1}</td>,
-      ...base,
+      fechaCol,
       <td>
         <Form.Control
           size="sm"
-          value={r.maquinaria}
+          value={r.maquinaria || ""}
           onChange={(e) => updateRow(i, "maquinaria", e.target.value)}
           className="input-terrax"
         />
       </td>,
       <td className="text-center">
         <Form.Check
-          checked={r.mapa}
+          checked={!!r.mapa}
           onChange={(e) => updateRow(i, "mapa", e.target.checked)}
         />
       </td>,
       <td>
         <Form.Control
           size="sm"
-          value={r.observaciones}
+          value={r.observaciones || ""}
           onChange={(e) => updateRow(i, "observaciones", e.target.value)}
           className="input-terrax"
         />
@@ -388,7 +472,6 @@ export default function ActividadesAgricolas() {
                   </option>
                 ))}
               </Form.Select>
-              {/* Mensaje si no hay lotes */}
               {campo && lotes.length === 0 && (
                 <div
                   style={{
@@ -411,12 +494,14 @@ export default function ActividadesAgricolas() {
               <Form.Select
                 value={actividad}
                 onChange={(e) => {
-                  setActividad(e.target.value);
+                  const val = e.target.value;
+                  setActividad(val);
                   setRows([]);
+                  if (val === "Fertilización") setFertVista("variable");
                 }}
                 required
                 className="input-terrax"
-                disabled={lotes.length === 0} // <-- Deshabilita si no hay lotes
+                disabled={lotes.length === 0}
               >
                 <option value="">Seleccione actividad</option>
                 {actividades.map((a) => (
@@ -428,63 +513,107 @@ export default function ActividadesAgricolas() {
             </Col>
           </Row>
 
-          <div className="text-end mt-3">
-            <Button
-              type="submit"
-              className="rounded-pill px-4 shadow-sm"
-              style={{
-                fontWeight: "bold",
-                background: verde,
-                borderColor: verde,
-              }}
-            >
-              Registrar Actividad
-            </Button>
-          </div>
-        </Form>
+          {actividad && (
+            <div className="mt-5">
+              {/* Cabecera solo con selector de vista para Fertilización */}
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <h5 style={{ color: verdeOscuro, margin: 0 }}>
+                  {actividad}
+                  {actividad === "Fertilización" &&
+                    (fertVista === "variable"
+                      ? " · Dosis Variable"
+                      : " · Dosis Fija")}
+                </h5>
 
-        {actividad && (
-          <div className="mt-5">
-            <h5 style={{ color: verdeOscuro }}>{actividad}</h5>
-            <div className="d-flex justify-content-between mb-2">
-              <Button
+                {actividad === "Fertilización" && (
+                  <ButtonGroup>
+                    <Button
+                      size="sm"
+                      variant={
+                        fertVista === "variable" ? "success" : "outline-success"
+                      }
+                      onClick={() => {
+                        setFertVista("variable");
+                        setRows([]);
+                      }}
+                    >
+                      Dosis Variable
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={
+                        fertVista === "fija" ? "success" : "outline-success"
+                      }
+                      onClick={() => {
+                        setFertVista("fija");
+                        setRows([]);
+                      }}
+                    >
+                      Dosis Fija
+                    </Button>
+                  </ButtonGroup>
+                )}
+              </div>
+
+              {/* Tabla */}
+              <Table
+                bordered
+                hover
                 size="sm"
-                variant="success"
-                className="rounded-pill px-3"
-                onClick={addRow}
+                className="table-terrax encabezado-claro"
               >
-                + Agregar fila
-              </Button>
-              <Button
-                size="sm"
-                variant="outline-danger"
-                className="rounded-pill px-3"
-                onClick={limpiarRows}
-              >
-                Limpiar
-              </Button>
-            </div>
-            <Table
-              bordered
-              hover
-              size="sm"
-              className="table-terrax encabezado-claro"
-            >
-              <thead>
-                <tr style={{ background: verde, color: blanco }}>
-                  {renderHeaders().map((h, idx) => (
-                    <th key={idx}>{h}</th>
+                <thead>
+                  <tr style={{ background: verde, color: blanco }}>
+                    {renderHeaders().map((h, idx) => (
+                      <th key={idx}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r, i) => (
+                    <tr key={i}>{renderCells(r, i)}</tr>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r, i) => (
-                  <tr key={i}>{renderCells(r, i)}</tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        )}
+                </tbody>
+              </Table>
+
+              {/* Botones abajo de la tabla */}
+              <div className="d-flex align-items-center mt-2">
+                <Button
+                  size="sm"
+                  variant="success"
+                  className="rounded-pill px-3"
+                  onClick={addRow}
+                >
+                  + Agregar fila
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline-danger"
+                  className="rounded-pill px-3 ms-2"
+                  onClick={limpiarRows}
+                >
+                  Limpiar
+                </Button>
+
+                {/* Submit a la derecha */}
+                <div className="ms-auto">
+                  <Button
+                    type="submit"
+                    className="rounded-pill px-4 shadow-sm"
+                    style={{
+                      fontWeight: "bold",
+                      background: verde,
+                      borderColor: verde,
+                    }}
+                    disabled={rows.length === 0}
+                  >
+                    Registrar Actividad
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </Form>
       </Card.Body>
     </Card>
   );
