@@ -42,10 +42,17 @@ const SolicitarServicio = ({ onClose }) => {
           <label>Tipo de tarea:</label>
           <select value={tipoTarea} onChange={(e) => setTipoTarea(e.target.value)} required>
             <option value="">Seleccione una opción</option>
-            <option value="Siembra">Siembra</option>
-            <option value="Fertilización">Fertilización</option>
-            <option value="Riego">Riego</option>
+            <option value="Cobertura">Cobertura</option>
             <option value="Cosecha">Cosecha</option>
+            <option value="Fertilización">Fertilización</option>
+            <option value="Manejo de suelo">Manejo de suelo</option>
+            <option value="Pulverización">Pulverizacion</option>
+            <option value="Riego">Riego</option>
+            <option value="Siembra">Siembra</option>
+            
+            
+            
+            
           </select>
 
           <label>Fecha inicio:</label>
@@ -53,6 +60,7 @@ const SolicitarServicio = ({ onClose }) => {
             type="date"
             value={fechaInicio}
             onChange={(e) => setFechaInicio(e.target.value)}
+            min={new Date().toISOString().split("T")[0]}
             required
           />
 
@@ -61,6 +69,7 @@ const SolicitarServicio = ({ onClose }) => {
             type="date"
             value={fechaFin}
             onChange={(e) => setFechaFin(e.target.value)}
+            min={fechaInicio || new Date().toISOString().split("T")[0]}
             required
           />
 
