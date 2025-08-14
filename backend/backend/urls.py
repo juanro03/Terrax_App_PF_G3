@@ -10,7 +10,7 @@ from usuarios.views import (
 from rest_framework_simplejwt.views import TokenRefreshView
 from usuarios.views import enviar_notificacion
 from lotes.views import FinalizarCampaniaView
-
+from .views_cac import cac_pizarra
 
 
 
@@ -34,6 +34,7 @@ urlpatterns = [
     path('api/productos/', include('productos.urls')),  
     path('siembras/finalizar/<int:lote_id>/', FinalizarCampaniaView.as_view(), name='finalizar-campania'),
     path('api/', include('reportes.urls')),
+    path("api/cac/pizarra/", cac_pizarra, name="cac_pizarra")
 ] 
 
 # Agrega soporte para archivos MEDIA en desarrollo

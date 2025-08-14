@@ -1,0 +1,28 @@
+/* Da un “gutter” (separación) lateral consistente respecto a la barra */
+.inicio-gutter {
+  padding-left: 1rem;     /* móvil */
+  padding-right: 1rem;
+}
+
+@media (min-width: 992px) { /* desktop */
+  .inicio-gutter {
+    padding-left: 2.5rem; /* ↑ separa más del sidebar cuando está abierto */
+    padding-right: 2rem;
+  }
+}
+:root{
+  --sidebar-open: 260px;   /* ancho del sidebar abierto */
+  --sidebar-closed: 72px;  /* ancho del sidebar cerrado (solo íconos) */
+}
+
+/* Contenido principal */
+.inicio-wrapper{
+  padding-left: var(--sidebar-closed);
+  padding-right: 24px;
+  transition: padding-left .25s ease;
+}
+
+/* Cuando el sidebar esté abierto, sumá más padding */
+.sidebar-open .inicio-wrapper{
+  padding-left: var(--sidebar-open);
+}

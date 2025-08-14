@@ -2,7 +2,7 @@
 import React from "react";
 import Carrusel from "./Carrusel";
 import WeatherWidget from "./WeatherWidget";
-
+import DolarWidget from "./DolarWidget";
 import { Container, Row, Col, Button, Card, Accordion } from "react-bootstrap";
 import {
   Chart as ChartJS,
@@ -15,7 +15,9 @@ import {
   Title,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-
+import "./Inicio.css";
+import PreciosGranos from "./PreciosGranos";
+import GeoConsentBanner from "../common/GeoConsentBanner";
 // Registrar componentes de Chart.js
 ChartJS.register(
   CategoryScale,
@@ -75,7 +77,7 @@ const Inicio = () => {
   };
 
   return (
-    <div >
+    <div className="inicio-wrapper">
       {/* 1) Hero / Cabecera */}
       <section
         style={{
@@ -84,18 +86,19 @@ const Inicio = () => {
         }}
       >
         <Container className="ps-5">
+          <GeoConsentBanner />
           <h1 className="display-4 fuente-bonita">Bienvenido a Terrax</h1>
           <p className="lead fuente-bonita">
             Gestiona tus lotes agrícolas, monitorea índices y planifica tu
             producción en un solo lugar.
           </p>
-          <Button variant="success" size="lg" href="/VerCampos">
-            Ver Mis Campos
-          </Button>
+          <Button variant="success" size="lg" href="/VerCampos"   className="me-3 mb-2">Ver Mis Campos</Button>
+          <Button variant="success" size="lg" href="/calculadora" className="me-3 mb-2">Ver Calculadora</Button>
+          <Button variant="success" size="lg" href="/reportes"     className="mb-2">Ver Mis Reportes</Button>
         </Container>
       </section>
 
-      {/* 2) Carrusel 
+      {/* 2) Carrusel*/}
       <Container fluid className="ps-2">
         <Row className="justify-content-center">
           <Col lg={10}>
@@ -103,17 +106,22 @@ const Inicio = () => {
           </Col>
         </Row>
       </Container>
-      */}
+      
 
 
       {/* 3) Widgets y Tarjetas informativas */}
       <Container style={{ padding: "2rem 0" }}>
-        <Row className="g-4">
+        <div className="d-flex justify-content-center flex-wrap gap-4">
           {/* 3.1) WeatherWidget */}
           <Col md={6}>
             <WeatherWidget />
           </Col>
-
+          <Col md={4}>
+            <DolarWidget />
+          </Col>
+          <Col md={4}>
+            <PreciosGranos />
+          </Col>
           {/* 3.2) Gráfica de NDVI */}
           <Col md={6}>
             <Card className="shadow-sm">
@@ -123,7 +131,7 @@ const Inicio = () => {
             </Card>
           </Col>
 
-          {/* 3.3) Tarjetas rápidas (Mis Campos, Calendario, Reportes) */}
+          {/* 3.3) Tarjetas rápidas (Mis Campos, Calendario, Reportes) 
           <Col md={4}>
             <Card className="h-100 shadow-sm">
               <Card.Body>
@@ -162,7 +170,7 @@ const Inicio = () => {
                 </Button>
               </Card.Body>
             </Card>
-          </Col>
+          </Col>*/}
 
           {/* 3.4) Sección de novedades con Accordion 
           <Col md={12}>
@@ -203,7 +211,7 @@ const Inicio = () => {
             </Card>
           </Col>
           */}
-        </Row>
+        </div>
       </Container>
 
       {/* 4) Footer */}
