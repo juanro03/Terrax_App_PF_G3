@@ -31,6 +31,13 @@ const Login = () => {
       if (response.ok) {
         localStorage.setItem("accessToken", data.access);
         localStorage.setItem("refreshToken", data.refresh);
+        // 🔁 forzar que se pregunte en este login
+        sessionStorage.setItem("geoAskOnLogin", "1");
+
+        // limpiar consentimiento/coords previos (que no quede cacheado de sesiones anteriores)
+        localStorage.removeItem("geoConsent");
+        localStorage.removeItem("geoCoords");
+
         window.location.href = "/inicio";
       } else {
         alert("Credenciales inválidas");

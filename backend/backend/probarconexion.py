@@ -8,7 +8,7 @@ try:
         host="localhost",
         port="5432"
     )
-    print("Conexión exitosa 🎉")
+    print("Conexión exitosa")
     conn.close()
 except Exception as e:
     print("Error en la conexión:", e)

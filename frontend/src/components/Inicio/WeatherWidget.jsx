@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Card, Row, Col } from "react-bootstrap";
+import { ThermometerIcon, DropletIcon, WindIcon, SunIcon } from "lucide-react";
 
 const WeatherWidget = () => {
   const [weather, setWeather] = useState(null);
@@ -31,60 +32,54 @@ const WeatherWidget = () => {
 
   if (loading) {
     return (
-      <Card className="h-100 shadow-sm">
-        <Card.Body className="d-flex justify-content-center align-items-center" style={{ minHeight: "200px" }}>
-          <span>Cargando clima...</span>
-        </Card.Body>
+      <Card className="h-100 shadow-sm p-4 d-flex justify-content-center align-items-center" style={{ minHeight: "260px" }}>
+        <span>Cargando clima...</span>
       </Card>
     );
   }
 
   if (error || !weather) {
     return (
-      <Card className="h-100 shadow-sm">
-        <Card.Body className="d-flex justify-content-center align-items-center" style={{ minHeight: "200px" }}>
-          <span>Error al cargar el clima.</span>
-        </Card.Body>
+      <Card className="h-100 shadow-sm p-4 d-flex justify-content-center align-items-center" style={{ minHeight: "260px" }}>
+        <span>Error al cargar el clima.</span>
       </Card>
     );
   }
 
   return (
-    <Card className="h-100 shadow-sm">
-      <Card.Body>
-        <Card.Title className="mb-5">
-          Clima en {weather.name}
-        </Card.Title>
+    <Card className="h-100 shadow-sm p-4" style={{ minHeight: "260px", backgroundColor: "var(--verde-claro)" }}>
+      <div className="mb-3 d-flex align-items-center">
+        <SunIcon className="me-2" size={22} color="#198754" />
+        <h5 className="mb-0" style={{ color: "#198754" }}>Tiempo</h5>
+      </div>
 
-        <Row className="text-center">
-          {/* Temperatura */}
-          <Col md={4} xs={12} className="mb-3">
-            <div style={{ fontSize: "3rem" }}>🌡️</div>
-            <div className="fw-bold" style={{ fontSize: "2rem" }}>
-              {weather.main.temp}°C
-            </div>
-            <div>Temperatura</div>
-          </Col>
+      <div className="text-center mb-4">
+        <div style={{ fontSize: "3.5rem", fontWeight: 500, color: "#333" }}>
+          {Math.round(weather.main.temp)}°C
+        </div>
+        <div className="text-muted">
+          {weather.weather[0].description.charAt(0).toUpperCase() + weather.weather[0].description.slice(1)}
+        </div>
+      </div>
 
-          {/* Humedad */}
-          <Col md={4} xs={12} className="mb-3">
-            <div style={{ fontSize: "3rem" }}>💧</div>
-            <div className="fw-bold" style={{ fontSize: "2rem" }}>
-              {weather.main.humidity}%
-            </div>
-            <div>Humedad</div>
-          </Col>
-
-          {/* Viento */}
-          <Col md={4} xs={12} className="mb-3">
-            <div style={{ fontSize: "3rem" }}>🌬️</div>
-            <div className="fw-bold" style={{ fontSize: "2rem" }}>
-              {weather.wind.speed} m/s
-            </div>
-            <div>Viento</div>
-          </Col>
-        </Row>
-      </Card.Body>
+      <Row className="text-start" style={{ fontSize: "0.95rem" }}>
+        <Col xs={6} className="d-flex align-items-center mb-2">
+          <ThermometerIcon size={18} className="me-2" />
+          <strong>Temp. máx:</strong>&nbsp; {Math.round(weather.main.temp_max)}°C
+        </Col>
+        <Col xs={6} className="d-flex align-items-center mb-2">
+          <ThermometerIcon size={18} className="me-2" />
+          <strong>Temp. mín:</strong>&nbsp; {Math.round(weather.main.temp_min)}°C
+        </Col>
+        <Col xs={6} className="d-flex align-items-center mb-2">
+          <DropletIcon size={18} className="me-2" />
+          <strong>Humedad:</strong>&nbsp; {weather.main.humidity}%
+        </Col>
+        <Col xs={6} className="d-flex align-items-center mb-2">
+          <WindIcon size={18} className="me-2" />
+          <strong>Viento:</strong>&nbsp; {weather.wind.speed} m/s
+        </Col>
+      </Row>
     </Card>
   );
 };

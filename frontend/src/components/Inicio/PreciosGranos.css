@@ -1,0 +1,50 @@
+/* mantené la card como está; solo cambiamos la tabla */
+.card-terrax .table {
+  background: var(--verde-claro);
+  border-radius: .75rem;          /* esquinas redondeadas */
+  overflow: hidden;               /* que el radius afecte filas */
+  margin-bottom: 0;
+}
+
+/* celdas con el mismo fondo y bordes suaves */
+.card-terrax .table thead th,
+.card-terrax .table tbody td {
+  background: var(--verde-claro);
+  border-color: rgba(0, 0, 0, .05);
+}
+
+/* encabezados un pelín más tenues para contraste */
+.card-terrax .table thead th {
+  color: #3b6651;                 /* opcional: tono verdoso para títulos */
+  font-weight: 600;
+}
+/* Hacé que TODO lo que hay dentro de la tabla use el verde claro */
+.terrax-table{
+  --bs-table-bg: var(--verde-claro);
+  --bs-table-striped-bg: var(--verde-claro);
+  --bs-table-hover-bg: var(--verde-claro);
+  --bs-table-border-color: rgba(0,0,0,.06);
+
+  background: var(--verde-claro);
+  border-radius: .75rem;
+  overflow: hidden;      /* para que el radius afecte a filas */
+  margin-bottom: 0;
+}
+
+/* Bootstrap aplica el fondo a cada celda con un selector muy específico;
+   lo igualamos para asegurarlo en todos los <th>/<td> */
+.terrax-table > :not(caption) > * > *{
+  background-color: var(--verde-claro) !important;
+}
+
+/* Encabezados con un tono más oscuro si querés contraste */
+.terrax-table thead th{
+  color: #3b6651;
+  font-weight: 600;
+  border-bottom-color: rgba(0,0,0,.06);
+}
+
+/* Bordes suaves entre filas */
+.terrax-table tbody td{
+  border-top-color: rgba(0,0,0,.06);
+}
