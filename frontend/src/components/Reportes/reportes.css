@@ -58,3 +58,206 @@
 .tabla-reportes tbody tr:last-child td:last-child {
   border-bottom-right-radius: 10px;
 }
+
+/* === Tarjetas de reportes === */
+:root{
+  --verde:#198754;
+  --verde-oscuro:#155a36;
+  --verde-claro:#e9fbe5;
+  --gris-borde:#e6e6e6;
+  --gris-claro:#f6fbf5;
+}
+
+/* contenedor: que ocupe como la tabla (80%) y centrado */
+.lista-reportes{
+  width: 100%;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+/* tarjeta base */
+.reporte-card{
+  background:#fff;
+  border-radius:14px;
+  border:1px solid var(--gris-borde);
+  overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  transition:transform .08s ease, box-shadow .2s ease;
+}
+
+.reporte-card:hover{
+  transform:translateY(-1px);
+  box-shadow:0 6px 18px rgba(0,0,0,.10);
+}
+
+/* encabezado (franja verde) */
+.reporte-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 18px;
+  background:var(--verde);
+  color:#fff;
+  font-weight:700;
+  letter-spacing:.2px;
+  border-bottom:1px solid rgba(0,0,0,.05);
+}
+
+.reporte-titulo{ font-size:16px; }
+
+/* cuerpo en verde claro */
+.reporte-body{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 18px;
+  background:var(--verde-claro);
+}
+
+/* chips/metadatos */
+.reporte-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.chip{
+  background:#fff;
+  border:1px solid var(--gris-borde);
+  padding:6px 10px;
+  border-radius:10px;
+  font-size:13px;
+  color:#333;
+}
+
+/* botón Ver PDF */
+.ver-pdf{
+  display:inline-flex;
+  align-items:center;
+  font-weight:600;
+  border-radius:10px;
+  border:1px solid var(--gris-borde);
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+  text-decoration:none;
+}
+
+/* acciones admin (editar/eliminar) */
+.reporte-actions{
+  display:flex;
+  gap:8px;
+}
+
+/* estado vacío */
+.reporte-card.empty{
+  padding:16px 18px;
+  text-align:center;
+  background:var(--gris-claro);
+  border:1px dashed var(--gris-borde);
+  color:#444;
+}
+
+/* opcional: tarjeta seleccionada (como tu mock verde intenso) */
+.reporte-card.selected .reporte-top{ background:#2bbc56; }
+.reporte-card.selected .reporte-body{ background:#e8ffd4; }
+
+/* === Layout 2 columnas === */
+.reportes-layout {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; 
+  gap: 5px;
+  margin-top: 20px;
+  max-width: 1400px;
+  width: 100%;
+}
+
+.reportes-col {
+  flex: 1;
+  margin-right: 30px;
+  max-width: 900px; 
+}
+
+.registros-col {
+  width: 600px; 
+  position: sticky;
+  top: 20px;
+}
+
+.registros-card{
+  background:#e9fbe5;
+  border-radius:16px;
+  border:1px solid #d9efd9;
+  box-shadow:0 6px 18px rgba(0,0,0,.1);
+  overflow: hidden;
+}
+
+.registros-header{
+  padding:12px 16px;
+  font-weight:800;
+  color:#2f6b41;
+  border-bottom:1px solid #d9efd9;
+}
+
+.registros-body{ padding:14px; }
+
+.registros-placeholder{
+  color:#517a60;
+  background:#f3fff1;
+  border:1px dashed #cfead2;
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+}
+
+.registros-subhead{
+  display:flex; align-items:center; gap:8px;
+  font-weight:700; color:#4f6f5b;
+  margin-bottom:10px;
+}
+
+.registros-subhead .bullet{
+  width:8px; height:8px; border-radius:999px; background:#9ad38f;
+  display:inline-block;
+}
+
+.registros-imgWrap{
+  background:#dff3db;
+  border-radius:18px;
+  padding:10px;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:10px;
+}
+
+.registros-img{
+  width:100%; max-height:240px; object-fit:cover; border-radius:14px;
+}
+
+.registros-loading, .registros-noimg{
+  color:#476c58; font-size:14px; padding:30px 0;
+}
+
+/* Burbujas */
+.registro-bubble{
+  padding:10px 12px; border-radius:12px; margin:8px 0;
+  box-shadow:0 8px 16px rgba(0,0,0,.15);
+  font-size:14px; line-height:1.25;
+}
+
+.registro-bubble.warn{ background:#ffe97a; color:#2f2f2f; }
+.registro-bubble.ok{ background:#d8f3d1; color:#234f2f; }
+
+/* Input comentario (solo UI) */
+.registro-input{
+  width:100%;
+  border-radius:12px; border:1px solid #d3e9d3;
+  padding:10px 12px; outline:none;
+}
+
+/* Responsive: apilar en pantallas chicas */
+@media (max-width: 992px){
+  .reportes-layout{
+    grid-template-columns: 1fr;
+  }
+  .registros-col{ position: static; }
+}
