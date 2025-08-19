@@ -7,18 +7,21 @@ const ModalNotificarUsuario = ({ show, onHide, usuarioId }) => {
   const [enviando, setEnviando] = useState(false);
 
   const handleEnviar = async () => {
-    setEnviando(true);
-    try {
-      await axios.post("/api/notificar/", { user_id: usuarioId });
-      alert("Notificación enviada con éxito");
-      onHide();
-    } catch (error) {
-      alert("Error al enviar la notificación");
-      console.error(error);
-    } finally {
-      setEnviando(false);
-    }
-  };
+  setEnviando(true);
+  try {
+    await axios.post(
+      "http://localhost:8000/api/notificar/",   // URL absoluta al backend
+      { usuario_id: usuarioId }                 // misma clave que espera la vista
+    );
+    alert("Notificación enviada con éxito");
+    onHide();
+  } catch (error) {
+    console.error("STATUS:", error.response?.status, error.response?.data);
+    alert("Error al enviar la notificación");
+  } finally {
+    setEnviando(false);
+  }
+};
 
   return (
     <Modal show={show} onHide={onHide} centered>

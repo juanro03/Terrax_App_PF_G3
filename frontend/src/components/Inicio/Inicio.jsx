@@ -36,6 +36,7 @@ const Inicio = () => {
     return null;
   }
 
+
   // Datos de ejemplo para la gráfica de NDVI
   const ndviData = {
     labels: ["Enero", "Febrero", "Marzo", "Abril", "Mayo"],
@@ -76,6 +77,7 @@ const Inicio = () => {
     },
   };
 
+
   return (
     <div className="inicio-wrapper">
       {/* 1) Hero / Cabecera */}
@@ -92,9 +94,9 @@ const Inicio = () => {
             Gestiona tus lotes agrícolas, monitorea índices y planifica tu
             producción en un solo lugar.
           </p>
-          <Button variant="success" size="lg" href="/VerCampos"   className="me-3 mb-2">Ver Mis Campos</Button>
+          <Button variant="success" size="lg" href="/VerCampos" className="me-3 mb-2">Ver Mis Campos</Button>
           <Button variant="success" size="lg" href="/calculadora" className="me-3 mb-2">Ver Calculadora</Button>
-          <Button variant="success" size="lg" href="/reportes"     className="mb-2">Ver Mis Reportes</Button>
+          <Button variant="success" size="lg" href="/reportes" className="mb-2">Ver Mis Reportes</Button>
         </Container>
       </section>
 
@@ -106,7 +108,7 @@ const Inicio = () => {
           </Col>
         </Row>
       </Container>
-      
+
 
 
       {/* 3) Widgets y Tarjetas informativas */}

@@ -8,7 +8,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from .models import Usuario
 from .serializers import UsuarioSerializer, CustomTokenObtainPairSerializer
-
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
@@ -56,26 +57,63 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 User = get_user_model()
 
-@api_view(['POST'])
+@api_view(["POST"])
 def enviar_notificacion(request):
     try:
-        user_id = request.data.get("user_id")
-        user = User.objects.get(id=user_id)
+        usuario_id = request.data.get("usuario_id")
+        usuario = Usuario.objects.get(pk=usuario_id)
 
-        send_mail(
-            subject="Aviso de deuda pendiente",
-            message="Estimado, nos ponemos en contacto con usted desde Terrax para informarle que tiene una deuda pendiente. Ponerse en contacto con los administradores. Muchas gracias. Saludos",
-            from_email="noreply@terrax.com",  # o el que esté en tus settings
-            recipient_list=[user.email],
-            fail_silently=False,
+        # ----- cuerpo del correo -----
+        context = {"nombre": usuario.first_name or usuario.username}
+
+        text_body = (
+            f"Estimado/a {context['nombre']},\n\n"
+            "Tiene una suscripción pendiente de pago. "
+            "Para regularizarla, por favor contacte a los administradores.\n\n"
+            "Saludos,\nEquipo Terrax"
         )
+        html_body = render_to_string("correos/deuda.html", context)
+
+        # ----- envío -----
+        email = EmailMultiAlternatives(
+            subject="Aviso de suscripción pendiente – Terrax",
+            body=text_body,                      # versión texto
+            from_email="Terrax <no-reply@terrax.com>",
+            to=[usuario.email],
+        )
+        email.attach_alternative(html_body, "text/html")  # versión HTML
+        email.send()
 
         return Response({"mensaje": "Notificación enviada con éxito"}, status=status.HTTP_200_OK)
 
+    except Usuario.DoesNotExist:
+        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        print("Error al enviar notificación:", e)
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # Log rápido en consola
+        print("Error al enviar correo:", e)
+        return Response({"error": "Error interno"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['PATCH'])
+def desactivar_usuario(request, pk):
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+    except Usuario.DoesNotExist:
+        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+    usuario.is_active = False
+    usuario.save()
+    return Response({"mensaje": "Usuario desactivado correctamente"}, status=status.HTTP_200_OK)
+
+
+@api_view(["PATCH"])
+def activar_usuario(request, pk):
+    try:
+        user = Usuario.objects.get(pk=pk)
+        user.is_active = True
+        user.save(update_fields=["is_active"])
+        return Response({"detail": "Usuario reactivado"})
+    except Usuario.DoesNotExist:
+        return Response({"detail": "No encontrado"}, status=status.HTTP_404_NOT_FOUND)
 class PasswordResetRequestAPIView(APIView):
     """
     Recibe { email }, valida usuario y envía mail con link de reset.

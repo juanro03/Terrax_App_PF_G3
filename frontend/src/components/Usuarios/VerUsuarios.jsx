@@ -38,17 +38,25 @@ const VerUsuarios = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar este usuario?")) {
-      try {
-        await axios.delete(`http://localhost:8000/api/usuarios/${id}/`);
-        setUsuarios(usuarios.filter((user) => user.id !== id));
-      } catch (error) {
-        console.error("Error al eliminar:", error);
-        alert("No se pudo eliminar el usuario");
-      }
-    }
-  };
+  const handleDesactivar = async (id) => {
+  if (window.confirm("¿Desactivar este usuario?")) {
+    try {
+      await axios.patch(`/api/usuarios/${id}/desactivar/`);
+      setUsuarios(u => u.map(x =>
+        x.id === id ? { ...x, is_active: false } : x
+      ));
+    } catch (e) { alert("No se pudo desactivar"); }
+  }
+};
+
+const handleActivar = async (id) => {
+  try {
+    await axios.patch(`/api/usuarios/${id}/activar/`);
+    setUsuarios(u => u.map(x =>
+      x.id === id ? { ...x, is_active: true } : x
+    ));
+  } catch (e) { alert("No se pudo activar"); }
+};
 
   const abrirModalImagen = (usuario) => {
     setUsuarioSeleccionado(usuario);
@@ -182,8 +190,11 @@ const VerUsuarios = () => {
                 </h5>
                 <p className="card-text text-dark">@{user.username}</p>
                 <p className="card-text text-dark">{user.email}</p>
-                <p className="card-text text-dark fw-bold">
-                  Estado: {user.is_active ? "Activo" : "No activo"}
+                <p className="card-text fw-bold text-dark">
+                  Estado:&nbsp;
+                  <span className={user.is_active ? "text-success" : "text-danger"}>
+                    {user.is_active ? "Activo" : "No activo"}
+                  </span>
                 </p>
                 <p
                   onClick={() => abrirModalPassword(user)}
@@ -197,28 +208,47 @@ const VerUsuarios = () => {
                 </p>
               </div>
               <div className="card-footer d-flex justify-content-around">
-                <button
-                  className="btn btn-outline-primary"
-                  onClick={() => abrirModalEditar(user)}
-                >
-                  <FaEdit />
-                </button>
+              {/* 1‑ Notificar */}
+              <button
+                className="btn btn-outline-success"
+                onClick={() => {
+                  setUsuarioParaNotificar(user);
+                  setShowNotificarModal(true);
+                }}
+              >
+                <FaEnvelope />
+              </button>
+
+              {/* 2‑ Editar */}
+              <button
+                className="btn btn-outline-primary"
+                onClick={() => abrirModalEditar(user)}
+              >
+                <FaEdit />
+              </button>
+
+              {/* 3‑ Activar/Suspender */}
+              {user.is_active ? (
+                /* Está activo → mostrar papelera para suspender */
                 <button
                   className="btn btn-outline-danger"
-                  onClick={() => handleDelete(user.id)}
+                  title="Suspender"
+                  onClick={() => handleDesactivar(user.id)}
                 >
                   <FaTrash />
                 </button>
+              ) : (
+                /* Está inactivo → mostrar tick para habilitar */
                 <button
                   className="btn btn-outline-success"
-                  onClick={() => {
-                      setUsuarioParaNotificar(user);
-                      setShowNotificarModal(true);
-                  }}
+                  title="Habilitar"
+                  onClick={() => handleActivar(user.id)}
                 >
-                  <FaEnvelope />
+                  ✅
                 </button>
-              </div>
+              )}
+            </div>
+
             </div>
           ))}
       </div>
