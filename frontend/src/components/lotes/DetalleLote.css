@@ -105,3 +105,41 @@ h4, h5, h6 {
 .btn-close:hover {
   opacity: 1;
 }
+.breadcrumb .breadcrumb-item + .breadcrumb-item::before{
+  content: "›";
+  color: var(--bs-success);
+}
+.breadcrumb a{
+  color: var(--bs-success);
+  text-decoration: none;
+}
+.breadcrumb a:hover{ text-decoration: underline; }
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.confirm-card {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.2);
+}
+/* Campo calculado automáticamente (solo lectura) */
+.auto-field {
+  background-color: #e8fdf0;   /* verdecito suave */
+  border-color: #a6dfc2;
+  color: #0f5132;              /* verde oscuro, legible */
+  cursor: not-allowed;         /* sensación de bloqueado */
+}
+
+.auto-field:focus {
+  box-shadow: none;            /* sin halo de foco */
+  border-color: #a6dfc2;
+}

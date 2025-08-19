@@ -7,6 +7,7 @@ import ModalEditarCampo from "./ModalEditarCampo";
 import { useNavigate } from "react-router-dom";
 import SolicitarServicio from "./SolicitarServicio";
 
+
 const VerCampos = () => {
   const [campos, setCampos] = useState([]);
   const [showCrear, setShowCrear] = useState(false);
@@ -49,7 +50,7 @@ const VerCampos = () => {
     <div
       className="container-fluid"
       style={{
-        backgroundColor: "#e8fdf0",
+        backgroundColor: "rgb(239, 254, 238)",
         minHeight: "100vh",
         padding: "20px",
       }}
@@ -95,11 +96,7 @@ const VerCampos = () => {
           </button>
         </div>
 
-        <button
-          className="btn btn-outline-success fw-bold btn-sm"
-          onClick={() => setShowCrear(true)}
-          style={{ height: "32px", whiteSpace: "nowrap" }}
-        >
+        <button className="btn btn-outline-success" onClick={() => setShowCrear(true)}>
           + Agregar Campo
         </button>
       </div>

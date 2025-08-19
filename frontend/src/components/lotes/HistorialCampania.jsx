@@ -1,11 +1,22 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useLocation} from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
 
 const HistorialCampania = () => {
   const { loteId } = useParams();
   const [historial, setHistorial] = useState([]);
+  const navigate = useNavigate();
+  const { state } = useLocation(); // opcional, por si pasaste campoNombre/loteNombre
 
+  const goBackToDetalle = () => {
+    // Si te trajiste info por state, la reenviamos al detalle
+    if (state) {
+      navigate(`/lote/${loteId}`, { state, replace: true });
+    } else {
+      navigate(`/lote/${loteId}`, {replace: true});
+    }
+  };
   useEffect(() => {
     const obtenerHistorial = async () => {
       try {
@@ -21,6 +32,13 @@ const HistorialCampania = () => {
 
   return (
     <div className="container mt-4">
+      <button
+        type="button"
+        className="btn btn-outline-success btn-sm d-inline-flex align-items-center"
+        onClick={goBackToDetalle}
+      >
+        <FaArrowLeft className="me-2" /> Volver
+      </button>
       <h4 className="fw-bold mb-4 text-success">Historial de Campañas</h4>
       {historial.length === 0 ? (
         <p className="text-muted">No hay campañas registradas aún para este lote.</p>
