@@ -12,6 +12,7 @@ urlpatterns = [
     # Registrar rutas personalizadas primero
     path('usuarios/me/', UsuarioActualAPIView.as_view(), name='usuario-actual'),
     path("notificar/", enviar_notificacion),
+    
 
     # Luego incluir las rutas generadas por el router
     path('', include(router.urls)),

@@ -32,6 +32,9 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("usuarios.urls")),
     path('api/productos/', include('productos.urls')),  
+    path('siembras/finalizar/<int:lote_id>/', FinalizarCampaniaView.as_view(), name='finalizar-campania'),
+    path('api/', include('reportes.urls')),
+    
 ] 
 
 # Agrega soporte para archivos MEDIA en desarrollo
