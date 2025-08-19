@@ -114,7 +114,7 @@ button {
 
 input[type="file"]::file-selector-button {
 background-color: #087507;
-color: black;
+color: white !important;
 border: none;
 padding: 6px 12px;
 border-radius: 4px;

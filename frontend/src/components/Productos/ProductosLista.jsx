@@ -10,6 +10,8 @@ import {
   Alert,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 
 const categorias = [
   { nombre: "COADYUVANTES", color: "#e9f7ef" },
@@ -116,17 +118,13 @@ const ProductosLista = () => {
       >
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h5 className="m-0">Mis Productos: {categoriaSeleccionada}</h5>
-          <Button
-            variant="outline-secondary"
+          <button
+            type="button"
+            className="btn btn-outline-success btn-sm d-inline-flex align-items-center"
             onClick={() => navigate("/productos")}
-            style={{
-              borderRadius: "10px",
-              padding: "6px 14px",
-              fontWeight: "500",
-            }}
           >
-            Volver
-          </Button>
+            <FaArrowLeft className="me-2" /> Volver
+          </button>
         </div>
 
         {loading ? (
@@ -157,14 +155,15 @@ const ProductosLista = () => {
                       : prod.tipo}
                   </p>
                   <div className="text-end">
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      onClick={() => handleEliminar(prod.id)}
-                      style={{ borderRadius: "8px" }}
+                    <button
+                      className="btn btn-outline-danger btn-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEliminar(prod.id);
+                      }}
                     >
-                      🗑️ Eliminar
-                    </Button>
+                      <FaTrash />
+                    </button>
                   </div>
                 </Card>
               </Col>

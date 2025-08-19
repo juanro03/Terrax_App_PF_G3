@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Container, Button, Form, Row, Col, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
 
 const categorias = [
   { nombre: "COADYUVANTES", color: "#e9f7ef" },
@@ -288,17 +289,13 @@ const ProductosForm = () => {
       >
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h5 className="m-0">Agregar {categoriaSeleccionada}</h5>
-          <Button
-            variant="outline-secondary"
+          <button
+            type="button"
+            className="btn btn-outline-success btn-sm d-inline-flex align-items-center"
             onClick={() => navigate("/productos")}
-            style={{
-              borderRadius: "10px",
-              padding: "6px 14px",
-              fontWeight: "500",
-            }}
           >
-            Volver
-          </Button>
+            <FaArrowLeft className="me-2" /> Volver
+          </button>
         </div>
 
         <Card

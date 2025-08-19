@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import dayjs from 'dayjs';
 import "./DetalleLote.css";
+import { FaArrowLeft } from "react-icons/fa";
 
 
 
@@ -15,7 +16,58 @@ const DetalleLote = () => {
     rinde: '',
     archivo: null,
   });
-  const navigate = useNavigate();
+  const location = useLocation();
+  const navigate  = useNavigate();
+
+  // viene desde VerLotes si lo pasaste en navigate(..., { state })
+  const [campoInfo, setCampoInfo] = useState({
+    id: location.state?.campoId ?? null,
+    nombre: location.state?.campoNombre ?? "",
+  });
+  // nombre del lote para el breadcrumb
+  const loteNombre = location.state?.loteNombre ?? `Lote ${loteId}`;
+
+  // si no vino el campo en el state, lo busco por API desde el lote
+  useEffect(() => {
+    if (campoInfo.id) return;
+    (async () => {
+      try {
+        const { data: lote } = await axios.get(`http://127.0.0.1:8000/api/lotes/${loteId}/`);
+        const campoId = lote.campo;
+        let campoNombre = "";
+        try {
+          const { data: campo } = await axios.get(`http://127.0.0.1:8000/api/campos/${campoId}/`);
+          campoNombre = campo.nombre;
+        } catch {}
+        setCampoInfo({ id: campoId, nombre: campoNombre });
+      } catch (e) {
+        console.error("No pude obtener el campo del lote", e);
+      }
+    })();
+  }, [loteId, campoInfo.id]);
+
+  // volver SIEMPRE a los lotes del campo
+  const handleBack = () => {
+    if (campoInfo.id) navigate(`/campos/${campoInfo.id}/lotes`);
+    else navigate("/campos");
+  };
+  // Modal de confirmación
+  const [showConfirmEnd, setShowConfirmEnd] = useState(false);
+  const puedeFinalizar = estado === "cultivado";
+
+  const abrirConfirmEnd = () => {
+    if (!puedeFinalizar) return;
+    setShowConfirmEnd(true);
+  };
+  const cerrarConfirmEnd = () => setShowConfirmEnd(false);
+
+  // Para cerrar con ESC
+  useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && setShowConfirmEnd(false);
+    if (showConfirmEnd) document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [showConfirmEnd]);
+
 
   const [siembra, setSiembra] = useState({
     fecha: "",
@@ -23,8 +75,8 @@ const DetalleLote = () => {
     variedad: "",
     densidad: "",
     unidad: "Kg/Ha",
-    ventanaCosecha: "",
-    ventanaCosechaISO: "", // 👉 NUEVO
+    fechaEstimadaCosecha: "",
+    fechaEstimadaCosechaISO: "", // 👉 NUEVO
     analisisSuelo: null
   });
   const [mostrarCobertura, setMostrarCobertura] = useState(false);
@@ -77,8 +129,8 @@ const DetalleLote = () => {
 
           setSiembra(prev => ({
             ...prev,
-            ventanaCosecha: cosecha,
-            ventanaCosechaISO: cosechaISO  // 👉 NUEVO
+            fechaEstimadaCosecha: cosecha,
+            fechaEstimadaCosechaISO: cosechaISO  // 👉 NUEVO
           }));
         }
       }
@@ -93,7 +145,7 @@ const DetalleLote = () => {
 
         setSiembra({
           ...siembraData,
-          ventanaCosechaISO: siembraData.ventana_cosecha // <--- asegurate de guardar este campo en ISO
+          fechaEstimadaCosechaISO: siembraData.ventana_cosecha // <--- asegurate de guardar este campo en ISO
         });
 
         setEstado("cultivado");
@@ -141,7 +193,7 @@ const DetalleLote = () => {
     formData.append("variedad", siembra.variedad);
     formData.append("densidad", siembra.densidad);
     formData.append("unidad_densidad", siembra.unidad);
-    formData.append("ventana_cosecha", siembra.ventanaCosechaISO || siembra.ventanaCosecha);
+    formData.append("ventana_cosecha", siembra.fechaEstimadaCosechaISO || siembra.fechaEstimadaCosecha);
     formData.append("lote", loteId);
 
     if (siembra.analisisSuelo) {
@@ -181,13 +233,17 @@ const DetalleLote = () => {
     }));
   };
   const finalizarCampania = async () => {
+    if (estado !== "cultivado") {
+      alert("El lote está en barbecho.");
+      return;
+    }
     try {
       // Validar que la fecha de cosecha > ventana de cosecha
       const fechaCosecha = new Date(cosecha.fecha);
-      const ventanaCosecha = new Date(siembra.ventanaCosechaISO); // <-- esta debe estar en formato YYYY-MM-DD
+      const fechaEstimadaCosecha = new Date(siembra.fechaEstimadaCosechaISO); // <-- esta debe estar en formato YYYY-MM-DD
 
-      if (fechaCosecha < ventanaCosecha) {
-        alert("La fecha de cosecha debe ser posterior a la ventana estimada de cosecha.");
+      if (fechaCosecha < fechaEstimadaCosecha) {
+        alert("La fecha de cosecha debe ser posterior a la fecha estimada de cosecha.");
         return;
       }
 
@@ -227,7 +283,7 @@ const DetalleLote = () => {
         variedad: "",
         densidad: "",
         unidad: "Kg/Ha",
-        ventanaCosecha: "",
+        fechaEstimadaCosecha: "",
         analisisSuelo: null
       });
       setMostrarCobertura(false);
@@ -249,24 +305,70 @@ const DetalleLote = () => {
       alert("Ocurrió un error al finalizar la campaña.");
     }
   };
+  // después de tus useState, arriba del return:
+  const minFechaCosechaISO = siembra.fechaEstimadaCosechaISO
+    ? dayjs(siembra.fechaEstimadaCosechaISO).add(1, "day").format("YYYY-MM-DD")
+    : "";
+  useEffect(() => {
+    if (!siembra.fechaEstimadaCosechaISO) return;
+
+    const min = dayjs(siembra.fechaEstimadaCosechaISO)
+      .add(1, "day")
+      .format("YYYY-MM-DD");
+
+    setCosecha(prev => {
+      if (!prev.fecha || dayjs(prev.fecha).isBefore(min, "day")) {
+        return { ...prev, fecha: min };
+      }
+      return prev;
+    });
+  }, [siembra.fechaEstimadaCosechaISO]);
 
   
   return (
     <div className="container-fluid p-4" style={{ backgroundColor: "#f0fdf4" }}>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4 className="fw-bold text-success">Campo: La Josefina &gt; Lote 1</h4>
-        <div>
-          <button className="btn btn-success me-2">Actual</button>
-          <button
-            className="btn btn-outline-success me-2"
-            onClick={() => navigate(`/lotes/${loteId}/historial`)}
-          >
-            Historial
-          </button>
+      <div className="d-flex align-items-center flex-wrap gap-3 mb-3">
+      <button
+        type="button"
+        className="btn btn-outline-success btn-sm d-inline-flex align-items-center"
+        onClick={handleBack}
+        disabled={!campoInfo.id}
+      >
+        <FaArrowLeft className="me-2" />
+        Volver
+      </button>
 
-          <button className="btn btn-outline-success">Reportes</button>
-        </div>
+      <nav aria-label="breadcrumb">
+        <ol className="breadcrumb m-0">
+          <li className="breadcrumb-item"><Link to="/campos">Campos</Link></li>
+          <li className="breadcrumb-item">
+            {campoInfo.id ? (
+              <Link to={`/campos/${campoInfo.id}/lotes`}>{campoInfo.nombre || "Campo"}</Link>
+            ) : (
+              <span>{campoInfo.nombre || "Campo"}</span>
+            )}
+          </li>
+          <li className="breadcrumb-item active" aria-current="page">{loteNombre}</li>
+        </ol>
+      </nav>
+
+      <div className="ms-auto d-flex align-items-center gap-2">
+        <button className="btn btn-success">Actual</button>
+        <button
+          className="btn btn-outline-success"
+          onClick={() =>
+            navigate(`/lotes/${loteId}/historial`, {
+              state: { campoId: campoInfo.id, campoNombre: campoInfo.nombre, loteNombre },
+            })
+          }
+        >
+          Historial
+        </button>
+        <button className="btn btn-outline-success">Reportes</button>
       </div>
+    </div>
+
+
 
       <div className="row g-4">
         {/* Columna izquierda */}
@@ -379,9 +481,17 @@ const DetalleLote = () => {
                     </div>
                 </div>
                 <div className="mb-2">
-                  <label className="form-label">Ventana Cosecha</label>
-                  <input type="text" name="ventanaCosecha" className="form-control" value={siembra.ventanaCosecha} readOnly />
+                  <label className="form-label">Fecha estimada de cosecha</label>
+                  <input
+                    type="text"
+                    name="fechaEstimadaCosecha"
+                    className="form-control auto-field"
+                    value={siembra.fechaEstimadaCosecha || ""}
+                    readOnly
+                    title="Se calcula automáticamente según la ventana de cosecha de la semilla."
+                  />
                 </div>
+
                 <div className="mb-2">
                   <label className="form-label">Último análisis de suelo</label>
 
@@ -437,20 +547,33 @@ const DetalleLote = () => {
           <div className="card p-3 shadow-sm mb-3" style={{ borderRadius: "15px" }}>
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h5 className="fw-bold">Cosecha</h5>
-              <button className="btn btn-danger" onClick={finalizarCampania}>
+              <button
+                className={`btn btn-danger ${!puedeFinalizar ? "opacity-50" : ""}`}
+                onClick={abrirConfirmEnd}
+                disabled={!puedeFinalizar}
+                title={!puedeFinalizar ? "Debes marcar el lote como 'Cultivado' para finalizar la campaña" : ""}
+              >
                 Finalizar Campaña
               </button>
             </div>
+
             <div className="mb-2">
               <label className="form-label">Fecha</label>
               <input
                 type="date"
                 name="fecha"
                 className="form-control"
-                value={cosecha.fecha}
+                value={cosecha.fecha || ""}         // en "YYYY-MM-DD"
+                min={minFechaCosechaISO}           // bloqueo de días anteriores
                 onChange={handleCosechaChange}
               />
+              {minFechaCosechaISO && (
+                <small className="text-muted">
+                  Debe ser posterior a {dayjs(minFechaCosechaISO).subtract(1, "day").format("DD/MM/YYYY")}.
+                </small>
+              )}
             </div>
+
             <div className="mb-2">
               <label className="form-label">Rinde</label>
               <div className="input-group">
@@ -487,7 +610,7 @@ const DetalleLote = () => {
               />
             </div>
           </div>
-
+                  
           {/* Botón Agregar Cobertura */}
           {!mostrarCobertura && (
             <button
@@ -565,6 +688,35 @@ const DetalleLote = () => {
           )}     
         </div>   {/* Fin de la columna derecha */}
       </div>     {/* Fin del row */}
+      {showConfirmEnd && (
+        <div
+          className="confirm-overlay"
+          onClick={(e) => e.target === e.currentTarget && cerrarConfirmEnd()}
+        >
+          <div className="confirm-card p-4">
+            <h5 className="fw-bold mb-2">¿Finalizar campaña?</h5>
+            <p className="mb-2">
+              Esta acción es irreversible: no podrás editar la siembra ni cargar nuevos datos.
+            </p>
+            <p className="mb-4">Los registros pasarán a Historial.</p>
+
+            <div className="d-flex justify-content-end gap-2">
+              <button className="btn btn-outline-secondary" onClick={cerrarConfirmEnd}>
+                Cancelar
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={async () => {
+                  await finalizarCampania();
+                  cerrarConfirmEnd();
+                }}
+              >
+                Sí, finalizar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>       
   );
 };
