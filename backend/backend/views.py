@@ -2,6 +2,8 @@ import requests
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+
+
 @api_view(['GET'])
 def cotizacion_dolar(request):
     url = "https://api.bcr.com.ar/gix/v1/dolar"
@@ -16,3 +18,4 @@ def cotizacion_dolar(request):
         return Response(response.json())  # devuelvo la lista de cotizaciones
     except requests.exceptions.RequestException as e:
         return Response({"error": str(e)}, status=500)
+    
