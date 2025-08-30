@@ -123,7 +123,7 @@ const Reportes = () => {
         .get(`${API}/lotes/por-campo/${nuevoReporte.campo}`, { headers })
         .then((res) => setLotes(res.data))
         .catch((err) => console.error(err));
-        console.log(lotes);
+      console.log(lotes);
     } else {
       setLotes([]);
     }
@@ -292,9 +292,9 @@ const Reportes = () => {
 
   const createAnotacion = async (reporteId, { x, y, color, text }) => {
     const payload = {
-      reporte: reporteId,                         
-      x_pct: Number(x.toFixed(2)),                
-      y_pct: Number(y.toFixed(2)),                
+      reporte: reporteId,
+      x_pct: Number(x.toFixed(2)),
+      y_pct: Number(y.toFixed(2)),
       color,
       texto: text,
     };
@@ -463,9 +463,9 @@ const Reportes = () => {
               const meses = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
               const mes = meses[fechaObj.getMonth()];
               const anio2 = fechaObj.getFullYear().toString().slice(-2);
-              const cabecera = `${dia} ${mes} ${anio2} - ${obtenerNombreCampo(r.campo)} - ${obtenerNombreLote(
-                r.lote
-              )} - ${r.nombre}`;
+              const cabecera = `${dia} ${mes} ${anio2} - ${r.campo_nombre || obtenerNombreCampo(r.campo)
+                } - ${r.lote_nombre || obtenerNombreLote(r.lote)
+                } - ${r.nombre}`;
 
               const isSel = reporteSel?.id === r.id;
 
