@@ -13,11 +13,14 @@ const Reportes = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [campos, setCampos] = useState([]);
   const [lotes, setLotes] = useState([]);
+
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState("");
   const [campoSeleccionado, setCampoSeleccionado] = useState("");
   const [loteSeleccionado, setLoteSeleccionado] = useState("");
   const [rol, setRol] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showRegModal, setShowRegModal] = useState(false);
+
   const [nuevoReporte, setNuevoReporte] = useState({
     productor: "",
     campo: "",
@@ -28,6 +31,7 @@ const Reportes = () => {
     archivo_pdf: null,
     fecha_reporte: "",
   });
+
   const [atributoFiltro, setAtributoFiltro] = useState("nombre");
   const [valorBusqueda, setValorBusqueda] = useState("");
 
@@ -62,7 +66,6 @@ const Reportes = () => {
     try {
       setCargandoLote(true);
       const { data } = await axios.get("http://127.0.0.1:8000/api/lotes/"); // sin headers
-      // reporte.lote puede ser un id o un objeto; cubrimos ambos casos
       const idReporteLote = Number(reporte?.lote?.id ?? reporte?.lote);
       const lote = data.find((l) => Number(l.id) === idReporteLote) || null;
       setLoteSel(lote);
@@ -237,6 +240,45 @@ const Reportes = () => {
     singleValue: (p) => ({ ...p, color: "#28a745" }),
   };
 
+  // === PINS ===
+  const [pins, setPins] = useState([]);                 // [{id,x,y,color,text}]
+  const [placingMode, setPlacingMode] = useState(false);// true cuando espero clic en imagen
+  const [pendingPos, setPendingPos] = useState(null);   // {x,y} hasta completar el modal
+  const [hoveredPinId, setHoveredPinId] = useState(null);
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [pinDraft, setPinDraft] = useState({ text: "", color: "#e74c3c" });
+
+  const pinColors = [
+    { value: "#e74c3c", label: "Rojo (alerta)" },
+    { value: "#f1c40f", label: "Amarillo (atención)" },
+    { value: "#2ecc71", label: "Verde (ok)" },
+  ];
+
+  // click relativo dentro del contenedor (en %)
+  const getRelativeClick = (evt) => {
+    const rect = evt.currentTarget.getBoundingClientRect();
+    const xPct = ((evt.clientX - rect.left) / rect.width) * 100;
+    const yPct = ((evt.clientY - rect.top) / rect.height) * 100;
+    return { x: Math.max(0, Math.min(100, xPct)), y: Math.max(0, Math.min(100, yPct)) };
+  };
+
+  const addPin = ({ x, y, color, text }) =>
+    setPins((prev) => [...prev, { id: Date.now(), x, y, color, text }]);
+
+  const deletePin = (id) => setPins((prev) => prev.filter((p) => p.id !== id));
+
+  // al cambiar de reporte limpiamos (luego podés traer del backend)
+  useEffect(() => { if (reporteSel) { setPins([]); setPlacingMode(false); setPendingPos(null); } }, [reporteSel]);
+
+  // ícono pin (solo icono, sin etiqueta)
+  const PinSVG = ({ color = "#e74c3c" }) => (
+    <svg viewBox="0 0 512 512" width="26" height="26" style={{ display: 'block' }}>
+      <path d="M256 0C156 0 75 81 75 181c0 110 128 215 170 326 5 13 22 13 27 0 42-111 170-216 170-326C437 81 356 0 256 0z"
+        fill={color} />
+      <circle cx="256" cy="181" r="70" fill="#ffffff" />
+    </svg>
+  );
+
   return (
     <div className="reportes-container">
       <h2 className="text-3xl font-bold mb-4">Reportes</h2>
@@ -379,7 +421,7 @@ const Reportes = () => {
                   className={`reporte-card ${isSel ? "selected" : ""}`}
                   onClick={() => {
                     setReporteSel(r);
-                    cargarLoteDeReporte(r); // << usa /api/lotes y matchea ID exacto
+                    cargarLoteDeReporte(r); // usa /api/lotes y matchea ID exacto
                   }}
                   role="button"
                 >
@@ -416,7 +458,7 @@ const Reportes = () => {
                       onClick={(e) => e.stopPropagation()}
                     >
                       <FontAwesomeIcon icon={faFilePdf} className="me-2" />
-                      Ver PDF
+                      Ver Reporte
                     </a>
                   </div>
                 </div>
@@ -436,29 +478,97 @@ const Reportes = () => {
 
               {reporteSel && (
                 <>
+                  {/* CABECERA + BOTONES */}
                   <div className="registros-subhead">
-                    <span className="bullet"></span>
-                    {new Date(reporteSel.fecha_reporte).toLocaleDateString("es-AR", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "2-digit",
-                    })}{" "}
-                    — {reporteSel.nombre}
+                    <div className="rs-left">
+                      <span className="bullet"></span>
+                      {new Date(reporteSel.fecha_reporte).toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "2-digit" })} — {reporteSel.nombre}
+                    </div>
+                    <div className="rs-right">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-success me-2"
+                        onClick={() => {
+                          setPlacingMode(true);         // primero elegir posición
+                          setPendingPos(null);
+                          setPinDraft({ text: "", color: pinColors[0].value });
+                        }}
+                      >
+                        Agregar anotación
+                      </button>
+
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-success"
+                        onClick={() => setShowRegModal(true)}
+                      >
+                        Expandir
+                      </button>
+                    </div>
                   </div>
 
+                  {/* IMAGEN */}
                   <div className="registros-imgWrap">
                     {cargandoLote ? (
                       <div className="registros-loading">Cargando imagen del lote…</div>
                     ) : getLoteImage(loteSel) ? (
-                      <img src={getLoteImage(loteSel)} alt="Mapa/imagen del lote" className="registros-img" />
+                      <div
+                        className={`pins-canvas ${placingMode ? "is-placing" : ""}`}
+                        onClick={(e) => {
+                          if (!placingMode) return;
+                          const pos = getRelativeClick(e);
+                          setPendingPos(pos);
+                          setShowPinModal(true);     // ahora abrimos el modal para texto/color
+                          setPlacingMode(false);
+                        }}
+                      >
+                        <img src={getLoteImage(loteSel)} alt="Mapa/imagen del lote" className="registros-img" />
+
+                        {/* Pines: solo iconos */}
+                        {pins.map((p) => (
+                          <div
+                            key={p.id}
+                            className={`pin ${hoveredPinId === p.id ? "is-hovered" : ""}`}
+                            style={{ left: `${p.x}%`, top: `${p.y}%` }}
+                            onMouseEnter={() => setHoveredPinId(p.id)}
+                            onMouseLeave={() => setHoveredPinId(null)}
+                          >
+                            <div className="pin-icon"><PinSVG color={p.color} /></div>
+                          </div>
+                        ))}
+                      </div>
                     ) : (
                       <div className="registros-noimg">Sin imagen del lote</div>
                     )}
                   </div>
 
-                  {reporteSel.observaciones && <div className="registro-bubble warn">{reporteSel.observaciones}</div>}
+                  {/* AVISO debajo de la imagen */}
+                  {placingMode && (
+                    <div className="placing-hint under">Hacé click en la imagen para ubicar el pin…</div>
+                  )}
 
-                  <input type="text" className="registro-input" placeholder="Añadir comentarios" disabled title="(Demo UI)" />
+                  {/* Lista de comentarios */}
+                  <div className="comentarios-list">
+                    {pins.length === 0 ? (
+                      <div className="comentario-empty">Sin anotaciones aún.</div>
+                    ) : (
+                      pins.map((p) => (
+                        <div
+                          key={p.id}
+                          className={`comentario-row ${hoveredPinId === p.id ? "is-hovered" : ""}`}
+                          style={{ "--pinColor": p.color }}
+                          onMouseEnter={() => setHoveredPinId(p.id)}
+                          onMouseLeave={() => setHoveredPinId(null)}
+                        >
+                          <span className="comentario-dot" style={{ background: p.color }} />
+                          <span className="comentario-text">{p.text}</span>
+                          <button className="comentario-del" onClick={() => deletePin(p.id)} title="Eliminar">×</button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {reporteSel.observaciones && <div className="registro-bubble warn">{reporteSel.observaciones}</div>}
                 </>
               )}
             </div>
@@ -466,7 +576,63 @@ const Reportes = () => {
         </aside>
       </div>
 
-      {/* Modal de creación */}
+      {/* Modal de creación de PIN */}
+      <Modal show={showPinModal} onHide={() => { setShowPinModal(false); setPendingPos(null); }} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Agregar anotación</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="mb-3">
+            <label className="form-label">Comentario</label>
+            <input
+              type="text"
+              className="form-control"
+              value={pinDraft.text}
+              onChange={(e) => setPinDraft({ ...pinDraft, text: e.target.value })}
+              placeholder="Ej: zona de plagas"
+              autoFocus
+            />
+          </div>
+
+          <div className="mb-2">
+            <label className="form-label">Color</label>
+            <div style={{ display: "flex", gap: 10 }}>
+              {pinColors.map((c) => (
+                <button
+                  key={c.value}
+                  type="button"
+                  className="color-pill"
+                  style={{
+                    background: c.value,
+                    outline: pinDraft.color === c.value ? "3px solid rgba(0,0,0,0.15)" : "none",
+                  }}
+                  onClick={() => setPinDraft({ ...pinDraft, color: c.value })}
+                  title={c.label}
+                />
+              ))}
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => { setShowPinModal(false); setPendingPos(null); }}>
+            Cancelar
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              if (!pinDraft.text.trim() || !pendingPos) return;
+              addPin({ x: pendingPos.x, y: pendingPos.y, color: pinDraft.color, text: pinDraft.text.trim() });
+              setShowPinModal(false);
+              setPendingPos(null);
+              setPinDraft({ text: "", color: "#e74c3c" });
+            }}
+          >
+            Guardar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Modal de creación de reporte */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Nuevo Reporte</Modal.Title>
@@ -569,6 +735,107 @@ const Reportes = () => {
             Guardar
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      {/* Modal expandir */}
+      <Modal
+        show={showRegModal}
+        onHide={() => setShowRegModal(false)}
+        size="xl"
+        centered
+        dialogClassName="registros-modal"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            Registros — {reporteSel?.nombre} ({reporteSel && new Date(reporteSel.fecha_reporte).toLocaleDateString("es-AR")})
+          </Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          {!reporteSel ? (
+            <div className="registros-placeholder">Seleccioná un reporte para ver sus registros.</div>
+          ) : (
+            <>
+              {/* Botón agregar en el modal grande */}
+              <div className="d-flex justify-content-end mb-2">
+                <button
+                  type="button"
+                  className="btn btn-success btn-sm"
+                  onClick={() => {
+                    setPlacingMode(true);
+                    setPendingPos(null);
+                    setPinDraft({ text: "", color: pinColors[0].value });
+                  }}
+                >
+                  Agregar anotación
+                </button>
+              </div>
+
+              <div className="registros-imgWrap">
+                {cargandoLote ? (
+                  <div className="registros-loading">Cargando imagen del lote…</div>
+                ) : getLoteImage(loteSel) ? (
+                  <div
+                    className={`pins-canvas ${placingMode ? "is-placing" : ""}`}
+                    onClick={(e) => {
+                      if (!placingMode) return;
+                      const pos = getRelativeClick(e);
+                      setPendingPos(pos);
+                      setShowPinModal(true);
+                      setPlacingMode(false);
+                    }}
+                  >
+                    <img
+                      src={getLoteImage(loteSel)}
+                      alt="Mapa/imagen del lote"
+                      className="registros-img registros-img--lg"
+                    />
+
+                    {pins.map((p) => (
+                      <div
+                        key={p.id}
+                        className={`pin ${hoveredPinId === p.id ? "is-hovered" : ""}`}
+                        style={{ left: `${p.x}%`, top: `${p.y}%` }}
+                        onMouseEnter={() => setHoveredPinId(p.id)}
+                        onMouseLeave={() => setHoveredPinId(null)}
+                        onClick={(ev) => ev.stopPropagation()}
+                      >
+                        <div className="pin-icon"><PinSVG color={p.color} /></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="registros-noimg">Sin imagen del lote</div>
+                )}
+              </div>
+
+              {placingMode && (
+                <div className="placing-hint under">Hacé click en la imagen para ubicar el pin…</div>
+              )}
+
+              {/* Lista de comentarios */}
+              <div className="comentarios-list">
+                {pins.length === 0 ? (
+                  <div className="comentario-empty">Sin anotaciones aún.</div>
+                ) : (
+                  pins.map((p) => (
+                    <div
+                      key={`row-${p.id}`}
+                      className={`comentario-row ${hoveredPinId === p.id ? "is-hovered" : ""}`}
+                      style={{ "--pinColor": p.color }}
+                      onMouseEnter={() => setHoveredPinId(p.id)}
+                      onMouseLeave={() => setHoveredPinId(null)}
+                    >
+                      <span className="comentario-dot" style={{ background: p.color }} />
+                      <span className="comentario-text">{p.text}</span>
+                      <button className="comentario-del" title="Eliminar" onClick={() => deletePin(p.id)}>×</button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
+          )}
+        </Modal.Body>
       </Modal>
     </div>
   );
