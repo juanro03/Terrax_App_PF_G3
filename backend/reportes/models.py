@@ -1,7 +1,9 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 from usuarios.models import Usuario
 from campos.models import Campo
 from lotes.models import Lote
+from usuarios.models import Usuario
 
 class Reporte(models.Model):
     productor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
@@ -15,3 +17,28 @@ class Reporte(models.Model):
 
     def __str__(self):
         return f"{self.nombre} ({self.lote})"
+
+
+class Anotacion(models.Model):
+    reporte = models.ForeignKey(
+        Reporte, on_delete=models.CASCADE, related_name="anotaciones"
+    )
+    
+    x_pct = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    y_pct = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    texto = models.CharField(max_length=200)   
+    color = models.CharField(max_length=7, default="#e74c3c")  
+
+    creado_por = models.ForeignKey(
+        Usuario, null=True, blank=True, on_delete=models.SET_NULL, related_name="anotaciones"
+    )
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+    orden = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        indexes = [models.Index(fields=["reporte", "creado_en"]),]
+        ordering = ["orden", "id"]
+
+    def __str__(self):
+        return f"{self.texto[:30]}… (rep:{self.reporte_id})"

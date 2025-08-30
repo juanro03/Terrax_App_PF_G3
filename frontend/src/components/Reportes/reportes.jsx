@@ -8,6 +8,8 @@ import { Modal, Button, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Select from "react-select";
 
+const API = "http://127.0.0.1:8000/api";
+
 const Reportes = () => {
   const [reportes, setReportes] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
@@ -50,7 +52,7 @@ const Reportes = () => {
     return `http://127.0.0.1:8000${p.startsWith("/") ? "" : "/"}${p}`;
   };
 
-  // Prioriza imagen_satelital y si no hay, usa imagen_dron (según tu modelo)
+  // Prioriza imagen_satelital y si no hay, usa imagen_dron
   const getLoteImage = (l) => {
     if (!l) return null;
     const candidate = l.imagen_satelital || l.imagen_dron || null;
@@ -65,7 +67,7 @@ const Reportes = () => {
     }
     try {
       setCargandoLote(true);
-      const { data } = await axios.get("http://127.0.0.1:8000/api/lotes/"); // sin headers
+      const { data } = await axios.get(`${API}/lotes/`); // sin headers
       const idReporteLote = Number(reporte?.lote?.id ?? reporte?.lote);
       const lote = data.find((l) => Number(l.id) === idReporteLote) || null;
       setLoteSel(lote);
@@ -80,17 +82,17 @@ const Reportes = () => {
   // =================== FETCHS INICIALES ===================
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/api/usuarios/me/", { headers })
+      .get(`${API}/usuarios/me/`, { headers })
       .then((res) => setRol(res.data.rol))
       .catch((err) => console.error(err));
 
     axios
-      .get("http://127.0.0.1:8000/api/reportes/", { headers })
+      .get(`${API}/reportes/`, { headers })
       .then((res) => setReportes(res.data))
       .catch((err) => console.error(err));
 
     axios
-      .get("http://127.0.0.1:8000/api/usuarios/", { headers })
+      .get(`${API}/usuarios/`, { headers })
       .then((res) => setUsuarios(res.data))
       .catch((err) => console.error(err));
   }, []);
@@ -98,12 +100,12 @@ const Reportes = () => {
   useEffect(() => {
     if (rol === "admin" && usuarioSeleccionado) {
       axios
-        .get(`http://127.0.0.1:8000/api/campos/?usuario=${usuarioSeleccionado}`, { headers })
+        .get(`${API}/campos/?usuario=${usuarioSeleccionado}`, { headers })
         .then((res) => setCampos(res.data))
         .catch((err) => console.error(err));
     } else if (rol !== "admin") {
       axios
-        .get("http://127.0.0.1:8000/api/campos/", { headers })
+        .get(`${API}/campos/`, { headers })
         .then((res) => setCampos(res.data))
         .catch((err) => console.error(err));
     }
@@ -115,7 +117,7 @@ const Reportes = () => {
   useEffect(() => {
     if (nuevoReporte.campo) {
       axios
-        .get(`http://127.0.0.1:8000/api/lotes/por-campo/${nuevoReporte.campo}`, { headers })
+        .get(`${API}/lotes/por-campo/${nuevoReporte.campo}`, { headers })
         .then((res) => setLotes(res.data))
         .catch((err) => console.error(err));
     } else {
@@ -126,7 +128,7 @@ const Reportes = () => {
   useEffect(() => {
     if (campoSeleccionado) {
       axios
-        .get(`http://127.0.0.1:8000/api/lotes/por-campo/${campoSeleccionado}`, { headers })
+        .get(`${API}/lotes/por-campo/${campoSeleccionado}`, { headers })
         .then((res) => setLotes(res.data))
         .catch((err) => console.error(err));
     } else {
@@ -141,7 +143,7 @@ const Reportes = () => {
     Object.entries(nuevoReporte).forEach(([key, value]) => formData.append(key, value));
 
     axios
-      .post("http://127.0.0.1:8000/api/reportes/", formData, {
+      .post(`${API}/reportes/`, formData, {
         headers: { ...headers, "Content-Type": "multipart/form-data" },
       })
       .then((res) => {
@@ -164,12 +166,13 @@ const Reportes = () => {
   const handleEliminar = (id) => {
     if (window.confirm("¿Estás seguro de eliminar este reporte?")) {
       axios
-        .delete(`http://127.0.0.1:8000/api/reportes/${id}/`, { headers })
+        .delete(`${API}/reportes/${id}/`, { headers })
         .then(() => {
           setReportes((prev) => prev.filter((r) => r.id !== id));
           if (reporteSel?.id === id) {
             setReporteSel(null);
             setLoteSel(null);
+            setPins([]);
           }
         })
         .catch((err) => {
@@ -240,10 +243,11 @@ const Reportes = () => {
     singleValue: (p) => ({ ...p, color: "#28a745" }),
   };
 
-  // === PINS ===
-  const [pins, setPins] = useState([]);                 // [{id,x,y,color,text}]
-  const [placingMode, setPlacingMode] = useState(false);// true cuando espero clic en imagen
-  const [pendingPos, setPendingPos] = useState(null);   // {x,y} hasta completar el modal
+  // ============ PINS (conexión backend) ============
+  // shape local: { id, x, y, color, text, serverId }
+  const [pins, setPins] = useState([]);
+  const [placingMode, setPlacingMode] = useState(false);
+  const [pendingPos, setPendingPos] = useState(null);
   const [hoveredPinId, setHoveredPinId] = useState(null);
   const [showPinModal, setShowPinModal] = useState(false);
   const [pinDraft, setPinDraft] = useState({ text: "", color: "#e74c3c" });
@@ -262,19 +266,66 @@ const Reportes = () => {
     return { x: Math.max(0, Math.min(100, xPct)), y: Math.max(0, Math.min(100, yPct)) };
   };
 
-  const addPin = ({ x, y, color, text }) =>
-    setPins((prev) => [...prev, { id: Date.now(), x, y, color, text }]);
+  // ---- API de anotaciones ----
+  const fetchAnotaciones = async (reporteId) => {
+    try {
+      const { data } = await axios.get(`${API}/reportes/${reporteId}/anotaciones/`, { headers });
+      const mapped = data.map((a) => ({
+        id: a.id,            // usamos el id del server para identificar
+        serverId: a.id,
+        x: parseFloat(a.x_pct),
+        y: parseFloat(a.y_pct),
+        color: a.color,
+        text: a.texto,
+      }));
+      setPins(mapped);
+    } catch (e) {
+      console.error("Error cargando anotaciones:", e);
+      setPins([]);
+    }
+  };
 
-  const deletePin = (id) => setPins((prev) => prev.filter((p) => p.id !== id));
+  const createAnotacion = async (reporteId, { x, y, color, text }) => {
+    const payload = {
+      reporte: reporteId,                         
+      x_pct: Number(x.toFixed(2)),                
+      y_pct: Number(y.toFixed(2)),                
+      color,
+      texto: text,
+    };
+    const { data } = await axios.post(`${API}/reportes/${reporteId}/anotaciones/`, payload, { headers });
+    return {
+      id: data.id,
+      serverId: data.id,
+      x: parseFloat(data.x_pct),
+      y: parseFloat(data.y_pct),
+      color: data.color,
+      text: data.texto,
+    };
+  };
 
-  // al cambiar de reporte limpiamos (luego podés traer del backend)
-  useEffect(() => { if (reporteSel) { setPins([]); setPlacingMode(false); setPendingPos(null); } }, [reporteSel]);
+  const deleteAnotacion = async (reporteId, anotacionId) => {
+    await axios.delete(`${API}/reportes/${reporteId}/anotaciones/${anotacionId}/`, { headers });
+  };
 
-  // ícono pin (solo icono, sin etiqueta)
+  // al seleccionar reporte: cargar lote + anotaciones
+  useEffect(() => {
+    if (!reporteSel) {
+      setPins([]);
+      return;
+    }
+    setPlacingMode(false);
+    setPendingPos(null);
+    fetchAnotaciones(reporteSel.id);
+  }, [reporteSel]);
+
+  // ícono pin (solo icono)
   const PinSVG = ({ color = "#e74c3c" }) => (
-    <svg viewBox="0 0 512 512" width="26" height="26" style={{ display: 'block' }}>
-      <path d="M256 0C156 0 75 81 75 181c0 110 128 215 170 326 5 13 22 13 27 0 42-111 170-216 170-326C437 81 356 0 256 0z"
-        fill={color} />
+    <svg viewBox="0 0 512 512" width="26" height="26" style={{ display: "block" }}>
+      <path
+        d="M256 0C156 0 75 81 75 181c0 110 128 215 170 326 5 13 22 13 27 0 42-111 170-216 170-326C437 81 356 0 256 0z"
+        fill={color}
+      />
       <circle cx="256" cy="181" r="70" fill="#ffffff" />
     </svg>
   );
@@ -399,9 +450,7 @@ const Reportes = () => {
         {/* Columna izquierda: tarjetas */}
         <div className="reportes-col">
           <div className="lista-reportes">
-            {reportesFiltrados.length === 0 && (
-              <div className="reporte-card empty">No hay reportes con ese filtro.</div>
-            )}
+            {reportesFiltrados.length === 0 && <div className="reporte-card empty">No hay reportes con ese filtro.</div>}
 
             {reportesFiltrados.map((r) => {
               const fechaObj = new Date(r.fecha_reporte);
@@ -421,7 +470,7 @@ const Reportes = () => {
                   className={`reporte-card ${isSel ? "selected" : ""}`}
                   onClick={() => {
                     setReporteSel(r);
-                    cargarLoteDeReporte(r); // usa /api/lotes y matchea ID exacto
+                    cargarLoteDeReporte(r);
                   }}
                   role="button"
                 >
@@ -472,9 +521,7 @@ const Reportes = () => {
           <div className="registros-card">
             <div className="registros-header">Registros</div>
             <div className="registros-body">
-              {!reporteSel && (
-                <div className="registros-placeholder">Seleccioná un reporte para ver sus registros.</div>
-              )}
+              {!reporteSel && <div className="registros-placeholder">Seleccioná un reporte para ver sus registros.</div>}
 
               {reporteSel && (
                 <>
@@ -482,14 +529,19 @@ const Reportes = () => {
                   <div className="registros-subhead">
                     <div className="rs-left">
                       <span className="bullet"></span>
-                      {new Date(reporteSel.fecha_reporte).toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "2-digit" })} — {reporteSel.nombre}
+                      {new Date(reporteSel.fecha_reporte).toLocaleDateString("es-AR", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "2-digit",
+                      })}{" "}
+                      — {reporteSel.nombre}
                     </div>
                     <div className="rs-right">
                       <button
                         type="button"
                         className="btn btn-sm btn-success me-2"
                         onClick={() => {
-                          setPlacingMode(true);         // primero elegir posición
+                          setPlacingMode(true);
                           setPendingPos(null);
                           setPinDraft({ text: "", color: pinColors[0].value });
                         }}
@@ -497,11 +549,7 @@ const Reportes = () => {
                         Agregar anotación
                       </button>
 
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline-success"
-                        onClick={() => setShowRegModal(true)}
-                      >
+                      <button type="button" className="btn btn-sm btn-outline-success" onClick={() => setShowRegModal(true)}>
                         Expandir
                       </button>
                     </div>
@@ -518,13 +566,13 @@ const Reportes = () => {
                           if (!placingMode) return;
                           const pos = getRelativeClick(e);
                           setPendingPos(pos);
-                          setShowPinModal(true);     // ahora abrimos el modal para texto/color
+                          setShowPinModal(true);
                           setPlacingMode(false);
                         }}
                       >
                         <img src={getLoteImage(loteSel)} alt="Mapa/imagen del lote" className="registros-img" />
 
-                        {/* Pines: solo iconos */}
+                        {/* Pines */}
                         {pins.map((p) => (
                           <div
                             key={p.id}
@@ -533,7 +581,9 @@ const Reportes = () => {
                             onMouseEnter={() => setHoveredPinId(p.id)}
                             onMouseLeave={() => setHoveredPinId(null)}
                           >
-                            <div className="pin-icon"><PinSVG color={p.color} /></div>
+                            <div className="pin-icon">
+                              <PinSVG color={p.color} />
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -543,9 +593,7 @@ const Reportes = () => {
                   </div>
 
                   {/* AVISO debajo de la imagen */}
-                  {placingMode && (
-                    <div className="placing-hint under">Hacé click en la imagen para ubicar el pin…</div>
-                  )}
+                  {placingMode && <div className="placing-hint under">Hacé click en la imagen para ubicar el pin…</div>}
 
                   {/* Lista de comentarios */}
                   <div className="comentarios-list">
@@ -562,7 +610,21 @@ const Reportes = () => {
                         >
                           <span className="comentario-dot" style={{ background: p.color }} />
                           <span className="comentario-text">{p.text}</span>
-                          <button className="comentario-del" onClick={() => deletePin(p.id)} title="Eliminar">×</button>
+                          <button
+                            className="comentario-del"
+                            onClick={async () => {
+                              try {
+                                if (p.serverId) await deleteAnotacion(reporteSel.id, p.serverId);
+                                setPins((prev) => prev.filter((x) => x.id !== p.id));
+                              } catch (e) {
+                                console.error("No se pudo eliminar la anotación:", e);
+                                alert("No se pudo eliminar la anotación.");
+                              }
+                            }}
+                            title="Eliminar"
+                          >
+                            ×
+                          </button>
                         </div>
                       ))
                     )}
@@ -619,12 +681,27 @@ const Reportes = () => {
           </Button>
           <Button
             variant="primary"
-            onClick={() => {
-              if (!pinDraft.text.trim() || !pendingPos) return;
-              addPin({ x: pendingPos.x, y: pendingPos.y, color: pinDraft.color, text: pinDraft.text.trim() });
-              setShowPinModal(false);
-              setPendingPos(null);
-              setPinDraft({ text: "", color: "#e74c3c" });
+            onClick={async () => {
+              try {
+                if (!pinDraft.text.trim() || !pendingPos || !reporteSel?.id) return;
+
+                // persistir en backend
+                const created = await createAnotacion(reporteSel.id, {
+                  x: pendingPos.x,
+                  y: pendingPos.y,
+                  color: pinDraft.color,
+                  text: pinDraft.text.trim(),
+                });
+
+                // reflejar en UI
+                setPins((prev) => [...prev, created]);
+                setShowPinModal(false);
+                setPendingPos(null);
+                setPinDraft({ text: "", color: "#e74c3c" });
+              } catch (e) {
+                console.error("No se pudo crear la anotación:", e);
+                alert("No se pudo crear la anotación.");
+              }
             }}
           >
             Guardar
@@ -738,13 +815,7 @@ const Reportes = () => {
       </Modal>
 
       {/* Modal expandir */}
-      <Modal
-        show={showRegModal}
-        onHide={() => setShowRegModal(false)}
-        size="xl"
-        centered
-        dialogClassName="registros-modal"
-      >
+      <Modal show={showRegModal} onHide={() => setShowRegModal(false)} size="xl" centered dialogClassName="registros-modal">
         <Modal.Header closeButton>
           <Modal.Title>
             Registros — {reporteSel?.nombre} ({reporteSel && new Date(reporteSel.fecha_reporte).toLocaleDateString("es-AR")})
@@ -756,7 +827,6 @@ const Reportes = () => {
             <div className="registros-placeholder">Seleccioná un reporte para ver sus registros.</div>
           ) : (
             <>
-              {/* Botón agregar en el modal grande */}
               <div className="d-flex justify-content-end mb-2">
                 <button
                   type="button"
@@ -785,11 +855,7 @@ const Reportes = () => {
                       setPlacingMode(false);
                     }}
                   >
-                    <img
-                      src={getLoteImage(loteSel)}
-                      alt="Mapa/imagen del lote"
-                      className="registros-img registros-img--lg"
-                    />
+                    <img src={getLoteImage(loteSel)} alt="Mapa/imagen del lote" className="registros-img registros-img--lg" />
 
                     {pins.map((p) => (
                       <div
@@ -800,7 +866,9 @@ const Reportes = () => {
                         onMouseLeave={() => setHoveredPinId(null)}
                         onClick={(ev) => ev.stopPropagation()}
                       >
-                        <div className="pin-icon"><PinSVG color={p.color} /></div>
+                        <div className="pin-icon">
+                          <PinSVG color={p.color} />
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -809,9 +877,7 @@ const Reportes = () => {
                 )}
               </div>
 
-              {placingMode && (
-                <div className="placing-hint under">Hacé click en la imagen para ubicar el pin…</div>
-              )}
+              {placingMode && <div className="placing-hint under">Hacé click en la imagen para ubicar el pin…</div>}
 
               {/* Lista de comentarios */}
               <div className="comentarios-list">
@@ -828,7 +894,21 @@ const Reportes = () => {
                     >
                       <span className="comentario-dot" style={{ background: p.color }} />
                       <span className="comentario-text">{p.text}</span>
-                      <button className="comentario-del" title="Eliminar" onClick={() => deletePin(p.id)}>×</button>
+                      <button
+                        className="comentario-del"
+                        title="Eliminar"
+                        onClick={async () => {
+                          try {
+                            if (p.serverId) await deleteAnotacion(reporteSel.id, p.serverId);
+                            setPins((prev) => prev.filter((x) => x.id !== p.id));
+                          } catch (e) {
+                            console.error("No se pudo eliminar la anotación:", e);
+                            alert("No se pudo eliminar la anotación.");
+                          }
+                        }}
+                      >
+                        ×
+                      </button>
                     </div>
                   ))
                 )}
