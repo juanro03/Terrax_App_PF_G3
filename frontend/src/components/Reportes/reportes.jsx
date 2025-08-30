@@ -80,6 +80,7 @@ const Reportes = () => {
   };
 
   // =================== FETCHS INICIALES ===================
+  // carga usuario logueado, reportes, y usuarios para filtrar
   useEffect(() => {
     axios
       .get(`${API}/usuarios/me/`, { headers })
@@ -97,6 +98,7 @@ const Reportes = () => {
       .catch((err) => console.error(err));
   }, []);
 
+  // filtra los campos en base al usuario seleccionado
   useEffect(() => {
     if (rol === "admin" && usuarioSeleccionado) {
       axios
@@ -114,17 +116,20 @@ const Reportes = () => {
     setLotes([]);
   }, [usuarioSeleccionado, rol]);
 
+  // carga lotes en el formulario de nuevo reporte.
   useEffect(() => {
     if (nuevoReporte.campo) {
       axios
         .get(`${API}/lotes/por-campo/${nuevoReporte.campo}`, { headers })
         .then((res) => setLotes(res.data))
         .catch((err) => console.error(err));
+        console.log(lotes);
     } else {
       setLotes([]);
     }
   }, [nuevoReporte.campo]);
 
+  // carga lotes cuando usás los filtros de búsqueda.
   useEffect(() => {
     if (campoSeleccionado) {
       axios

@@ -3,6 +3,8 @@ from .models import Reporte
 from .models import Anotacion
 
 class ReporteSerializer(serializers.ModelSerializer):
+    lote_nombre = serializers.CharField(source="lote.nombre", read_only=True)
+
     class Meta:
         model = Reporte
         fields = '__all__'
