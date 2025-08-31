@@ -1,0 +1,90 @@
+.flow-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 28px 28px;
+  position: relative;
+}
+
+.flow-cell {
+  position: relative;
+  min-height: 140px;
+}
+
+.flow-card {
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.flow-title {
+  font-weight: 800;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.flow-date {
+  font-size: 13px;
+  color: #444;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.flow-meta {
+  font-size: 12px;
+  color: #555;
+  text-align: center;
+}
+
+/* Flechas */
+.arrow-right {
+  position: absolute;
+  right: -18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #222;
+  opacity: .7;
+}
+
+.arrow-down {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #222;
+  opacity: .7;
+}
+
+/* flecha indicativa de “vuelve a la izquierda” entre filas */
+.arrow-left-hint {
+  position: absolute;
+  right: -38px;
+  bottom: -32px;
+  transform: rotate(180deg);
+  color: #222;
+  opacity: .4;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  background: #e3f5ea;
+  border-radius: 18px;
+  padding: 4px 8px;
+  gap: 8px;
+}
+
+.chip-label {
+  font-weight: 600;
+  color: #0f5132;
+}
+
+.chip-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 2px 6px;
+  min-width: 150px;
+}
