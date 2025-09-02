@@ -29,7 +29,6 @@ urlpatterns = [
     path('api/', include('backend.tareas.urls')),
     path('api/auth/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
 
-    path("admin/", admin.site.urls),
     path("api/", include("usuarios.urls")),
     path('api/productos/', include('productos.urls')),  
     path('siembras/finalizar/<int:lote_id>/', FinalizarCampaniaView.as_view(), name='finalizar-campania'),

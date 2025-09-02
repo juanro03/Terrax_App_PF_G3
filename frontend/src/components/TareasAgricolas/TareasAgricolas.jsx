@@ -24,6 +24,15 @@ const actividades = [
   "Aplicación Fitosanitaria",
 ];
 
+// Mapa actividad (UI) -> key del modelo
+const TIPO_MAP = {
+  Fertilización: "fertilizacion",
+  "Manejo de Malezas": "maleza",
+  "Laboreos de Lote": "laboreo",
+  Riego: "riego",
+  "Aplicación Fitosanitaria": "fitosanitaria",
+};
+
 // Opciones para "Tipo de laboreo"
 const TIPOS_LABOREO = [
   "Cincel",
@@ -96,21 +105,23 @@ export default function ActividadesAgricolas() {
       return;
     }
 
-    // slug para el tipo de actividad (sin espacios ni acentos)
-    const tipoSlug = actividad
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, "_");
+    const tipoKey = TIPO_MAP[actividad];
+    if (!tipoKey) {
+      setMensajeOk(false);
+      setMensaje("Actividad inválida.");
+      setTimeout(() => setMensaje(""), 3500);
+      return;
+    }
 
     let todoOk = true;
+    let primerError = null;
 
     for (const tarea of tareas) {
       const formData = new FormData();
 
       // Campos comunes
       formData.append("lote", lote);
-      formData.append("tipo", tipoSlug);
+      formData.append("tipo", tipoKey);
       formData.append("fecha", tarea.fecha || "");
       formData.append("observaciones", tarea.observaciones || "");
 
@@ -150,14 +161,24 @@ export default function ActividadesAgricolas() {
       }
 
       if (actividad === "Aplicación Fitosanitaria") {
-        formData.append("dosis_tipo", fitoVista); // hoy no cambia en UI
-        formData.append("porcentaje", tarea.porcentaje || "");
+        // Solo campos existentes en el modelo:
+        formData.append("dosis_tipo", fitoVista); // 'variable' o 'fija'
         formData.append("plaga_maleza", tarea.plaga || "");
-        formData.append("estado_fenologico", tarea.estadoFen || "");
         formData.append("producto_aplicar", tarea.producto || "");
-        formData.append("maquinaria", tarea.maquinaria || "");
-        // Si luego adjuntás archivo: formData.append("mapa_adjunto", tarea.mapaAdjunto)
-        formData.append("mapa", tarea.mapa ? "true" : "false");
+
+        // Si querés guardar extras (porcentaje/maquinaria/mapa) sin tocar el modelo:
+        const extras = [];
+        if (tarea.porcentaje) extras.push(`% afectado: ${tarea.porcentaje}`);
+        if (tarea.maquinaria) extras.push(`Maquinaria: ${tarea.maquinaria}`);
+        if (typeof tarea.mapa !== "undefined")
+          extras.push(`Mapa: ${tarea.mapa ? "sí" : "no"}`);
+
+        if (extras.length) {
+          const obs = (tarea.observaciones || "") + " | " + extras.join(" · ");
+          formData.set("observaciones", obs);
+        }
+        // Si más adelante agregás archivos:
+        // if (tarea.mapaAdjunto) formData.append("mapa_adjunto", tarea.mapaAdjunto);
       }
 
       try {
@@ -166,7 +187,13 @@ export default function ActividadesAgricolas() {
         });
       } catch (err) {
         todoOk = false;
-        console.error("Error al registrar la tarea:", err);
+        if (!primerError)
+          primerError = err?.response?.data || err?.message || err;
+        console.error(
+          "Error al registrar la tarea:",
+          err?.response?.data || err
+        );
+        break; // cortamos el loop para no seguir enviando
       }
     }
 
@@ -185,7 +212,10 @@ export default function ActividadesAgricolas() {
     } else {
       setMensajeOk(false);
       setMensaje(
-        "Ocurrieron errores al registrar alguna actividad. Intenta nuevamente."
+        "Error al registrar: " +
+          (typeof primerError === "object"
+            ? JSON.stringify(primerError)
+            : String(primerError || ""))
       );
     }
 
@@ -777,7 +807,7 @@ export default function ActividadesAgricolas() {
         {mensaje && (
           <div
             className={`alert ${mensajeOk ? "alert-success" : "alert-danger"}`}
-            style={{ fontWeight: "bold" }}
+            style={{ fontWeight: "bold", whiteSpace: "pre-wrap" }}
           >
             {mensaje}
           </div>

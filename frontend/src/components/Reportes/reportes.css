@@ -1,65 +1,4 @@
-/* Reportes.css */
 
-.reportes-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem;
-}
-
-.filtros {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.filtro {
-  display: flex;
-  flex-direction: column;
-  min-width: 200px;
-}
-
-.tabla-reportes {
-  width: 80%;
-  border-collapse: separate;
-  border-spacing: 0;
-  margin-top: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.tabla-reportes th,
-.tabla-reportes td {
-  border: 1px solid #ccc;
-  padding: 0.75rem;
-  text-align: left;
-}
-
-.tabla-reportes thead {
-  background-color: #f0f0f0;
-}
-
-/* Bordes redondeados solo en esquinas */
-.tabla-reportes thead th:first-child {
-  border-top-left-radius: 10px;
-}
-
-.tabla-reportes thead th:last-child {
-  border-top-right-radius: 10px;
-}
-
-.tabla-reportes tbody tr:last-child td:first-child {
-  border-bottom-left-radius: 10px;
-}
-
-.tabla-reportes tbody tr:last-child td:last-child {
-  border-bottom-right-radius: 10px;
-}
-
-/* === Tarjetas de reportes === */
 :root{
   --verde:#198754;
   --verde-oscuro:#155a36;
@@ -68,196 +7,185 @@
   --gris-claro:#f6fbf5;
 }
 
-/* contenedor: que ocupe como la tabla (80%) y centrado */
-.lista-reportes{
-  width: 100%;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
+/* --------- Contenedor & filtros --------- */
+.reportes-container{
+  display:flex; flex-direction:column; align-items:center;
+  padding:2rem;
 }
+.filtros{
+  display:flex; gap:1rem; margin-bottom:1.5rem;
+  flex-wrap:wrap; justify-content:center;
+}
+.filtro{ display:flex; flex-direction:column; min-width:200px; }
 
-/* tarjeta base */
+/* --------- Lista / tarjetas de reportes --------- */
+.lista-reportes{
+  width:100%; display:flex; flex-direction:column; gap:14px;
+}
 .reporte-card{
-  background:#fff;
-  border-radius:14px;
-  border:1px solid var(--gris-borde);
-  overflow:hidden;
-  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  background:#fff; border-radius:14px; border:1px solid var(--gris-borde);
+  overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.06);
   transition:transform .08s ease, box-shadow .2s ease;
 }
+.reporte-card:hover{ transform:translateY(-1px); box-shadow:0 6px 18px rgba(0,0,0,.10); }
 
-.reporte-card:hover{
-  transform:translateY(-1px);
-  box-shadow:0 6px 18px rgba(0,0,0,.10);
-}
-
-/* encabezado (franja verde) */
 .reporte-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:14px 18px;
-  background:var(--verde);
-  color:#fff;
-  font-weight:700;
-  letter-spacing:.2px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; background:var(--verde); color:#fff; font-weight:700; letter-spacing:.2px;
   border-bottom:1px solid rgba(0,0,0,.05);
 }
-
 .reporte-titulo{ font-size:16px; }
 
-/* cuerpo en verde claro */
 .reporte-body{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:12px 18px;
-  background:var(--verde-claro);
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:12px 18px; background:var(--verde-claro);
 }
-
-/* chips/metadatos */
-.reporte-meta{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
+.reporte-meta{ display:flex; flex-wrap:wrap; gap:8px; }
 .chip{
-  background:#fff;
-  border:1px solid var(--gris-borde);
-  padding:6px 10px;
-  border-radius:10px;
-  font-size:13px;
-  color:#333;
+  background:#fff; border:1px solid var(--gris-borde);
+  padding:6px 10px; border-radius:10px; font-size:13px; color:#333;
 }
-
-/* botón Ver PDF */
 .ver-pdf{
-  display:inline-flex;
-  align-items:center;
-  font-weight:600;
-  border-radius:10px;
-  border:1px solid var(--gris-borde);
-  box-shadow:0 1px 3px rgba(0,0,0,.05);
-  text-decoration:none;
+  display:inline-flex; align-items:center; font-weight:600;
+  border-radius:10px; border:1px solid var(--gris-borde);
+  box-shadow:0 1px 3px rgba(0,0,0,.05); text-decoration:none;
 }
+.reporte-actions{ display:flex; gap:8px; }
 
-/* acciones admin (editar/eliminar) */
-.reporte-actions{
-  display:flex;
-  gap:8px;
-}
-
-/* estado vacío */
 .reporte-card.empty{
-  padding:16px 18px;
-  text-align:center;
-  background:var(--gris-claro);
-  border:1px dashed var(--gris-borde);
-  color:#444;
+  padding:16px 18px; text-align:center; background:var(--gris-claro);
+  border:1px dashed var(--gris-borde); color:#444;
 }
-
-/* opcional: tarjeta seleccionada (como tu mock verde intenso) */
 .reporte-card.selected .reporte-top{ background:#2bbc56; }
 .reporte-card.selected .reporte-body{ background:#e8ffd4; }
 
-/* === Layout 2 columnas === */
-.reportes-layout {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start; 
-  gap: 5px;
-  margin-top: 20px;
-  max-width: 1400px;
-  width: 100%;
+/* --------- Layout 2 columnas --------- */
+.reportes-layout{
+  display:flex; justify-content:center; align-items:flex-start;
+  gap:5px; margin-top:20px; max-width:1400px; width:100%;
 }
+.reportes-col{ flex:1; margin-right:30px; max-width:900px; }
+.registros-col{ width:600px; position:sticky; top:20px; }
 
-.reportes-col {
-  flex: 1;
-  margin-right: 30px;
-  max-width: 900px; 
-}
-
-.registros-col {
-  width: 600px; 
-  position: sticky;
-  top: 20px;
-}
-
+/* --------- Panel Registros --------- */
 .registros-card{
-  background:#e9fbe5;
-  border-radius:16px;
-  border:1px solid #d9efd9;
-  box-shadow:0 6px 18px rgba(0,0,0,.1);
-  overflow: hidden;
+  background:#e9fbe5; border-radius:16px; border:1px solid #d9efd9;
+  box-shadow:0 6px 18px rgba(0,0,0,.1); overflow:hidden;
 }
-
 .registros-header{
-  padding:12px 16px;
-  font-weight:800;
-  color:#2f6b41;
+  padding:12px 16px; font-weight:800; color:#2f6b41;
   border-bottom:1px solid #d9efd9;
 }
-
 .registros-body{ padding:14px; }
 
 .registros-placeholder{
-  color:#517a60;
-  background:#f3fff1;
-  border:1px dashed #cfead2;
-  border-radius:12px;
-  padding:16px;
-  text-align:center;
+  color:#517a60; background:#f3fff1; border:1px dashed #cfead2;
+  border-radius:12px; padding:16px; text-align:center;
 }
 
+/* Fila superior: título a la izquierda, botón a la derecha */
 .registros-subhead{
-  display:flex; align-items:center; gap:8px;
-  font-weight:700; color:#4f6f5b;
-  margin-bottom:10px;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; margin-bottom:8px;
 }
-
-.registros-subhead .bullet{
-  width:8px; height:8px; border-radius:999px; background:#9ad38f;
-  display:inline-block;
+.registros-subhead .rs-left{
+  display:flex; align-items:center; gap:8px; font-weight:700; color:#4f6f5b;
 }
+.registros-subhead .rs-left .bullet{
+  width:8px; height:8px; border-radius:999px; background:#9ad38f; display:inline-block;
+}
+.registros-subhead .rs-right{ display:flex; align-items:center; }
 
+/* Imagen del lote */
 .registros-imgWrap{
-  background:#dff3db;
-  border-radius:18px;
-  padding:10px;
+  background:#dff3db; border-radius:18px; padding:10px;
   display:flex; align-items:center; justify-content:center;
   margin-bottom:10px;
 }
-
 .registros-img{
   width:100%; max-height:240px; object-fit:cover; border-radius:14px;
 }
+.registros-loading, .registros-noimg{ color:#476c58; font-size:14px; padding:30px 0; }
 
-.registros-loading, .registros-noimg{
-  color:#476c58; font-size:14px; padding:30px 0;
-}
-
-/* Burbujas */
+/* (Opcional) Burbujas de aviso */
 .registro-bubble{
   padding:10px 12px; border-radius:12px; margin:8px 0;
-  box-shadow:0 8px 16px rgba(0,0,0,.15);
-  font-size:14px; line-height:1.25;
+  box-shadow:0 8px 16px rgba(0,0,0,.15); font-size:14px; line-height:1.25;
 }
-
 .registro-bubble.warn{ background:#ffe97a; color:#2f2f2f; }
 .registro-bubble.ok{ background:#d8f3d1; color:#234f2f; }
 
-/* Input comentario (solo UI) */
-.registro-input{
-  width:100%;
-  border-radius:12px; border:1px solid #d3e9d3;
-  padding:10px 12px; outline:none;
+/* --------- Toolbar / hint --------- */
+.registros-toolbar{ display:flex; align-items:center; gap:10px; }
+.placing-hint{
+  font-size:12px; color:#2b7a3d; background:#e6f5ea;
+  padding:4px 8px; border:1px dashed #75c78f; border-radius:6px;
+}
+.placing-hint.under{ margin:8px 0 10px; }
+
+/* --------- Canvas de pines --------- */
+.pins-canvas{
+  position:relative; width:100%; border-radius:12px; overflow:hidden;
+}
+.pins-canvas.is-placing{ cursor:crosshair; }
+.pins-canvas .registros-img{
+  display:block; width:100%; height:auto; user-select:none; pointer-events:none;
 }
 
-/* Responsive: apilar en pantallas chicas */
-@media (max-width: 992px){
-  .reportes-layout{
-    grid-template-columns: 1fr;
-  }
-  .registros-col{ position: static; }
+/* Pin (sólo icono) + hover sync */
+.pin{
+  position:absolute; transform:translate(-50%, -100%); z-index:2;
+  transition: transform .15s ease, filter .15s ease;
 }
+.pin.is-hovered{
+  transform:translate(-50%, -100%) scale(1.12);
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));
+  z-index:3;
+}
+.pin-icon{ width:26px; height:26px; }
+
+/* --------- Lista de comentarios (debajo de la imagen) --------- */
+.comentarios-list{
+  display:flex; flex-direction:column; gap:8px; margin-top:12px;
+}
+.comentario-empty{
+  padding:12px; border-radius:10px; background:#f8fff8; color:#5f6f64; font-size:.95rem;
+}
+.comentario-row{
+  display:flex; align-items:center; gap:10px;
+  background:#fff; border-radius:10px; padding:10px 12px;
+  box-shadow:0 1px 0 rgba(0,0,0,.04);
+  transition: background .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+.comentario-row.is-hovered{
+  background:#f6fff8; box-shadow:0 0 0 2px var(--pinColor, #2ecc71) inset;
+  transform:translateY(-1px);
+}
+.comentario-dot{ width:10px; height:10px; border-radius:50%; flex:0 0 10px; }
+.comentario-text{ flex:1; }
+.comentario-del{
+  border:0; background:#f2f2f2; width:22px; height:22px;
+  border-radius:999px; line-height:20px; cursor:pointer;
+}
+.comentario-del:hover{ background:#e8e8e8; }
+
+/* --------- Selector de color (modal) --------- */
+.color-pill{
+  width:26px; height:26px; border-radius:999px; border:2px solid #fff;
+  box-shadow:0 1px 5px rgba(0,0,0,.15);
+}
+
+/* --------- Responsive --------- */
+@media (max-width: 992px){
+  .reportes-layout{ flex-direction:column; }
+  .reportes-col{ margin-right:0; max-width:100%; }
+  .registros-col{ width:100%; position:static; }
+}
+
+/* Modal “Expandir” de Registros */
+.registros-modal .modal-dialog { max-width: min(1200px, 96vw); }
+.registros-modal .modal-body  { padding: 16px; }
+
+/* Imagen más alta dentro del modal */
+.registros-img--lg { max-height: 70vh; }
+

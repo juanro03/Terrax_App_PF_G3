@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from .models import Reporte
+from .models import Anotacion
 from .serializers import ReporteSerializer
+from .serializers import AnotacionSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 
@@ -53,3 +55,17 @@ class ReporteViewSet(viewsets.ModelViewSet):
                 raise ValidationError("Solo los administradores pueden eliminar reportes.")
 
             return super().destroy(request, *args, **kwargs)
+    
+class AnotacionViewSet(viewsets.ModelViewSet):
+    serializer_class = AnotacionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = Anotacion.objects.all()
+        rep_id = self.kwargs.get("reporte_pk") or self.request.query_params.get("reporte")
+        if rep_id:
+            qs = qs.filter(reporte_id=rep_id)
+        return qs
+
+    def perform_create(self, serializer):
+        serializer.save(creado_por=self.request.user)
