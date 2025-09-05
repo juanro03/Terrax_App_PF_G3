@@ -27,6 +27,7 @@ import ProductosForm from "./components/Productos/ProductosForm";
 import Reportes from "./components/Reportes/reportes.jsx";
 import HistorialCampania from "./components/lotes/HistorialCampania";
 import TareasAgricolas from "./components/TareasAgricolas/TareasAgricolas";
+import Trazabilidad from "./components/lotes/trazabilidad.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -77,8 +78,8 @@ function AppContent() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/lote/:loteId" element={<DetalleLote />} />
           <Route
-            path="/lotes/:loteId/historial"
-            element={<HistorialCampania />}
+            path="/lotes/:loteId/trazabilidad"
+            element={<Trazabilidad />}
           />
           <Route path="/productos" element={<ProductosInicio />} />
           <Route path="/productos/agregar" element={<ProductosForm />} />

@@ -357,7 +357,7 @@ const DetalleLote = () => {
         <button
           className="btn btn-outline-success"
           onClick={() =>
-            navigate(`/lotes/${loteId}/historial`, {
+            navigate(`/lotes/${loteId}/trazabilidad`, {
               state: { campoId: campoInfo.id, campoNombre: campoInfo.nombre, loteNombre },
             })
           }
