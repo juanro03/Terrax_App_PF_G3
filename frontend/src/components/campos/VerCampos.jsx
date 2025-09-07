@@ -69,7 +69,7 @@ const VerCampos = () => {
             style={{
               height: "32px",
               backgroundColor: "#d1fae5",
-              width: "450px",
+              width: "350px",
               marginLeft: 100,
               marginTop: 0,
               marginBottom: 0,
@@ -94,6 +94,19 @@ const VerCampos = () => {
           >
             Limpiar
           </button>
+        <button
+      className="btn btn-success btn-sm"
+      style={{
+        height: "32px",
+        borderRadius: "8px",
+        padding: "6px 12px",
+        border: "1px solid #ced4da",
+
+      }}
+      onClick={() => setMostrarModal(true)}
+    >
+      Solicitar Servicio
+    </button>
         </div>
 
         <button className="btn btn-outline-success" onClick={() => setShowCrear(true)}>
@@ -101,6 +114,8 @@ const VerCampos = () => {
         </button>
       </div>
 
+{mostrarModal && <SolicitarServicio onClose={() => setMostrarModal(false)} />}
+  
       <div className="row justify-content-center">
         <div className="container mt-4">
           <div className="row">
@@ -176,14 +191,7 @@ const VerCampos = () => {
                 </div>
                 
               ))}
-              {/* Botón para solicitar servicio */}
-<div className="mt-4 text-center">
-  <button className="btn btn-success" onClick={() => setMostrarModal(true)}>
-    Solicitar Servicio
-  </button>
-</div>
-
-{mostrarModal && <SolicitarServicio onClose={() => setMostrarModal(false)} />}
+              
           </div>
         </div>
       </div>
