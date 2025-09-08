@@ -7,6 +7,16 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import { Modal, Button, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Select from "react-select";
+import { Card, Row, Col } from "react-bootstrap"; // ya usás bootstrap
+import { BsSearch } from "react-icons/bs";
+
+// PALETA 
+const verde = "#198754";
+const verdeClaro = "#e9fbe5";
+const verdeOscuro = "#155a36";
+const grisClaro = "#f3f6f5";
+const blanco = "#fff";
+
 
 const API = "http://127.0.0.1:8000/api";
 
@@ -336,231 +346,533 @@ const Reportes = () => {
   );
 
   return (
-    <div className="reportes-container">
-      <h2 className="text-3xl font-bold mb-4">Reportes</h2>
+    <Card
+      className="mx-auto my-5 shadow"
+      style={{
+        maxWidth: 1500,
+        background: blanco,
+        borderRadius: "1.4rem",
+        border: "none",
+      }}
+    >
+      <Card.Body className="p-4 p-sm-5">
+        <div className="reportes-container">
+          <h2 className="text-3xl font-bold mb-4">Reportes</h2>
 
-      {rol === "admin" && (
-        <div className="mb-4">
-          <button className="btn btn-success" onClick={() => setShowModal(true)}>
-            Agregar nuevo reporte
-          </button>
-        </div>
-      )}
+          {rol === "admin" && (
+            <div className="mb-4 d-flex justify-content-end">
+              <button className="btn btn-success px-4 py-2 fw-semibold rounded-3">
+                Agregar nuevo reporte
+              </button>
+            </div>
+          )}
 
-      {/* Buscador */}
-      <div className="mb-3" style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "center" }}>
-        <div style={{ width: "180px" }}>
-          <Select
-            options={opcionesFiltro}
-            value={opcionesFiltro.find((opt) => opt.value === atributoFiltro)}
-            onChange={(opcion) => setAtributoFiltro(opcion.value)}
-            styles={customStyles}
-            isSearchable={false}
-          />
-        </div>
+          {/* Buscador */}
+          <div className="filters-row">
+            <div className="mb-3" style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "center" }}>
+              <div style={{ width: "180px" }}>
+                <Select
+                  options={opcionesFiltro}
+                  value={opcionesFiltro.find((opt) => opt.value === atributoFiltro)}
+                  onChange={(opcion) => setAtributoFiltro(opcion.value)}
+                  styles={customStyles}
+                  isSearchable={false}
+                />
+              </div>
 
-        <input
-          type="text"
-          placeholder={`Buscar por ${atributoFiltro}`}
-          value={valorBusqueda}
-          onChange={(e) => setValorBusqueda(e.target.value)}
-          style={{
-            height: "38px",
-            borderRadius: "6px",
-            border: "1px solid #ced4da",
-            backgroundColor: "#fff",
-            padding: "0 12px",
-            fontSize: "14px",
-            color: "#333",
-            boxShadow: "none",
-            width: "450px",
-            boxSizing: "border-box",
-          }}
-        />
+              <input
+                type="text"
+                placeholder={`Buscar por ${atributoFiltro}`}
+                value={valorBusqueda}
+                onChange={(e) => setValorBusqueda(e.target.value)}
+                style={{
+                  height: "38px",
+                  borderRadius: "6px",
+                  border: "1px solid #ced4da",
+                  backgroundColor: "#fff",
+                  padding: "0 12px",
+                  fontSize: "14px",
+                  color: "#333",
+                  boxShadow: "none",
+                  width: "450px",
+                  boxSizing: "border-box",
+                }}
+              />
 
-        <button
-          onClick={() => {
-            setValorBusqueda("");
-            setAtributoFiltro("nombre");
-          }}
-          style={{
-            height: "38px",
-            padding: "0 16px",
-            fontSize: "14px",
-            border: "1px solid #ced4da",
-            borderRadius: "6px",
-            backgroundColor: "#fff",
-            color: "#333",
-          }}
-        >
-          Limpiar
-        </button>
-      </div>
-
-      {/* Filtros */}
-      <div className="filtros">
-        {rol === "admin" && (
-          <div className="filtro" style={{ minWidth: "250px" }}>
-            <label>Usuario:</label>
-            <Select
-              options={[{ value: "", label: "Todos" }, ...opcionesUsuarios]}
-              value={opcionesUsuarios.find((o) => o.value === usuarioSeleccionado) || { value: "", label: "Todos" }}
-              onChange={(opcion) => setUsuarioSeleccionado(opcion.value)}
-              placeholder="Buscar usuario..."
-              isSearchable
-              styles={customStyles}
-            />
+              <button
+                onClick={() => {
+                  setValorBusqueda("");
+                  setAtributoFiltro("nombre");
+                }}
+                style={{
+                  height: "38px",
+                  padding: "0 16px",
+                  fontSize: "14px",
+                  border: "1px solid #ced4da",
+                  borderRadius: "6px",
+                  backgroundColor: "#fff",
+                  color: "#333",
+                }}
+              >
+                Limpiar
+              </button>
+            </div>
           </div>
-        )}
 
-        <div className="filtro">
-          <label>Campo:</label>
-          <Select
-            options={[{ value: "", label: "Todos" }, ...opcionesCampos]}
-            value={
-              opcionesCampos.find((o) => o.value === campoSeleccionado) || {
-                value: "",
-                label: "Todos",
-              }
-            }
-            onChange={(opcion) => setCampoSeleccionado(opcion.value)}
-            placeholder="Buscar campo..."
-            isSearchable
-            isDisabled={rol === "admin" && !usuarioSeleccionado}
-            styles={customStyles}
-          />
-        </div>
-
-        <div className="filtro">
-          <label>Lote:</label>
-          <Select
-            options={[{ value: "", label: "Todos" }, ...opcionesLotes]}
-            value={
-              opcionesLotes.find((o) => o.value === loteSeleccionado) || {
-                value: "",
-                label: "Todos",
-              }
-            }
-            onChange={(opcion) => setLoteSeleccionado(opcion.value)}
-            placeholder="Buscar lote..."
-            isSearchable
-            isDisabled={!campoSeleccionado}
-            styles={customStyles}
-          />
-        </div>
-      </div>
-
-      {/* Layout 2 columnas */}
-      <div className="reportes-layout">
-        {/* Columna izquierda: tarjetas */}
-        <div className="reportes-col">
-          <div className="lista-reportes">
-            {reportesFiltrados.length === 0 && <div className="reporte-card empty">No hay reportes con ese filtro.</div>}
-
-            {reportesFiltrados.map((r) => {
-              const fechaObj = new Date(r.fecha_reporte);
-              const dia = fechaObj.getDate().toString().padStart(2, "0");
-              const meses = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
-              const mes = meses[fechaObj.getMonth()];
-              const anio2 = fechaObj.getFullYear().toString().slice(-2);
-              const cabecera = `${dia} ${mes} ${anio2} - ${r.campo_nombre || obtenerNombreCampo(r.campo)
-                } - ${r.lote_nombre || obtenerNombreLote(r.lote)
-                } - ${r.nombre}`;
-
-              const isSel = reporteSel?.id === r.id;
-
-              return (
-                <div
-                  key={r.id}
-                  className={`reporte-card ${isSel ? "selected" : ""}`}
-                  onClick={() => {
-                    setReporteSel(r);
-                    cargarLoteDeReporte(r);
-                  }}
-                  role="button"
-                >
-                  <div className="reporte-top">
-                    <span className="reporte-titulo">{cabecera}</span>
-                    {rol === "admin" && (
-                      <div className="reporte-actions" onClick={(e) => e.stopPropagation()}>
-                        <button className="btn btn-outline-primary btn-sm" title="Editar">
-                          <FaEdit />
-                        </button>
-                        <button
-                          className="btn btn-outline-danger btn-sm"
-                          title="Eliminar"
-                          onClick={() => handleEliminar(r.id)}
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="reporte-body">
-                    <div className="reporte-meta">
-                      <span className="chip">Tipo: {r.tipo_reporte}</span>
-                      {r.observaciones && <span className="chip">Obs: {r.observaciones}</span>}
-                      {rol === "admin" && <span className="chip">Usuario: {obtenerNombreUsuario(r.productor)}</span>}
-                    </div>
-
-                    <a
-                      href={r.archivo_pdf}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-light ver-pdf"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <FontAwesomeIcon icon={faFilePdf} className="me-2" />
-                      Ver Reporte
-                    </a>
-                  </div>
+          {/* Filtros */}
+          <div className="filters-row">
+            <div className="filtros">
+              {rol === "admin" && (
+                <div className="filtro" style={{ minWidth: "250px" }}>
+                  <label>Usuario:</label>
+                  <Select
+                    classNamePrefix="rs"
+                    options={[{ value: "", label: "Todos" }, ...opcionesUsuarios]}
+                    value={opcionesUsuarios.find((o) => o.value === usuarioSeleccionado) || { value: "", label: "Todos" }}
+                    onChange={(opcion) => setUsuarioSeleccionado(opcion.value)}
+                    placeholder="Buscar usuario..."
+                    isSearchable
+                    styles={customStyles}
+                  />
                 </div>
-              );
-            })}
+              )}
+
+              <div className="filtro">
+                <label>Campo:</label>
+                <Select
+                  classNamePrefix="rs"
+                  options={[{ value: "", label: "Todos" }, ...opcionesCampos]}
+                  value={
+                    opcionesCampos.find((o) => o.value === campoSeleccionado) || {
+                      value: "",
+                      label: "Todos",
+                    }
+                  }
+                  onChange={(opcion) => setCampoSeleccionado(opcion.value)}
+                  placeholder="Buscar campo..."
+                  isSearchable
+                  isDisabled={rol === "admin" && !usuarioSeleccionado}
+                  styles={customStyles}
+                />
+              </div>
+
+              <div className="filtro">
+                <label>Lote:</label>
+                <Select
+                  classNamePrefix="rs"
+                  options={[{ value: "", label: "Todos" }, ...opcionesLotes]}
+                  value={
+                    opcionesLotes.find((o) => o.value === loteSeleccionado) || {
+                      value: "",
+                      label: "Todos",
+                    }
+                  }
+                  onChange={(opcion) => setLoteSeleccionado(opcion.value)}
+                  placeholder="Buscar lote..."
+                  isSearchable
+                  isDisabled={!campoSeleccionado}
+                  styles={customStyles}
+                />
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Columna derecha: Registros */}
-        <aside className="registros-col">
-          <div className="registros-card">
-            <div className="registros-header">Registros</div>
-            <div className="registros-body">
-              {!reporteSel && <div className="registros-placeholder">Seleccioná un reporte para ver sus registros.</div>}
+          {/* Layout 2 columnas */}
+          <div className="reportes-layout">
+            {/* Columna izquierda: tarjetas */}
+            <div className="reportes-col">
+              <div className="lista-reportes">
+                {reportesFiltrados.length === 0 && <div className="reporte-card empty">No hay reportes con ese filtro.</div>}
 
-              {reporteSel && (
+                {reportesFiltrados.map((r) => {
+                  const fechaObj = new Date(r.fecha_reporte);
+                  const dia = fechaObj.getDate().toString().padStart(2, "0");
+                  const meses = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+                  const mes = meses[fechaObj.getMonth()];
+                  const anio2 = fechaObj.getFullYear().toString().slice(-2);
+                  const cabecera = `${dia} ${mes} ${anio2} - ${r.campo_nombre || obtenerNombreCampo(r.campo)
+                    } - ${r.lote_nombre || obtenerNombreLote(r.lote)
+                    } - ${r.nombre}`;
+
+                  const isSel = reporteSel?.id === r.id;
+
+                  return (
+                    <div
+                      key={r.id}
+                      className={`reporte-card ${isSel ? "selected" : ""}`}
+                      onClick={() => {
+                        setReporteSel(r);
+                        cargarLoteDeReporte(r);
+                      }}
+                      role="button"
+                    >
+                      <div className="reporte-top">
+                        <span className="reporte-titulo">{cabecera}</span>
+                        {rol === "admin" && (
+                          <div className="reporte-actions" onClick={(e) => e.stopPropagation()}>
+                            <button className="btn btn-outline-primary btn-sm" title="Editar">
+                              <FaEdit />
+                            </button>
+                            <button
+                              className="btn btn-outline-danger btn-sm"
+                              title="Eliminar"
+                              onClick={() => handleEliminar(r.id)}
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="reporte-body">
+                        <div className="reporte-meta">
+                          <span className="chip">Tipo: {r.tipo_reporte}</span>
+                          {r.observaciones && <span className="chip">Obs: {r.observaciones}</span>}
+                          {rol === "admin" && <span className="chip">Usuario: {obtenerNombreUsuario(r.productor)}</span>}
+                        </div>
+
+                        <a
+                          href={r.archivo_pdf}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-light ver-pdf"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <FontAwesomeIcon icon={faFilePdf} className="me-2" />
+                          Ver Reporte
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Columna derecha: Registros */}
+            <aside className="registros-col">
+              <div className="registros-card">
+                <div className="registros-header">Registros</div>
+                <div className="registros-body">
+                  {!reporteSel && <div className="registros-placeholder">Seleccioná un reporte para ver sus registros.</div>}
+
+                  {reporteSel && (
+                    <>
+                      {/* CABECERA + BOTONES */}
+                      <div className="registros-subhead">
+                        <div className="rs-left">
+                          <span className="bullet"></span>
+                          {new Date(reporteSel.fecha_reporte).toLocaleDateString("es-AR", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "2-digit",
+                          })}{" "}
+                          — {reporteSel.nombre}
+                        </div>
+                        <div className="rs-right">
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-success me-2"
+                            onClick={() => {
+                              setPlacingMode(true);
+                              setPendingPos(null);
+                              setPinDraft({ text: "", color: pinColors[0].value });
+                            }}
+                          >
+                            Agregar anotación
+                          </button>
+
+                          <button type="button" className="btn btn-sm btn-outline-success" onClick={() => setShowRegModal(true)}>
+                            Expandir
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* IMAGEN */}
+                      <div className="registros-imgWrap">
+                        {cargandoLote ? (
+                          <div className="registros-loading">Cargando imagen del lote…</div>
+                        ) : getLoteImage(loteSel) ? (
+                          <div
+                            className={`pins-canvas ${placingMode ? "is-placing" : ""}`}
+                            onClick={(e) => {
+                              if (!placingMode) return;
+                              const pos = getRelativeClick(e);
+                              setPendingPos(pos);
+                              setShowPinModal(true);
+                              setPlacingMode(false);
+                            }}
+                          >
+                            <img src={getLoteImage(loteSel)} alt="Mapa/imagen del lote" className="registros-img" />
+
+                            {/* Pines */}
+                            {pins.map((p) => (
+                              <div
+                                key={p.id}
+                                className={`pin ${hoveredPinId === p.id ? "is-hovered" : ""}`}
+                                style={{ left: `${p.x}%`, top: `${p.y}%` }}
+                                onMouseEnter={() => setHoveredPinId(p.id)}
+                                onMouseLeave={() => setHoveredPinId(null)}
+                              >
+                                <div className="pin-icon">
+                                  <PinSVG color={p.color} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="registros-noimg">Sin imagen del lote</div>
+                        )}
+                      </div>
+
+                      {/* AVISO debajo de la imagen */}
+                      {placingMode && <div className="placing-hint under">Hacé click en la imagen para ubicar el pin…</div>}
+
+                      {/* Lista de comentarios */}
+                      <div className="comentarios-list">
+                        {pins.length === 0 ? (
+                          <div className="comentario-empty">Sin anotaciones aún.</div>
+                        ) : (
+                          pins.map((p) => (
+                            <div
+                              key={p.id}
+                              className={`comentario-row ${hoveredPinId === p.id ? "is-hovered" : ""}`}
+                              style={{ "--pinColor": p.color }}
+                              onMouseEnter={() => setHoveredPinId(p.id)}
+                              onMouseLeave={() => setHoveredPinId(null)}
+                            >
+                              <span className="comentario-dot" style={{ background: p.color }} />
+                              <span className="comentario-text">{p.text}</span>
+                              <button
+                                className="comentario-del"
+                                onClick={async () => {
+                                  try {
+                                    if (p.serverId) await deleteAnotacion(reporteSel.id, p.serverId);
+                                    setPins((prev) => prev.filter((x) => x.id !== p.id));
+                                  } catch (e) {
+                                    console.error("No se pudo eliminar la anotación:", e);
+                                    alert("No se pudo eliminar la anotación.");
+                                  }
+                                }}
+                                title="Eliminar"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))
+                        )}
+                      </div>
+
+                      {reporteSel.observaciones && <div className="registro-bubble warn">{reporteSel.observaciones}</div>}
+                    </>
+                  )}
+                </div>
+              </div>
+            </aside>
+          </div>
+
+          {/* Modal de creación de PIN */}
+          <Modal show={showPinModal} onHide={() => { setShowPinModal(false); setPendingPos(null); }} centered>
+            <Modal.Header closeButton>
+              <Modal.Title>Agregar anotación</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <div className="mb-3">
+                <label className="form-label">Comentario</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={pinDraft.text}
+                  onChange={(e) => setPinDraft({ ...pinDraft, text: e.target.value })}
+                  placeholder="Ej: zona de plagas"
+                  autoFocus
+                />
+              </div>
+
+              <div className="mb-2">
+                <label className="form-label">Color</label>
+                <div style={{ display: "flex", gap: 10 }}>
+                  {pinColors.map((c) => (
+                    <button
+                      key={c.value}
+                      type="button"
+                      className="color-pill"
+                      style={{
+                        background: c.value,
+                        outline: pinDraft.color === c.value ? "3px solid rgba(0,0,0,0.15)" : "none",
+                      }}
+                      onClick={() => setPinDraft({ ...pinDraft, color: c.value })}
+                      title={c.label}
+                    />
+                  ))}
+                </div>
+              </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => { setShowPinModal(false); setPendingPos(null); }}>
+                Cancelar
+              </Button>
+              <Button
+                variant="primary"
+                onClick={async () => {
+                  try {
+                    if (!pinDraft.text.trim() || !pendingPos || !reporteSel?.id) return;
+
+                    // persistir en backend
+                    const created = await createAnotacion(reporteSel.id, {
+                      x: pendingPos.x,
+                      y: pendingPos.y,
+                      color: pinDraft.color,
+                      text: pinDraft.text.trim(),
+                    });
+
+                    // reflejar en UI
+                    setPins((prev) => [...prev, created]);
+                    setShowPinModal(false);
+                    setPendingPos(null);
+                    setPinDraft({ text: "", color: "#e74c3c" });
+                  } catch (e) {
+                    console.error("No se pudo crear la anotación:", e);
+                    alert("No se pudo crear la anotación.");
+                  }
+                }}
+              >
+                Guardar
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+          {/* Modal de creación de reporte */}
+          <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton>
+              <Modal.Title>Nuevo Reporte</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Form>
+                <Form.Group>
+                  <Form.Label>Usuario</Form.Label>
+                  <Form.Control
+                    as="select"
+                    value={nuevoReporte.productor}
+                    onChange={(e) => setNuevoReporte({ ...nuevoReporte, productor: e.target.value })}
+                  >
+                    <option value="">Seleccione</option>
+                    {usuarios.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.email}
+                      </option>
+                    ))}
+                  </Form.Control>
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Campo</Form.Label>
+                  <Form.Control
+                    as="select"
+                    value={nuevoReporte.campo}
+                    onChange={(e) => setNuevoReporte({ ...nuevoReporte, campo: e.target.value })}
+                  >
+                    <option value="">Seleccione</option>
+                    {campos.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.nombre}
+                      </option>
+                    ))}
+                  </Form.Control>
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Lote</Form.Label>
+                  <Form.Control
+                    as="select"
+                    value={nuevoReporte.lote}
+                    onChange={(e) => setNuevoReporte({ ...nuevoReporte, lote: e.target.value })}
+                  >
+                    <option value="">Seleccione</option>
+                    {lotes.map((l) => (
+                      <option key={l.id} value={l.id}>
+                        {l.nombre}
+                      </option>
+                    ))}
+                  </Form.Control>
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Nombre</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={nuevoReporte.nombre}
+                    onChange={(e) => setNuevoReporte({ ...nuevoReporte, nombre: e.target.value })}
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Tipo de Reporte</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={nuevoReporte.tipo_reporte}
+                    onChange={(e) => setNuevoReporte({ ...nuevoReporte, tipo_reporte: e.target.value })}
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Fecha del Reporte</Form.Label>
+                  <Form.Control
+                    type="datetime-local"
+                    value={nuevoReporte.fecha_reporte}
+                    onChange={(e) => setNuevoReporte({ ...nuevoReporte, fecha_reporte: e.target.value })}
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Observaciones</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    value={nuevoReporte.observaciones}
+                    onChange={(e) => setNuevoReporte({ ...nuevoReporte, observaciones: e.target.value })}
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Archivo PDF</Form.Label>
+                  <Form.Control
+                    type="file"
+                    accept="application/pdf"
+                    onChange={(e) => setNuevoReporte({ ...nuevoReporte, archivo_pdf: e.target.files[0] })}
+                  />
+                </Form.Group>
+              </Form>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowModal(false)}>
+                Cancelar
+              </Button>
+              <Button variant="primary" onClick={handleCrearReporte}>
+                Guardar
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+          {/* Modal expandir */}
+          <Modal show={showRegModal} onHide={() => setShowRegModal(false)} size="xl" centered dialogClassName="registros-modal">
+            <Modal.Header closeButton>
+              <Modal.Title>
+                Registros — {reporteSel?.nombre} ({reporteSel && new Date(reporteSel.fecha_reporte).toLocaleDateString("es-AR")})
+              </Modal.Title>
+            </Modal.Header>
+
+            <Modal.Body>
+              {!reporteSel ? (
+                <div className="registros-placeholder">Seleccioná un reporte para ver sus registros.</div>
+              ) : (
                 <>
-                  {/* CABECERA + BOTONES */}
-                  <div className="registros-subhead">
-                    <div className="rs-left">
-                      <span className="bullet"></span>
-                      {new Date(reporteSel.fecha_reporte).toLocaleDateString("es-AR", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "2-digit",
-                      })}{" "}
-                      — {reporteSel.nombre}
-                    </div>
-                    <div className="rs-right">
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-success me-2"
-                        onClick={() => {
-                          setPlacingMode(true);
-                          setPendingPos(null);
-                          setPinDraft({ text: "", color: pinColors[0].value });
-                        }}
-                      >
-                        Agregar anotación
-                      </button>
-
-                      <button type="button" className="btn btn-sm btn-outline-success" onClick={() => setShowRegModal(true)}>
-                        Expandir
-                      </button>
-                    </div>
+                  <div className="d-flex justify-content-end mb-2">
+                    <button
+                      type="button"
+                      className="btn btn-success btn-sm"
+                      onClick={() => {
+                        setPlacingMode(true);
+                        setPendingPos(null);
+                        setPinDraft({ text: "", color: pinColors[0].value });
+                      }}
+                    >
+                      Agregar anotación
+                    </button>
                   </div>
 
-                  {/* IMAGEN */}
                   <div className="registros-imgWrap">
                     {cargandoLote ? (
                       <div className="registros-loading">Cargando imagen del lote…</div>
@@ -575,9 +887,8 @@ const Reportes = () => {
                           setPlacingMode(false);
                         }}
                       >
-                        <img src={getLoteImage(loteSel)} alt="Mapa/imagen del lote" className="registros-img" />
+                        <img src={getLoteImage(loteSel)} alt="Mapa/imagen del lote" className="registros-img registros-img--lg" />
 
-                        {/* Pines */}
                         {pins.map((p) => (
                           <div
                             key={p.id}
@@ -585,6 +896,7 @@ const Reportes = () => {
                             style={{ left: `${p.x}%`, top: `${p.y}%` }}
                             onMouseEnter={() => setHoveredPinId(p.id)}
                             onMouseLeave={() => setHoveredPinId(null)}
+                            onClick={(ev) => ev.stopPropagation()}
                           >
                             <div className="pin-icon">
                               <PinSVG color={p.color} />
@@ -597,7 +909,6 @@ const Reportes = () => {
                     )}
                   </div>
 
-                  {/* AVISO debajo de la imagen */}
                   {placingMode && <div className="placing-hint under">Hacé click en la imagen para ubicar el pin…</div>}
 
                   {/* Lista de comentarios */}
@@ -607,7 +918,7 @@ const Reportes = () => {
                     ) : (
                       pins.map((p) => (
                         <div
-                          key={p.id}
+                          key={`row-${p.id}`}
                           className={`comentario-row ${hoveredPinId === p.id ? "is-hovered" : ""}`}
                           style={{ "--pinColor": p.color }}
                           onMouseEnter={() => setHoveredPinId(p.id)}
@@ -617,6 +928,7 @@ const Reportes = () => {
                           <span className="comentario-text">{p.text}</span>
                           <button
                             className="comentario-del"
+                            title="Eliminar"
                             onClick={async () => {
                               try {
                                 if (p.serverId) await deleteAnotacion(reporteSel.id, p.serverId);
@@ -626,7 +938,6 @@ const Reportes = () => {
                                 alert("No se pudo eliminar la anotación.");
                               }
                             }}
-                            title="Eliminar"
                           >
                             ×
                           </button>
@@ -634,295 +945,14 @@ const Reportes = () => {
                       ))
                     )}
                   </div>
-
-                  {reporteSel.observaciones && <div className="registro-bubble warn">{reporteSel.observaciones}</div>}
                 </>
               )}
-            </div>
-          </div>
-        </aside>
-      </div>
+            </Modal.Body>
+          </Modal>
+        </div>
 
-      {/* Modal de creación de PIN */}
-      <Modal show={showPinModal} onHide={() => { setShowPinModal(false); setPendingPos(null); }} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Agregar anotación</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="mb-3">
-            <label className="form-label">Comentario</label>
-            <input
-              type="text"
-              className="form-control"
-              value={pinDraft.text}
-              onChange={(e) => setPinDraft({ ...pinDraft, text: e.target.value })}
-              placeholder="Ej: zona de plagas"
-              autoFocus
-            />
-          </div>
-
-          <div className="mb-2">
-            <label className="form-label">Color</label>
-            <div style={{ display: "flex", gap: 10 }}>
-              {pinColors.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  className="color-pill"
-                  style={{
-                    background: c.value,
-                    outline: pinDraft.color === c.value ? "3px solid rgba(0,0,0,0.15)" : "none",
-                  }}
-                  onClick={() => setPinDraft({ ...pinDraft, color: c.value })}
-                  title={c.label}
-                />
-              ))}
-            </div>
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => { setShowPinModal(false); setPendingPos(null); }}>
-            Cancelar
-          </Button>
-          <Button
-            variant="primary"
-            onClick={async () => {
-              try {
-                if (!pinDraft.text.trim() || !pendingPos || !reporteSel?.id) return;
-
-                // persistir en backend
-                const created = await createAnotacion(reporteSel.id, {
-                  x: pendingPos.x,
-                  y: pendingPos.y,
-                  color: pinDraft.color,
-                  text: pinDraft.text.trim(),
-                });
-
-                // reflejar en UI
-                setPins((prev) => [...prev, created]);
-                setShowPinModal(false);
-                setPendingPos(null);
-                setPinDraft({ text: "", color: "#e74c3c" });
-              } catch (e) {
-                console.error("No se pudo crear la anotación:", e);
-                alert("No se pudo crear la anotación.");
-              }
-            }}
-          >
-            Guardar
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Modal de creación de reporte */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Nuevo Reporte</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group>
-              <Form.Label>Usuario</Form.Label>
-              <Form.Control
-                as="select"
-                value={nuevoReporte.productor}
-                onChange={(e) => setNuevoReporte({ ...nuevoReporte, productor: e.target.value })}
-              >
-                <option value="">Seleccione</option>
-                {usuarios.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.email}
-                  </option>
-                ))}
-              </Form.Control>
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Campo</Form.Label>
-              <Form.Control
-                as="select"
-                value={nuevoReporte.campo}
-                onChange={(e) => setNuevoReporte({ ...nuevoReporte, campo: e.target.value })}
-              >
-                <option value="">Seleccione</option>
-                {campos.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nombre}
-                  </option>
-                ))}
-              </Form.Control>
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Lote</Form.Label>
-              <Form.Control
-                as="select"
-                value={nuevoReporte.lote}
-                onChange={(e) => setNuevoReporte({ ...nuevoReporte, lote: e.target.value })}
-              >
-                <option value="">Seleccione</option>
-                {lotes.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.nombre}
-                  </option>
-                ))}
-              </Form.Control>
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Nombre</Form.Label>
-              <Form.Control
-                type="text"
-                value={nuevoReporte.nombre}
-                onChange={(e) => setNuevoReporte({ ...nuevoReporte, nombre: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Tipo de Reporte</Form.Label>
-              <Form.Control
-                type="text"
-                value={nuevoReporte.tipo_reporte}
-                onChange={(e) => setNuevoReporte({ ...nuevoReporte, tipo_reporte: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Fecha del Reporte</Form.Label>
-              <Form.Control
-                type="datetime-local"
-                value={nuevoReporte.fecha_reporte}
-                onChange={(e) => setNuevoReporte({ ...nuevoReporte, fecha_reporte: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Observaciones</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={nuevoReporte.observaciones}
-                onChange={(e) => setNuevoReporte({ ...nuevoReporte, observaciones: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Archivo PDF</Form.Label>
-              <Form.Control
-                type="file"
-                accept="application/pdf"
-                onChange={(e) => setNuevoReporte({ ...nuevoReporte, archivo_pdf: e.target.files[0] })}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Cancelar
-          </Button>
-          <Button variant="primary" onClick={handleCrearReporte}>
-            Guardar
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Modal expandir */}
-      <Modal show={showRegModal} onHide={() => setShowRegModal(false)} size="xl" centered dialogClassName="registros-modal">
-        <Modal.Header closeButton>
-          <Modal.Title>
-            Registros — {reporteSel?.nombre} ({reporteSel && new Date(reporteSel.fecha_reporte).toLocaleDateString("es-AR")})
-          </Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          {!reporteSel ? (
-            <div className="registros-placeholder">Seleccioná un reporte para ver sus registros.</div>
-          ) : (
-            <>
-              <div className="d-flex justify-content-end mb-2">
-                <button
-                  type="button"
-                  className="btn btn-success btn-sm"
-                  onClick={() => {
-                    setPlacingMode(true);
-                    setPendingPos(null);
-                    setPinDraft({ text: "", color: pinColors[0].value });
-                  }}
-                >
-                  Agregar anotación
-                </button>
-              </div>
-
-              <div className="registros-imgWrap">
-                {cargandoLote ? (
-                  <div className="registros-loading">Cargando imagen del lote…</div>
-                ) : getLoteImage(loteSel) ? (
-                  <div
-                    className={`pins-canvas ${placingMode ? "is-placing" : ""}`}
-                    onClick={(e) => {
-                      if (!placingMode) return;
-                      const pos = getRelativeClick(e);
-                      setPendingPos(pos);
-                      setShowPinModal(true);
-                      setPlacingMode(false);
-                    }}
-                  >
-                    <img src={getLoteImage(loteSel)} alt="Mapa/imagen del lote" className="registros-img registros-img--lg" />
-
-                    {pins.map((p) => (
-                      <div
-                        key={p.id}
-                        className={`pin ${hoveredPinId === p.id ? "is-hovered" : ""}`}
-                        style={{ left: `${p.x}%`, top: `${p.y}%` }}
-                        onMouseEnter={() => setHoveredPinId(p.id)}
-                        onMouseLeave={() => setHoveredPinId(null)}
-                        onClick={(ev) => ev.stopPropagation()}
-                      >
-                        <div className="pin-icon">
-                          <PinSVG color={p.color} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="registros-noimg">Sin imagen del lote</div>
-                )}
-              </div>
-
-              {placingMode && <div className="placing-hint under">Hacé click en la imagen para ubicar el pin…</div>}
-
-              {/* Lista de comentarios */}
-              <div className="comentarios-list">
-                {pins.length === 0 ? (
-                  <div className="comentario-empty">Sin anotaciones aún.</div>
-                ) : (
-                  pins.map((p) => (
-                    <div
-                      key={`row-${p.id}`}
-                      className={`comentario-row ${hoveredPinId === p.id ? "is-hovered" : ""}`}
-                      style={{ "--pinColor": p.color }}
-                      onMouseEnter={() => setHoveredPinId(p.id)}
-                      onMouseLeave={() => setHoveredPinId(null)}
-                    >
-                      <span className="comentario-dot" style={{ background: p.color }} />
-                      <span className="comentario-text">{p.text}</span>
-                      <button
-                        className="comentario-del"
-                        title="Eliminar"
-                        onClick={async () => {
-                          try {
-                            if (p.serverId) await deleteAnotacion(reporteSel.id, p.serverId);
-                            setPins((prev) => prev.filter((x) => x.id !== p.id));
-                          } catch (e) {
-                            console.error("No se pudo eliminar la anotación:", e);
-                            alert("No se pudo eliminar la anotación.");
-                          }
-                        }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </>
-          )}
-        </Modal.Body>
-      </Modal>
-    </div>
+      </Card.Body>
+    </Card>
   );
 };
 

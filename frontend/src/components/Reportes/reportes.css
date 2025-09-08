@@ -1,89 +1,171 @@
-
+/* ===== PALETA ===== */
 :root{
   --verde:#198754;
-  --verde-oscuro:#155a36;
-  --verde-claro:#e9fbe5;
-  --gris-borde:#e6e6e6;
-  --gris-claro:#f6fbf5;
+  --verdeOscuro:#155a36;
+  --verdeClaro:#e9fbe5;
+  --grisClaro:#f3f6f5;
+  --grisBorde:#e6e6e6;
+  --grisOscuro:#424242;
+  --blanco:#fff;
 }
 
-/* --------- Contenedor & filtros --------- */
+/* ===== CONTENEDOR GENERAL ===== */
 .reportes-container{
   display:flex; flex-direction:column; align-items:center;
   padding:2rem;
 }
-.filtros{
-  display:flex; gap:1rem; margin-bottom:1.5rem;
-  flex-wrap:wrap; justify-content:center;
-}
-.filtro{ display:flex; flex-direction:column; min-width:200px; }
 
-/* --------- Lista / tarjetas de reportes --------- */
+/* ===== FILTROS EN UNA SOLA FILA ===== */
+/* Contenedor que ENVUELVE Buscador + Filtros */
+.filters-row{
+  width:100%; max-width:1400px;
+  display:flex; align-items:center;
+  gap:10px;
+  flex-wrap:wrap;                 /* en móvil se parte en varias líneas */
+  justify-content:center;
+  margin-bottom:1.4rem;
+}
+
+/* Evita que el antiguo .mb-3 meta salto vertical */
+.filters-row .mb-3{ margin:0 !important; }
+
+/* La caja .filtros NO rompe la fila: sus hijos fluyen como si no existiera */
+.filtros{ display:contents; }
+
+.filtro{ display:flex; flex-direction:column; }
+.filter-item{ flex:0 1 auto; min-width:180px; }
+
+.filter-label{
+  font-weight:600; color:#000; margin-bottom:6px; font-size:.9rem;
+}
+
+/* Input búsqueda */
+.filter-input{
+  height:38px; border-radius:10px; border:1px solid #ced4da;
+  background:#fff; padding:0 12px; font-size:14px;
+  color:#000; box-shadow:none;
+  width: clamp(220px, 30vw, 450px);
+  box-sizing:border-box;
+}
+
+/* Botón “Limpiar” */
+.filters-row .btn{
+  height:38px; border-radius:10px; padding:0 16px;
+}
+
+/* React-Select (usa classNamePrefix="rs") -> textos NEGROS */
+.rs__control{
+  min-height:38px; border-color:#ced4da !important; box-shadow:none !important;
+}
+.rs__control.rs__control--is-focused{
+  border-color:var(--verde) !important; box-shadow:0 0 0 1px var(--verde) !important;
+}
+.rs__single-value{ color:#000 !important; }
+.rs__input input{ color:#000 !important; }
+.rs__placeholder{ color:#555 !important; }
+.rs__option{ color:#000 !important; }
+.rs__option--is-focused{ background:var(--grisClaro) !important; }
+.rs__option--is-selected{ background:var(--verdeClaro) !important; color:var(--verdeOscuro) !important; }
+
+/* ===== LISTA / TARJETAS ===== */
 .lista-reportes{
   width:100%; display:flex; flex-direction:column; gap:14px;
 }
+
+/* NO seleccionado: gris */
 .reporte-card{
-  background:#fff; border-radius:14px; border:1px solid var(--gris-borde);
+  background:var(--grisClaro);
+  border-radius:14px; border:1px solid rgba(66,66,66,.18);
   overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.06);
-  transition:transform .08s ease, box-shadow .2s ease;
+  transition:transform .18s, box-shadow .18s, border-color .18s, background .18s;
 }
-.reporte-card:hover{ transform:translateY(-1px); box-shadow:0 6px 18px rgba(0,0,0,.10); }
+.reporte-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 14px 28px rgba(0,0,0,.08);
+  border-color:rgba(66,66,66,.28);
+  background:var(--blanco);
+}
 
 .reporte-top{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:14px 18px; background:var(--verde); color:#fff; font-weight:700; letter-spacing:.2px;
-  border-bottom:1px solid rgba(0,0,0,.05);
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:12px 16px; background:#e9ecef; color:var(--grisOscuro);
 }
-.reporte-titulo{ font-size:16px; }
+.reporte-titulo{ font-size:16px; font-weight:700; letter-spacing:.15px; color:var(--grisOscuro); }
 
 .reporte-body{
-  display:flex; align-items:center; justify-content:space-between;
-  gap:12px; padding:12px 18px; background:var(--verde-claro);
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px 16px; background:#f4f7f6;
 }
-.reporte-meta{ display:flex; flex-wrap:wrap; gap:8px; }
+.reporte-meta{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
 .chip{
-  background:#fff; border:1px solid var(--gris-borde);
-  padding:6px 10px; border-radius:10px; font-size:13px; color:#333;
+  background:#fff; border:1px solid var(--grisBorde);
+  padding:6px 10px; border-radius:999px; font-size:.82rem; font-weight:600; color:#333;
 }
 .ver-pdf{
-  display:inline-flex; align-items:center; font-weight:600;
-  border-radius:10px; border:1px solid var(--gris-borde);
-  box-shadow:0 1px 3px rgba(0,0,0,.05); text-decoration:none;
+  display:inline-flex; align-items:center; gap:6px; font-weight:600;
+  border-radius:.8rem; padding:.35rem .7rem;
+  border:1px solid rgba(66,66,66,.2);
+  color:var(--grisOscuro); background:var(--blanco); text-decoration:none;
 }
+.ver-pdf:hover{ background:#f2f6f5; border-color:rgba(66,66,66,.35); }
 .reporte-actions{ display:flex; gap:8px; }
 
+/* Card vacío */
 .reporte-card.empty{
-  padding:16px 18px; text-align:center; background:var(--gris-claro);
-  border:1px dashed var(--gris-borde); color:#444;
+  padding:16px 18px; text-align:center; background:#fafafa;
+  border:1px dashed var(--grisBorde); color:#555;
 }
-.reporte-card.selected .reporte-top{ background:#2bbc56; }
-.reporte-card.selected .reporte-body{ background:#e8ffd4; }
 
-/* --------- Layout 2 columnas --------- */
+/* SELECCIONADO: verde */
+.reporte-card.selected{
+  border-color:var(--verde);
+  box-shadow:0 10px 20px rgba(25,135,84,.12);
+  background:var(--verdeClaro);
+}
+.reporte-card.selected .reporte-top{ background:var(--verde); color:#fff; }
+.reporte-card.selected .reporte-titulo{ color:#fff; }
+.reporte-card.selected .reporte-body{ background:#f0fff0; }
+.reporte-card.selected .chip{
+  background:var(--verdeClaro); color:var(--verdeOscuro);
+  border-color:rgba(25,135,84,.25);
+}
+.reporte-card.selected .ver-pdf{
+  color:var(--verdeOscuro); border-color:rgba(25,135,84,.25);
+}
+.reporte-card.selected .ver-pdf:hover{
+  background:var(--verdeClaro); border-color:rgba(25,135,84,.45);
+}
+
+/* ===== LAYOUT 2 COLUMNAS ===== */
 .reportes-layout{
-  display:flex; justify-content:center; align-items:flex-start;
-  gap:5px; margin-top:20px; max-width:1400px; width:100%;
+  display:grid; grid-template-columns:1.2fr 0.9fr; gap:22px;
+  max-width:1400px; width:100%;
 }
-.reportes-col{ flex:1; margin-right:30px; max-width:900px; }
-.registros-col{ width:600px; position:sticky; top:20px; }
+.reportes-col{ min-width:0; }
+.registros-col{ min-width:0; position:sticky; top:20px; }
+@media (max-width: 992px){
+  .reportes-layout{ grid-template-columns:1fr; }
+  .registros-col{ position:static; }
+}
 
-/* --------- Panel Registros --------- */
+/* ===== PANEL REGISTROS ===== */
 .registros-card{
-  background:#e9fbe5; border-radius:16px; border:1px solid #d9efd9;
-  box-shadow:0 6px 18px rgba(0,0,0,.1); overflow:hidden;
+  background:var(--blanco);
+  border:1px solid rgba(25,135,84,.2);
+  border-radius:16px; overflow:hidden;
+  box-shadow:0 6px 18px rgba(0,0,0,.1);
 }
 .registros-header{
-  padding:12px 16px; font-weight:800; color:#2f6b41;
-  border-bottom:1px solid #d9efd9;
+  padding:12px 16px; font-weight:800; color:var(--verdeOscuro);
+  border-bottom:1px solid rgba(25,135,84,.15); background:#fafdf9;
 }
-.registros-body{ padding:14px; }
+.registros-body{ padding:14px 16px; }
 
 .registros-placeholder{
   color:#517a60; background:#f3fff1; border:1px dashed #cfead2;
   border-radius:12px; padding:16px; text-align:center;
 }
 
-/* Fila superior: título a la izquierda, botón a la derecha */
 .registros-subhead{
   display:flex; align-items:center; justify-content:space-between;
   gap:12px; margin-bottom:8px;
@@ -94,20 +176,18 @@
 .registros-subhead .rs-left .bullet{
   width:8px; height:8px; border-radius:999px; background:#9ad38f; display:inline-block;
 }
-.registros-subhead .rs-right{ display:flex; align-items:center; }
+.registros-subhead .rs-right{ display:flex; align-items:center; gap:8px; }
 
 /* Imagen del lote */
 .registros-imgWrap{
   background:#dff3db; border-radius:18px; padding:10px;
   display:flex; align-items:center; justify-content:center;
-  margin-bottom:10px;
+  margin-bottom:10px; border:1px solid rgba(25,135,84,.2);
 }
-.registros-img{
-  width:100%; max-height:240px; object-fit:cover; border-radius:14px;
-}
+.registros-img{ width:100%; max-height:240px; object-fit:cover; border-radius:14px; }
 .registros-loading, .registros-noimg{ color:#476c58; font-size:14px; padding:30px 0; }
 
-/* (Opcional) Burbujas de aviso */
+/* Burbujas */
 .registro-bubble{
   padding:10px 12px; border-radius:12px; margin:8px 0;
   box-shadow:0 8px 16px rgba(0,0,0,.15); font-size:14px; line-height:1.25;
@@ -115,24 +195,11 @@
 .registro-bubble.warn{ background:#ffe97a; color:#2f2f2f; }
 .registro-bubble.ok{ background:#d8f3d1; color:#234f2f; }
 
-/* --------- Toolbar / hint --------- */
-.registros-toolbar{ display:flex; align-items:center; gap:10px; }
-.placing-hint{
-  font-size:12px; color:#2b7a3d; background:#e6f5ea;
-  padding:4px 8px; border:1px dashed #75c78f; border-radius:6px;
-}
-.placing-hint.under{ margin:8px 0 10px; }
-
-/* --------- Canvas de pines --------- */
-.pins-canvas{
-  position:relative; width:100%; border-radius:12px; overflow:hidden;
-}
+/* ===== PINES ===== */
+.pins-canvas{ position:relative; width:100%; border-radius:12px; overflow:hidden; }
 .pins-canvas.is-placing{ cursor:crosshair; }
-.pins-canvas .registros-img{
-  display:block; width:100%; height:auto; user-select:none; pointer-events:none;
-}
+.pins-canvas .registros-img{ display:block; width:100%; height:auto; user-select:none; pointer-events:none; }
 
-/* Pin (sólo icono) + hover sync */
 .pin{
   position:absolute; transform:translate(-50%, -100%); z-index:2;
   transition: transform .15s ease, filter .15s ease;
@@ -144,7 +211,7 @@
 }
 .pin-icon{ width:26px; height:26px; }
 
-/* --------- Lista de comentarios (debajo de la imagen) --------- */
+/* ===== COMENTARIOS ===== */
 .comentarios-list{
   display:flex; flex-direction:column; gap:8px; margin-top:12px;
 }
@@ -155,37 +222,25 @@
   display:flex; align-items:center; gap:10px;
   background:#fff; border-radius:10px; padding:10px 12px;
   box-shadow:0 1px 0 rgba(0,0,0,.04);
-  transition: background .15s ease, box-shadow .15s ease, transform .15s ease;
+  border:1px solid rgba(25,135,84,.18);
+  transition: background .15s ease, box-shadow .15s ease, transform .15s ease, border-color .15s ease;
 }
 .comentario-row.is-hovered{
   background:#f6fff8; box-shadow:0 0 0 2px var(--pinColor, #2ecc71) inset;
   transform:translateY(-1px);
 }
 .comentario-dot{ width:10px; height:10px; border-radius:50%; flex:0 0 10px; }
-.comentario-text{ flex:1; }
+.comentario-text{ flex:1; color:#3f4a45; }
 .comentario-del{
   border:0; background:#f2f2f2; width:22px; height:22px;
   border-radius:999px; line-height:20px; cursor:pointer;
 }
 .comentario-del:hover{ background:#e8e8e8; }
 
-/* --------- Selector de color (modal) --------- */
-.color-pill{
-  width:26px; height:26px; border-radius:999px; border:2px solid #fff;
-  box-shadow:0 1px 5px rgba(0,0,0,.15);
+/* ===== MODALES ===== */
+.modal-content{
+  border-radius:1rem; border:1px solid rgba(25,135,84,.18);
 }
-
-/* --------- Responsive --------- */
-@media (max-width: 992px){
-  .reportes-layout{ flex-direction:column; }
-  .reportes-col{ margin-right:0; max-width:100%; }
-  .registros-col{ width:100%; position:static; }
+.modal-header{
+  background:#fafdf9; border-bottom:1px solid rgba(25,135,84,.12);
 }
-
-/* Modal “Expandir” de Registros */
-.registros-modal .modal-dialog { max-width: min(1200px, 96vw); }
-.registros-modal .modal-body  { padding: 16px; }
-
-/* Imagen más alta dentro del modal */
-.registros-img--lg { max-height: 70vh; }
-
