@@ -1,14 +1,10 @@
 import { useState } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useLocation,
-} from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Login from "./components/Auth/Login";
 import Inicio from "./components/Inicio/Inicio";
 import VerCampos from "./components/campos/VerCampos";
 import VerLotes from "./components/lotes/VerLotes";
+import Calendario from "./components/Calendario/Calendario";
 import VerUsuarios from "./components/Usuarios/VerUsuarios";
 import Sidebar from "./components/Inicio/Sidebar";
 import AdminRoute from "./components/Auth/AdminRoute";
@@ -31,17 +27,11 @@ import TareasAgricolas from "./components/TareasAgricolas/TareasAgricolas";
 function AppContent() {
   const location = useLocation();
 
-  // 1) Definimos aquí el estado de si el sidebar está abierto o colapsado:
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // 2) Rutas en las que NO queremos mostrar la barra lateral:
   const hideSidebarPaths = ["/login", "/"];
   const isSidebarVisible = !hideSidebarPaths.includes(location.pathname);
 
-  // 3) Según isSidebarVisible y sidebarOpen, calculamos el margen izquierdo:
-  //    - Si NO se muestra el sidebar, marginLeft = 0
-  //    - Si se muestra y está abierto, marginLeft = 250px
-  //    - Si se muestra y está colapsado, marginLeft = 70px
   const contentMarginLeft = !isSidebarVisible
     ? "0px"
     : sidebarOpen
@@ -51,7 +41,6 @@ function AppContent() {
   return (
     <div className="d-flex" style={{ minHeight: "100vh" }}>
       {isSidebarVisible && (
-        // 4) Le pasamos a Sidebar la prop `isOpen` y la función para cambiarla:
         <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
       )}
 
@@ -61,14 +50,16 @@ function AppContent() {
           marginLeft: contentMarginLeft,
           width: "100%",
           backgroundColor: "#effeee",
-          minHeight: "100vh", // mantiene altura mínima
-          overflowX: "hidden", // evita scroll horizontal
+          minHeight: "100vh",
+          overflowX: "hidden",
         }}
       >
         <Routes location={location}>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Login />} />
           <Route path="/inicio" element={<Inicio />} />
+          {/* 👇 CORREGIDO: era <Router ...> */}
+          <Route path="/calendario" element={<Calendario />} />
           <Route path="/tareas" element={<TareasAgricolas />} />
           <Route path="/vercampos" element={<VerCampos />} />
           <Route path="/campos/:campoId/lotes" element={<VerLotesWrapper />} />
@@ -84,7 +75,6 @@ function AppContent() {
           <Route path="/productos/agregar" element={<ProductosForm />} />
           <Route path="/productos/ver" element={<ProductosLista />} />
           <Route path="/reportes" element={<Reportes />} />
-
           <Route
             path="/usuarios"
             element={
