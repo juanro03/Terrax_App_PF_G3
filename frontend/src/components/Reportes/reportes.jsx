@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./reportes.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import { faFilePdf, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { Modal, Button, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -349,7 +349,7 @@ const Reportes = () => {
     <Card
       className="mx-auto my-5 shadow"
       style={{
-        maxWidth: 1500,
+        maxWidth: 1700,
         background: blanco,
         borderRadius: "1.4rem",
         border: "none",
@@ -372,6 +372,7 @@ const Reportes = () => {
             <div className="mb-3" style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "center" }}>
               <div style={{ width: "180px" }}>
                 <Select
+                  classNamePrefix="rs"
                   options={opcionesFiltro}
                   value={opcionesFiltro.find((opt) => opt.value === atributoFiltro)}
                   onChange={(opcion) => setAtributoFiltro(opcion.value)}
@@ -490,9 +491,7 @@ const Reportes = () => {
                   const meses = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
                   const mes = meses[fechaObj.getMonth()];
                   const anio2 = fechaObj.getFullYear().toString().slice(-2);
-                  const cabecera = `${dia} ${mes} ${anio2} - ${r.campo_nombre || obtenerNombreCampo(r.campo)
-                    } - ${r.lote_nombre || obtenerNombreLote(r.lote)
-                    } - ${r.nombre}`;
+                  const cabecera = `${dia} ${mes} ${anio2} - ${r.campo_nombre || obtenerNombreCampo(r.campo)} - ${r.lote_nombre || obtenerNombreLote(r.lote)} - ${r.nombre}`;
 
                   const isSel = reporteSel?.id === r.id;
 
@@ -500,16 +499,11 @@ const Reportes = () => {
                     <div
                       key={r.id}
                       className={`reporte-card ${isSel ? "selected" : ""}`}
-                      onClick={() => {
-                        setReporteSel(r);
-                        cargarLoteDeReporte(r);
-                      }}
-                      role="button"
                     >
                       <div className="reporte-top">
                         <span className="reporte-titulo">{cabecera}</span>
                         {rol === "admin" && (
-                          <div className="reporte-actions" onClick={(e) => e.stopPropagation()}>
+                          <div className="reporte-actions">
                             <button className="btn btn-outline-primary btn-sm" title="Editar">
                               <FaEdit />
                             </button>
@@ -531,29 +525,44 @@ const Reportes = () => {
                           {rol === "admin" && <span className="chip">Usuario: {obtenerNombreUsuario(r.productor)}</span>}
                         </div>
 
-                        <a
-                          href={r.archivo_pdf}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn btn-light ver-pdf"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <FontAwesomeIcon icon={faFilePdf} className="me-2" />
-                          Ver Reporte
-                        </a>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button
+                            type="button"
+                            className="btn btn-light ver-pdf"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setReporteSel(r);
+                              cargarLoteDeReporte(r);
+                            }}
+                          >
+                            <FontAwesomeIcon icon={faLocationDot} className="me-2" />
+                            Ver anotaciones
+                          </button>
+                          <a
+                            href={r.archivo_pdf}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-light ver-pdf"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <FontAwesomeIcon icon={faFilePdf} className="me-2" />
+                            Ver reporte
+                          </a>
+                        </div>
                       </div>
                     </div>
                   );
                 })}
+
               </div>
             </div>
 
             {/* Columna derecha: Registros */}
             <aside className="registros-col">
               <div className="registros-card">
-                <div className="registros-header">Registros</div>
+                <div className="registros-header">Anotaciones</div>
                 <div className="registros-body">
-                  {!reporteSel && <div className="registros-placeholder">Seleccioná un reporte para ver sus registros.</div>}
+                  {!reporteSel && <div className="registros-placeholder">Seleccioná un reporte para ver sus anotaciones.</div>}
 
                   {reporteSel && (
                     <>
@@ -578,7 +587,7 @@ const Reportes = () => {
                               setPinDraft({ text: "", color: pinColors[0].value });
                             }}
                           >
-                            Agregar anotación
+                            Agregar Anotación
                           </button>
 
                           <button type="button" className="btn btn-sm btn-outline-success" onClick={() => setShowRegModal(true)}>
