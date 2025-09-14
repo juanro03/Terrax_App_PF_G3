@@ -81,27 +81,35 @@ const Inicio = () => {
   return (
     <div className="inicio-wrapper">
       {/* 1) Hero / Cabecera */}
-      <section
-        style={{
-          color: "#333333",
-          padding: "3rem 0",
-        }}
-      >
-        <Container className="ps-5">
-          <GeoConsentBanner />
-          <h1 className="display-4 fuente-bonita">Bienvenido a Terrax</h1>
-          <p className="lead fuente-bonita">
-            Gestiona tus lotes agrícolas, monitorea índices y planifica tu
-            producción en un solo lugar.
-          </p>
-          <Button variant="success" size="lg" href="/VerCampos" className="me-3 mb-2">Ver Mis Campos</Button>
-          <Button variant="success" size="lg" href="/calculadora" className="me-3 mb-2">Ver Calculadora</Button>
-          <Button variant="success" size="lg" href="/reportes" className="mb-2">Ver Mis Reportes</Button>
+      {/* 1) Hero / Cabecera */}
+      <section style={{ color: "#333333", padding: "3rem 0" }}>
+        <Container fluid className="px-0">
+          <Row className="justify-content-center">
+            <Col lg={10}>
+              <GeoConsentBanner />
+              <div className="px-3 px-md-4 px-lg-5">
+                <h1 className="display-4 fuente-bonita">Bienvenido a Terrax</h1>
+                <p className="lead fuente-bonita">
+                  Gestiona tus lotes agrícolas, monitorea índices y planifica tu
+                  producción en un solo lugar.
+                </p>
+                <Button variant="success" size="lg" href="/VerCampos" className="me-3 mb-2">
+                  Ver Mis Campos
+                </Button>
+                <Button variant="success" size="lg" href="/calculadora" className="me-3 mb-2">
+                  Ver Calculadora
+                </Button>
+                <Button variant="success" size="lg" href="/reportes" className="mb-2">
+                  Ver Mis Reportes
+                </Button>
+              </div>
+            </Col>
+          </Row>
         </Container>
       </section>
 
-      {/* 2) Carrusel*/}
-      <Container fluid className="ps-2">
+      {/* 2) Carrusel */}
+      <Container fluid className="px-0">
         <Row className="justify-content-center">
           <Col lg={10}>
             <Carrusel />

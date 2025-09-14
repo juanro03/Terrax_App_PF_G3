@@ -9,7 +9,7 @@ from .models import Cobertura
 class LoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lote
-        fields = '__all__'  # o poné los campos que quieras exponer
+        fields = '__all__'  
 
 class SiembraSerializer(serializers.ModelSerializer):
     lote_nombre = serializers.CharField(source='lote.nombre', read_only=True)

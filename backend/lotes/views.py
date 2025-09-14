@@ -19,9 +19,6 @@ from .models import Cobertura
 
 
 class LoteViewSet(viewsets.ModelViewSet):
-    """
-    API REST para gestionar lotes agrícolas.
-    """
     queryset = Lote.objects.all()
     serializer_class = LoteSerializer
     permission_classes = [AllowAny]  #permiso abierto para pruebas (IsAuthenticated para pedir autenticacion)
@@ -65,6 +62,7 @@ class CosechaCreateView(CreateAPIView):
         else:
             print("ERRORES DEL SERIALIZER:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class FinalizarCampaniaView(APIView):
     def post(self, request, lote_id):
         try:

@@ -1,11 +1,12 @@
-from django.shortcuts import render
+# reportes/views.py
 from rest_framework import viewsets
-from .models import Reporte
-from .models import Anotacion
-from .serializers import ReporteSerializer
-from .serializers import AnotacionSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
+
+from .models import Reporte, Anotacion
+from .serializers import ReporteSerializer, AnotacionSerializer
+
+from lotes.models import Lote  # para validaciones / filtros
 
 class ReporteViewSet(viewsets.ModelViewSet):
     queryset = Reporte.objects.all()
@@ -14,27 +15,22 @@ class ReporteViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-
         if user.rol == 'admin':
-            return Reporte.objects.all()
+            qs = Reporte.objects.all()
+        else:
+            qs = Reporte.objects.filter(productor=user)
 
-        queryset = Reporte.objects.filter(productor=user)
-
-        # Filtro opcional por campo y lote
         campo_id = self.request.query_params.get('campo')
         lote_id = self.request.query_params.get('lote')
         if campo_id:
-            queryset = queryset.filter(campo_id=campo_id)
+            qs = qs.filter(campo_id=campo_id)
         if lote_id:
-            queryset = queryset.filter(lote_id=lote_id)
+            qs = qs.filter(lote_id=lote_id)
+        return qs
 
-        return queryset
-
-    
     def perform_create(self, serializer):
         user = self.request.user
-
-        if not user.rol == 'admin':
+        if user.rol != 'admin':
             raise ValidationError("Solo los administradores pueden crear reportes.")
 
         campo = serializer.validated_data['campo']
@@ -45,27 +41,61 @@ class ReporteViewSet(viewsets.ModelViewSet):
             raise ValidationError("El campo no pertenece al productor indicado.")
         if lote.campo != campo:
             raise ValidationError("El lote no pertenece al campo indicado.")
-
         serializer.save()
 
     def destroy(self, request, *args, **kwargs):
-            user = request.user
+        user = request.user
+        if user.rol != 'admin':
+            raise ValidationError("Solo los administradores pueden eliminar reportes.")
+        return super().destroy(request, *args, **kwargs)
 
-            if user.rol != 'admin':
-                raise ValidationError("Solo los administradores pueden eliminar reportes.")
 
-            return super().destroy(request, *args, **kwargs)
-    
-class AnotacionViewSet(viewsets.ModelViewSet):
+# ====== NUEVO: Anotaciones por LOTE ======
+class LoteAnotacionViewSet(viewsets.ModelViewSet):
+    """
+    /api/lotes/<lote_pk>/anotaciones/
+    """
     serializer_class = AnotacionSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         qs = Anotacion.objects.all()
-        rep_id = self.kwargs.get("reporte_pk") or self.request.query_params.get("reporte")
-        if rep_id:
-            qs = qs.filter(reporte_id=rep_id)
+        lote_pk = self.kwargs.get("lote_pk") or self.request.query_params.get("lote")
+        if lote_pk:
+            qs = qs.filter(lote_id=lote_pk)
         return qs
 
     def perform_create(self, serializer):
-        serializer.save(creado_por=self.request.user)
+        lote_pk = self.kwargs.get("lote_pk") or self.request.data.get("lote")
+        if not lote_pk:
+            raise ValidationError("Debe indicar el lote.")
+        try:
+            Lote.objects.get(pk=lote_pk)
+        except Lote.DoesNotExist:
+            raise ValidationError("Lote inválido.")
+
+        serializer.save(
+            lote_id=lote_pk,
+            creado_por=self.request.user
+        )
+
+
+# ====== COMPATIBILIDAD: /reportes/<id>/anotaciones/ ======
+# (redirige a las anotaciones del LOTE de ese reporte)
+class ReporteAnotacionProxyViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Mantiene la ruta vieja solo para lectura:
+    /api/reportes/<reporte_pk>/anotaciones/
+    """
+    serializer_class = AnotacionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        rep_id = self.kwargs.get("reporte_pk")
+        if not rep_id:
+            return Anotacion.objects.none()
+        try:
+            reporte = Reporte.objects.select_related("lote").get(pk=rep_id)
+        except Reporte.DoesNotExist:
+            return Anotacion.objects.none()
+        return Anotacion.objects.filter(lote_id=reporte.lote_id)
