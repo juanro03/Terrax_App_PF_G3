@@ -273,7 +273,7 @@ const DetalleLote = () => {
       }
 
       await axios.post("http://localhost:8000/api/cosechas/", formData);
-      await axios.post(`http://localhost:8000/api/siembras/finalizar/${loteId}/`);
+      //await axios.post(`http://localhost:8000/api/siembras/finalizar/${loteId}/`);
 
       // Reset
       setEstado("barbecho");

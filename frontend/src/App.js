@@ -28,6 +28,8 @@ import Reportes from "./components/Reportes/reportes.jsx";
 import HistorialCampania from "./components/lotes/HistorialCampania";
 import TareasAgricolas from "./components/TareasAgricolas/TareasAgricolas";
 import Trazabilidad from "./components/lotes/trazabilidad.jsx";
+import TrazabilidadAgricola from "./components/TareasAgricolas/TrazabilidadAgricola";
+
 
 function AppContent() {
   const location = useLocation();
@@ -85,6 +87,7 @@ function AppContent() {
           <Route path="/productos/agregar" element={<ProductosForm />} />
           <Route path="/productos/ver" element={<ProductosLista />} />
           <Route path="/reportes" element={<Reportes />} />
+          <Route path="/tareas/trazabilidad" element={<TrazabilidadAgricola />} />
 
           <Route
             path="/usuarios"

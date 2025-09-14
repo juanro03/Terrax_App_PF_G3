@@ -6,6 +6,7 @@ from .models import Campania
 import re
 from .models import Cobertura
 
+
 class LoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lote
