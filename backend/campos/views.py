@@ -1,5 +1,6 @@
+# backend/campos/views.py
 from rest_framework import viewsets
-from .models import Campo
+from .models import Campo, Servicio     # <-- Servicio aquí debe estar definido en models.py
 from .serializers import CampoSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
@@ -8,25 +9,18 @@ from rest_framework import status
 from django.core.mail import send_mail
 from django.conf import settings
 from datetime import date
-from .serializers import CampoSerializer
-
-
 
 class CampoViewSet(viewsets.ModelViewSet):
     queryset = Campo.objects.all()
     serializer_class = CampoSerializer
-    permission_classes = [AllowAny]  #permiso abierto para pruebas (IsAuthenticated para pedir autenticacion)
+    permission_classes = [AllowAny]  # cambiar a IsAuthenticated en producción si corresponde
 
     def get_queryset(self):
         user = self.request.user
-        # Si no está autenticado, devolver todos para pruebas
         if not user.is_authenticated:
             return Campo.objects.all()
-
-        # Si está autenticado y es admin
         if hasattr(user, 'rol') and user.rol == 'admin':
             return Campo.objects.all()
-
         return Campo.objects.filter(propietario=user)
 
     def perform_create(self, serializer):
@@ -43,7 +37,7 @@ class CampoViewSet(viewsets.ModelViewSet):
         if request.user.rol == 'productor' and campo.propietario != request.user:
             return Response({"detail": "No tiene permiso para eliminar este campo."}, status=status.HTTP_403_FORBIDDEN)
         return super().destroy(request, *args, **kwargs)
-    
+
 
 class MisCamposView(APIView):
     permission_classes = [IsAuthenticated]
@@ -52,33 +46,40 @@ class MisCamposView(APIView):
         campos = Campo.objects.filter(propietario=request.user)
         serializer = CampoSerializer(campos, many=True)
         return Response(serializer.data)
+
+
 class SolicitarServicioView(APIView):
-    permission_classes = [AllowAny]
-    
+    # Requiere que el usuario esté autenticado para poder asociar la solicitud.
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
+        # datos desde frontend
         campo_id = request.data.get('campo')
         tipo_tarea = request.data.get('tipoTarea')
         fecha_inicio = request.data.get('fechaInicio')
         fecha_fin = request.data.get('fechaFin')
         observaciones = request.data.get('observaciones', "")
 
+        # validación básica de presencia
         if not campo_id or not tipo_tarea or not fecha_inicio or not fecha_fin:
             return Response({"error": "Faltan datos"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Validar campo
+
+        # validar existencia de campo y permisos
         try:
             campo = Campo.objects.get(id=campo_id)
-            # Si el usuario está logueado y no es admin, validar que el campo sea suyo
-            if request.user.is_authenticated and getattr(request.user, "rol", None) != "admin":
-                if campo.propietario != request.user:
-                    return Response({"error": "No tiene permiso para solicitar servicio en este campo."}, status=status.HTTP_403_FORBIDDEN)
+            # si no es admin, el campo debe ser del usuario
+            if getattr(request.user, "rol", None) != "admin" and campo.propietario != request.user:
+                return Response({"error": "No tiene permiso para solicitar servicio en este campo."}, status=status.HTTP_403_FORBIDDEN)
         except Campo.DoesNotExist:
             return Response({"error": "El campo no existe"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Validar fechas
-        today = date.today()
-        fecha_inicio_obj = date.fromisoformat(fecha_inicio)
-        fecha_fin_obj = date.fromisoformat(fecha_fin)
+        # validar fechas
+        try:
+            today = date.today()
+            fecha_inicio_obj = date.fromisoformat(fecha_inicio)
+            fecha_fin_obj = date.fromisoformat(fecha_fin)
+        except ValueError:
+            return Response({"error": "Formato de fecha inválido. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
 
         if fecha_inicio_obj < today or fecha_fin_obj < today:
             return Response({"error": "Las fechas no pueden ser anteriores a hoy"}, status=status.HTTP_400_BAD_REQUEST)
@@ -86,23 +87,25 @@ class SolicitarServicioView(APIView):
         if fecha_fin_obj < fecha_inicio_obj:
             return Response({"error": "La fecha fin no puede ser anterior a la fecha inicio"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Formato HTML para el correo
-        html_content = f"""
-        <html>
-        <body style="font-family: Arial, sans-serif; color: #333;">
-            <h2 style="color: #4CAF50;">Nueva Solicitud de Servicio</h2>
-            <p><strong>Campo:</strong> {campo.nombre}</p>
-            <p><strong>Tarea:</strong> {tipo_tarea}</p>
-            <p><strong>Fecha de inicio:</strong> {fecha_inicio}</p>
-            <p><strong>Fecha de fin:</strong> {fecha_fin}</p>
-            {"<p><strong>Observaciones:</strong> " + observaciones + "</p>" if observaciones else ""}
-            <hr>
-            <p style="font-size: 12px; color: #777;">Este es un mensaje automático, no responder.</p>
-        </body>
-        </html>
-        """
-# Texto plano (backup en caso que no soporte HTML)
+        # Crear registro en la BD (si tenés el modelo Servicio con estos campos)
+        try:
+            # Ajustá los nombres de campo si tu modelo Servicio tiene otros nombres
+            servicio = Servicio.objects.create(
+                usuario=request.user,
+                campo=campo,
+                tipo_tarea=tipo_tarea,
+                fecha_inicio=fecha_inicio_obj,
+                fecha_fin=fecha_fin_obj,
+                observaciones=observaciones
+            )
+        except Exception as e:
+            # si no tenés Servicio o falló, lo logueamos y seguimos (no rompemos el envío de mail)
+            # print("Error al guardar Servicio:", e)
+            servicio = None
+
+        # Preparar email (texto plano y html)
         plain_message = (
+            f"Usuario: {request.user.username} ({request.user.email})\n"
             f"Campo: {campo.nombre}\n"
             f"Tarea: {tipo_tarea}\n"
             f"Fecha inicio: {fecha_inicio}\n"
@@ -111,13 +114,35 @@ class SolicitarServicioView(APIView):
         if observaciones:
             plain_message += f"Observaciones: {observaciones}\n"
 
-        send_mail(
-            subject="Nueva solicitud de servicio",
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=['mati992008@gmail.com'],
-            fail_silently=False,
-            html_message=html_content
-        )
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <h2 style="color: #4CAF50;">Nueva Solicitud de Servicio</h2>
+            <p><strong>Usuario:</strong> {request.user.get_full_name() or request.user.username} ({request.user.email})</p>
+            <p><strong>Campo:</strong> {campo.nombre}</p>
+            <p><strong>Tarea:</strong> {tipo_tarea}</p>
+            <p><strong>Fecha de inicio:</strong> {fecha_inicio}</p>
+            <p><strong>Fecha de fin:</strong> {fecha_fin}</p>
+            {f"<p><strong>Observaciones:</strong> {observaciones}</p>" if observaciones else ""}
+            <hr>
+            <p style="font-size: 12px; color: #777;">Este es un mensaje automático, no responder.</p>
+        </body>
+        </html>
+        """
 
+        # enviar correo
+        try:
+            send_mail(
+                subject="Nueva solicitud de servicio",
+                message=plain_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=['mati992008@gmail.com'],  # ajustar destinatarios
+                fail_silently=False,
+                html_message=html_content
+            )
+        except Exception as e:
+            # si el envío falla podes devolver un 500 o un 200 con mensaje de fallo de envío.
+            return Response({"error": "Error al enviar correo", "detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # todo OK
         return Response({"mensaje": "Solicitud enviada con éxito"}, status=status.HTTP_200_OK)
