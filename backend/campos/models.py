@@ -1,5 +1,5 @@
 from django.db import models
-from usuarios.models import Usuario
+from usuarios.models import Usuario   # ya lo tenés importado
 from django.utils import timezone
 
 
@@ -15,3 +15,16 @@ class Campo(models.Model):
 
     def __str__(self):
         return self.nombre
+
+
+class Servicio(models.Model):
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="servicios")  # <-- corregido
+    campo = models.ForeignKey(Campo, on_delete=models.CASCADE, related_name="servicios")
+    tipo_tarea = models.CharField(max_length=200)
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+    observaciones = models.TextField(blank=True, null=True)
+    creado = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.tipo_tarea} - {self.campo.nombre} ({self.usuario.username})"
