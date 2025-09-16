@@ -23,6 +23,8 @@ import ProductosForm from "./components/Productos/ProductosForm";
 import Reportes from "./components/Reportes/reportes.jsx";
 import HistorialCampania from "./components/lotes/HistorialCampania";
 import TareasAgricolas from "./components/TareasAgricolas/TareasAgricolas";
+import TrazabilidadAgricola from "./components/TareasAgricolas/TrazabilidadAgricola";
+
 
 function AppContent() {
   const location = useLocation();
@@ -67,14 +69,12 @@ function AppContent() {
           <Route path="/calculadora" element={<Calculadora />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/lote/:loteId" element={<DetalleLote />} />
-          <Route
-            path="/lotes/:loteId/historial"
-            element={<HistorialCampania />}
-          />
           <Route path="/productos" element={<ProductosInicio />} />
           <Route path="/productos/agregar" element={<ProductosForm />} />
           <Route path="/productos/ver" element={<ProductosLista />} />
           <Route path="/reportes" element={<Reportes />} />
+          <Route path="/tareas/trazabilidad" element={<TrazabilidadAgricola />} />
+
           <Route
             path="/usuarios"
             element={

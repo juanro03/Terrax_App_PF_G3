@@ -273,7 +273,7 @@ const DetalleLote = () => {
       }
 
       await axios.post("http://localhost:8000/api/cosechas/", formData);
-      await axios.post(`http://localhost:8000/api/siembras/finalizar/${loteId}/`);
+      //await axios.post(`http://localhost:8000/api/siembras/finalizar/${loteId}/`);
 
       // Reset
       setEstado("barbecho");
@@ -357,7 +357,7 @@ const DetalleLote = () => {
         <button
           className="btn btn-outline-success"
           onClick={() =>
-            navigate(`/lotes/${loteId}/historial`, {
+            navigate(`/lotes/${loteId}/trazabilidad`, {
               state: { campoId: campoInfo.id, campoNombre: campoInfo.nombre, loteNombre },
             })
           }

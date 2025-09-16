@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Form, Button, ButtonGroup } from "react-bootstrap";
 import axios from "../../axiosconfig";
 import "bootstrap-icons/font/bootstrap-icons.css";
-
+import { Link } from "react-router-dom";
 // PALETA DE COLORES
 const verde = "#198754";
 const verdeOscuro = "#155a36";
@@ -342,8 +342,12 @@ export default function ActividadesAgricolas() {
             )}
           </div>
         )}
-
-        {/* Selector campo/lote/actividad */}
+        <div className="ms-auto d-flex gap-2">
+          {/* …tus otros botones */}
+          <Link to="/tareas/trazabilidad" className="btn btn-outline-success">
+            Trazabilidad
+          </Link>
+        </div>
         <Form onSubmit={handleSubmit}>
           <Row className="g-3 mb-4">
             <Col md={4}>
