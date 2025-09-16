@@ -6,7 +6,7 @@ body {
 
 /* Contenedor del formulario */
 .form-card {
-    background-color: rgb(25 135 84);
+    background-color: #198754;
     color: white;
     border-radius: 20px;
     padding: 40px;
@@ -180,3 +180,56 @@ input[type="file"]::file-selector-button:hover {
   color: #117256;
   text-align: center;
 }
+
+
+/* Fondo general como Usuarios */
+.campos-page {
+  background-color: #e9fbe5;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Caja blanca contenedora (igual a Usuarios) */
+.campos-shell {
+  max-width: 1400px;
+  background: #fff;
+  border-radius: 1.4rem;
+  border: none;
+}
+
+/* === GRID de tarjetas (flex, 4 por fila) === */
+.campos-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;   /* centrado del conjunto */
+  gap: 20px;                 /* separación uniforme */
+  max-width: 1280px;         /* ancho pensado para 4 cards (~300px) + 3 gaps */
+  margin: 0 auto;
+}
+
+/* Cada tarjeta ocupa 25% menos el gap → 4 por fila */
+.campos-card {
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;                               /* Asegura contraste de la sombra */ 
+  flex: 0 1 calc(25% - 15px);   /* 4 columnas */
+  max-width: 300px;             /* no más anchas de 300 */
+  min-width: 240px;             /* evita que achiquen de más */
+}
+
+.campos-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.274);
+}
+
+/* Responsivo: 3, 2, 1 columnas */
+@media (max-width: 1200px) {
+  .campos-card { flex-basis: calc(33.333% - 14px); }
+}
+@media (max-width: 900px) {
+  .campos-card { flex-basis: calc(50% - 10px); }
+}
+@media (max-width: 600px) {
+  .campos-card { flex-basis: 100%; max-width: 520px; }
+}
+

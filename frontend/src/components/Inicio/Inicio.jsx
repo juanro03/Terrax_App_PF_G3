@@ -132,7 +132,7 @@ const Inicio = () => {
           <Col md={4}>
             <PreciosGranos />
           </Col>
-          {/* 3.2) Gráfica de NDVI */}
+          {/* 3.2) Gráfica de NDVI 
           <Col md={6}>
             <Card className="shadow-sm">
               <Card.Body>
@@ -140,7 +140,7 @@ const Inicio = () => {
               </Card.Body>
             </Card>
           </Col>
-
+            
           {/* 3.3) Tarjetas rápidas (Mis Campos, Calendario, Reportes) 
           <Col md={4}>
             <Card className="h-100 shadow-sm">
