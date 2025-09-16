@@ -8,24 +8,27 @@ import {
   Row,
   Col,
   Form,
-  Badge,
   Spinner,
   Modal,
   Button,
   Alert,
+  Dropdown,
+  ButtonGroup,
+  Badge,
+  OverlayTrigger,
+  Tooltip,
 } from "react-bootstrap";
 import axios from "../../axiosconfig";
 
-// Colores por tipo (coinciden con tu backend)
+// ====== Diseño: Colores por tipo (coinciden con backend) ======
 const COLOR_MAP = {
-  fertilizacion: "#78e495ff",
-  maleza: "#198754",
-  laboreo: "#619472ff",
-  riego: "#20c997",
-  fitosanitaria: "#54ad6fff",
-  otra: "#637c6fff",
+  fertilizacion: "#e478d0ff",
+  maleza: "#0f0f0fff",
+  laboreo: "#a35f23ff",
+  riego: "#79beecff",
+  fitosanitaria: "#54ad6f",
+  otra: "#a2a5a3ff",
 };
-
 // Labels legibles por tipo
 const LABEL_MAP = {
   fertilizacion: "Fertilización",
@@ -35,55 +38,164 @@ const LABEL_MAP = {
   fitosanitaria: "Aplicación Fitosanitaria",
   otra: "Anotación",
 };
-
+const ACTIVIDADES = Object.keys(LABEL_MAP);
 const TIPO_OPTS = Object.entries(LABEL_MAP).map(([key, label]) => ({
   key,
   label,
 }));
-const ACTIVIDADES = Object.keys(LABEL_MAP);
 
-// 🔧 CSS para forzar texto azul -> negro + estilos del botón “+” en celdas
-const calendarTextCss = `
-  .fc .fc-daygrid-day-number { color: #000 !important; }
-  .fc .fc-col-header-cell-cushion { color: #000 !important; }
-  .fc .fc-daygrid-more-link { color: #000 !important; }
-  .fc .fc-toolbar-title { color: #000 !important; }
+// ====== Estilos UI/UX adicionales ======
+const styles = `
+  /* Tipografía más clara del calendario y encabezados */
+  .fc .fc-toolbar-title { font-weight: 700; color: #0f5132; letter-spacing: .2px; }
+  .fc .fc-col-header-cell-cushion, .fc .fc-daygrid-day-number { color: #111; }
 
-  /* Alinear contenido del header del día y dejar hueco entre + y número */
-  .fc .fc-daygrid-day-top {
-    display: flex;
-    justify-content: flex-end;
+  /* Eventos con pastilla redondeada y fondo cremita (sobrescribe celeste default) */
+  .fc .fc-h-event, .fc .fc-daygrid-event, .fc-event {
+    background: #f9f5e9ff !important; /* cremita */
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 2px 6px !important;
+    box-shadow: 0 1px 0 rgba(0,0,0,.04);
+  }
+  .fc .fc-daygrid-day-frame { padding: 4px; }
+
+  /* Hover sutil en días y eventos */
+  .fc .fc-daygrid-day:hover { background: #fafcfb; }
+
+  /* Hoy destacado pero no invasivo */
+  .fc .fc-day-today { background: #eefaf2 !important; }
+
+  /* Chip del evento con barra lateral de color por tipo */
+  .event-chip {
+    display: grid;
+    grid-template-columns: 6px 1fr;
+    gap: 8px;
     align-items: center;
-    gap: 6px; /* separa el + del número */
+  }
+  .event-chip .bar {
+    height: 100%;
+    border-radius: 8px;
+    background: var(--evcolor, #198754);
+  }
+  .event-chip .text {
+    color: #0f172a;
+    font-weight: 600;
+    line-height: 1.2;
+    font-size: 12.5px;
+  }
+  .event-chip .sub {
+    color: #334155;
+    font-weight: 500;
+    font-size: 11.5px;
   }
 
-  /* Botón + inline, no posicionado absoluto */
-  .fc .fc-add-inline-btn {
-    width: 18px;
-    height: 18px;
-    padding: 0;
-    border: none;
-    border-radius: 50%;
-    background: #198754;
-    color: #fff;
-    font-size: 12px;
-    line-height: 18px;
-    text-align: center;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity .15s ease-in-out, transform .05s ease;
+  /* Toolbar sticky: siempre visible al hacer scroll */
+  .calendar-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: #ffffffd9;
+    backdrop-filter: saturate(140%) blur(4px);
+    border-bottom: 1px solid #eef3ef;
   }
-  .fc .fc-daygrid-day:hover .fc-add-inline-btn { opacity: 1; }
-  .fc .fc-add-inline-btn:active { transform: scale(0.96); }
+
+  /* Botón de acción flotante (FAB) */
+  .fab-add {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 20;
+    border-radius: 9999px;
+    padding: 12px 16px;
+    box-shadow: 0 10px 24px rgba(25,135,84,.28);
+  }
+
+  /* Multiselect dropdown ancho y scrolleable, encima del calendario */
+  .filter-dropdown .dropdown-menu {
+    z-index: 1060;
+    min-width: 280px;
+    max-height: 340px;
+    overflow: auto;
+    padding: 8px 10px;
+  }
+
+  /* Leyenda compacta */
+  .legend-dot {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 4px; margin-right: 6px;
+  }
+
+  /* Overlay loading */
+  .loading-overlay {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    background: rgba(255,255,255,.6); z-index: 5; border-radius: 1.4rem;
+  }
 `;
 
+function MultiSelectActividades({ selected, onChange }) {
+  const allSelected = selected.size === ACTIVIDADES.length;
+
+  const toggleOne = (k) => {
+    const next = new Set(selected);
+    if (next.has(k)) next.delete(k);
+    else next.add(k);
+    onChange(next);
+  };
+  const selectAll = () => onChange(new Set(ACTIVIDADES));
+  const clearAll = () => onChange(new Set());
+
+  return (
+    <Dropdown as={ButtonGroup} className="filter-dropdown">
+      <OverlayTrigger
+        placement="top"
+        overlay={<Tooltip>Filtrar por tipo</Tooltip>}
+      >
+        <Dropdown.Toggle variant="outline-success">
+          Tipos ({selected.size})
+        </Dropdown.Toggle>
+      </OverlayTrigger>
+      <Dropdown.Menu>
+        <div className="d-flex gap-2 mb-2">
+          <Button size="sm" variant="outline-secondary" onClick={selectAll}>
+            Todos
+          </Button>
+          <Button size="sm" variant="outline-secondary" onClick={clearAll}>
+            Ninguno
+          </Button>
+        </div>
+        {ACTIVIDADES.map((k) => (
+          <Form.Check
+            key={k}
+            type="checkbox"
+            id={`chk-${k}`}
+            className="mb-1"
+            label={
+              <span>
+                <span
+                  className="legend-dot"
+                  style={{ background: COLOR_MAP[k] }}
+                />
+                {LABEL_MAP[k]}
+              </span>
+            }
+            checked={selected.has(k)}
+            onChange={() => toggleOne(k)}
+          />
+        ))}
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+}
+
 export default function Calendario() {
+  // ======= Estado =======
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorTxt, setErrorTxt] = useState("");
   const [okTxt, setOkTxt] = useState("");
 
-  // Filtros superiores
   const [filtroActividades, setFiltroActividades] = useState(
     () => new Set(ACTIVIDADES)
   );
@@ -92,13 +204,8 @@ export default function Calendario() {
   const [campos, setCampos] = useState([]);
   const [lotes, setLotes] = useState([]);
 
-  // Rango visible en calendario para pedir datos al backend
-  const rangoRef = useRef({ startStr: null, endStr: null });
-
-  // Modal de detalle
   const [detalle, setDetalle] = useState(null);
 
-  // Modal de alta rápida (tarea/comentario)
   const [showForm, setShowForm] = useState(false);
   const [sending, setSending] = useState(false);
   const [form, setForm] = useState({
@@ -110,7 +217,9 @@ export default function Calendario() {
   });
   const [formLotes, setFormLotes] = useState([]);
 
-  // Cargar combos de campos/lotes
+  const rangoRef = useRef({ startStr: null, endStr: null });
+
+  // ======= Carga de combos =======
   useEffect(() => {
     axios
       .get("/api/campos/")
@@ -129,7 +238,7 @@ export default function Calendario() {
       .catch(() => setLotes([]));
   }, [campo]);
 
-  // ===== Helpers formulario rápido =====
+  // ======= Helpers =======
   const openForm = ({
     dateStr = "",
     presetCampo = campo,
@@ -143,7 +252,6 @@ export default function Calendario() {
       tipo: presetTipo,
       observaciones: "",
     });
-    // cargar lotes del campo elegido en el form
     if (presetCampo) {
       axios
         .get(`/api/lotes/por-campo/${presetCampo}/`)
@@ -173,30 +281,23 @@ export default function Calendario() {
     e.preventDefault();
     setErrorTxt("");
     setOkTxt("");
-
-    // Validaciones mínimas
     if (!form.fecha || !form.tipo || !form.loteId) {
       setErrorTxt("Completá fecha, tipo y lote para guardar.");
       return;
     }
-
     const payload = new FormData();
     payload.append("lote", form.loteId);
     payload.append("tipo", form.tipo);
     payload.append("fecha", form.fecha);
     payload.append("observaciones", form.observaciones || "");
-
     try {
       setSending(true);
       await axios.post("/api/tareas/", payload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setShowForm(false);
-      setOkTxt("¡Anotación agregado correctamente!");
-      // refrescar calendario
-      if (rangoRef.current.startStr) {
-        await fetchEventos(rangoRef.current);
-      }
+      setOkTxt("¡Anotación agregada correctamente!");
+      if (rangoRef.current.startStr) await fetchEventos(rangoRef.current);
       setTimeout(() => setOkTxt(""), 4000);
     } catch (err) {
       const msg = err?.response?.data
@@ -215,18 +316,14 @@ export default function Calendario() {
     const tipo = t?.tipo || "otra";
     const color = COLOR_MAP[tipo] || COLOR_MAP.otra;
     const loteLabel = t?.lote_nombre || (t?.lote ? `Lote ${t.lote}` : "Lote");
-    const titulo = `${LABEL_MAP[tipo] || "Tarea"} · ${loteLabel}`;
-
     return {
       id: String(t.id ?? `${tipo}-${t.fecha}-${t.lote ?? ""}-${Math.random()}`),
-      title: titulo,
-      start: t.fecha, // YYYY-MM-DD (allDay)
+      title: `${LABEL_MAP[tipo] || "Tarea"} · ${loteLabel}`,
+      start: t.fecha,
       allDay: true,
-      backgroundColor: color,
-      borderColor: color,
-      textColor: "#fff",
       extendedProps: {
         tipo,
+        color,
         observaciones: t.observaciones || "",
         lote: t.lote,
         lote_nombre: t.lote_nombre,
@@ -235,11 +332,9 @@ export default function Calendario() {
     };
   };
 
-  // Fetch de tareas desde el backend
   const fetchEventos = async ({ startStr, endStr }) => {
     setLoading(true);
     setErrorTxt("");
-
     try {
       const params = {};
       if (startStr) params.start = startStr;
@@ -248,12 +343,8 @@ export default function Calendario() {
       if (lote) params.lote = lote;
 
       const { data } = await axios.get("/api/tareas/", { params });
-
-      const enRango = (it) => {
-        if (!startStr || !endStr) return true;
-        return it.fecha >= startStr && it.fecha < endStr; // end exclusivo
-      };
-
+      const enRango = (it) =>
+        !startStr || !endStr ? true : it.fecha >= startStr && it.fecha < endStr;
       const filtradas = (Array.isArray(data) ? data : [])
         .filter(enRango)
         .filter((t) => filtroActividades.has(t.tipo || "otra"))
@@ -273,81 +364,61 @@ export default function Calendario() {
     }
   };
 
-  // Refiltrar en memoria cuando cambian filtros sin mover el calendario
-  const eventosFiltrados = useMemo(() => {
-    return eventos.filter((ev) =>
-      filtroActividades.has(ev.extendedProps?.tipo || "otra")
-    );
-  }, [eventos, filtroActividades]);
+  const eventosFiltrados = useMemo(
+    () =>
+      eventos.filter((ev) =>
+        filtroActividades.has(ev.extendedProps?.tipo || "otra")
+      ),
+    [eventos, filtroActividades]
+  );
 
-  // Manejo de cambio de mes / rango visible (FullCalendar)
   const onDatesSet = (arg) => {
-    const startStr = arg?.startStr?.slice(0, 10); // YYYY-MM-DD
+    const startStr = arg?.startStr?.slice(0, 10);
     const endStr = arg?.endStr?.slice(0, 10);
     rangoRef.current = { startStr, endStr };
     fetchEventos({ startStr, endStr });
   };
 
-  // Botón "Actualizar" manual
-  const handleRefresh = () => {
-    fetchEventos(rangoRef.current || {});
+  const handleRefresh = () => fetchEventos(rangoRef.current || {});
+
+  // Render rico de evento
+  const renderEventContent = (info) => {
+    const tipo = info.event.extendedProps?.tipo || "otra";
+    const color = info.event.extendedProps?.color || COLOR_MAP[tipo];
+    const [titulo, sub] = info.event.title.split(" · ");
+    return (
+      <div className="event-chip" style={{ "--evcolor": color }}>
+        <div className="bar" />
+        <div className="d-flex flex-column py-1">
+          <div className="text">{titulo}</div>
+          {sub && <div className="sub">{sub}</div>}
+        </div>
+      </div>
+    );
   };
 
-  // Cambio de filtros de actividad
-  const toggleActividad = (key) => {
-    setFiltroActividades((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
-
-  // Re-fetch cuando cambian campo/lote
-  useEffect(() => {
-    if (rangoRef.current.startStr) {
-      fetchEventos(rangoRef.current);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [campo, lote]);
+  // Modal detalle: header temático por tipo
+  const headerStyle = (tipo) => ({
+    background: `${COLOR_MAP[tipo] || "#198754"}10`,
+    borderBottom: `2px solid ${COLOR_MAP[tipo] || "#198754"}`,
+  });
 
   return (
     <Card
-      className="mx-auto my-5 shadow"
+      className="mx-auto my-4 shadow position-relative"
       style={{
         maxWidth: 1160,
         background: "#fff",
         borderRadius: "1.4rem",
         border: "none",
-        overflow: "hidden",
+        overflow: "visible", // permite que el dropdown no se recorte
       }}
     >
-      <Card.Body>
-        {/* CSS: texto negro + botón en celdas */}
-        <style>{calendarTextCss}</style>
+      <style>{styles}</style>
 
-        <Card.Title className="fw-bold mb-3" style={{ color: "#155a36" }}>
-          Calendario Personal
-        </Card.Title>
-
-        {/* Mensajes */}
-        {okTxt && (
-          <Alert variant="success" className="py-2">
-            {okTxt}
-          </Alert>
-        )}
-        {errorTxt && (
-          <Alert
-            variant="danger"
-            className="py-2"
-            style={{ whiteSpace: "pre-wrap" }}
-          >
-            {errorTxt}
-          </Alert>
-        )}
-
-        {/* Filtros */}
-        <Row className="g-3 align-items-end mb-3">
+      {/* Toolbar Sticky: filtros y acciones */}
+      <div className="calendar-toolbar px-4 pt-3 pb-2">
+        <Row className="g-3 align-items-end">
           <Col md={4}>
             <Form.Label className="fw-semibold">Campo</Form.Label>
             <Form.Select
@@ -380,140 +451,164 @@ export default function Calendario() {
               ))}
             </Form.Select>
           </Col>
-          <Col md={4} className="d-flex gap-2">
-            {/* Si querés ocultar este botón, simplemente borrá estas 2 líneas */}
-            <Button
-              variant="success"
-              className="ms-auto"
-              onClick={() => openForm({})}
-            >
-              + Nueva tarea o anotación
-            </Button>
+          <Col md={4} className="d-flex gap-2 justify-content-md-end">
+            <MultiSelectActividades
+              selected={filtroActividades}
+              onChange={setFiltroActividades}
+            />
             <Button variant="outline-success" onClick={handleRefresh}>
               {loading ? (
                 <>
-                  <Spinner animation="border" size="sm" className="me-2" />{" "}
+                  <Spinner animation="border" size="sm" className="me-2" />
                   Cargando…
                 </>
               ) : (
                 "Actualizar"
               )}
             </Button>
+            <Button variant="success" onClick={() => openForm({})}>
+              + Nuevo
+            </Button>
           </Col>
         </Row>
 
-        {/* Chips de filtro por actividad */}
-        <div className="mb-3 d-flex flex-wrap gap-2">
+        {/* Hints compactos */}
+        <div className="pt-2 pb-1 d-flex flex-wrap gap-3">
           {ACTIVIDADES.map((k) => (
-            <Badge
-              key={k}
-              pill
-              bg={filtroActividades.has(k) ? "success" : "secondary"}
-              style={{
-                cursor: "pointer",
-                background: COLOR_MAP[k] || undefined,
-              }}
-              onClick={() => toggleActividad(k)}
-              title={LABEL_MAP[k]}
-            >
-              {LABEL_MAP[k]}
-            </Badge>
-          ))}
-        </div>
-
-        {/* Calendario */}
-        <div className="calendar-wrapper">
-          <FullCalendar
-            plugins={[dayGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
-            height="auto"
-            firstDay={1}
-            locale="es"
-            fixedWeekCount={false}
-            showNonCurrentDates={false}
-            headerToolbar={{
-              left: "prev,next today",
-              center: "title",
-              right: "",
-            }}
-            events={eventosFiltrados}
-            datesSet={onDatesSet}
-            /* Click en el día completo también abre el form */
-            dateClick={(info) => openForm({ dateStr: info.dateStr })}
-            /* aca agregamos el botón “+” dentro de cada celda */
-            dayCellDidMount={(args) => {
-              try {
-                const topEl = args.el.querySelector(".fc-daygrid-day-top");
-                if (!topEl) return;
-
-                const numberEl = topEl.querySelector(".fc-daygrid-day-number");
-
-                const btn = document.createElement("button");
-                btn.type = "button";
-                btn.className = "fc-add-inline-btn";
-                btn.title = "Nueva anotación personal";
-                btn.setAttribute("aria-label", "Nueva anotación personal");
-                btn.textContent = "+";
-
-                btn.addEventListener("click", (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  const dateStr = args.date.toISOString().slice(0, 10);
-                  openForm({ dateStr }); // tu modal con la fecha precargada
-                });
-
-                // 👉 Insertar a la izquierda del número (antes en el DOM)
-                if (numberEl) topEl.insertBefore(btn, numberEl);
-                else topEl.appendChild(btn);
-              } catch {
-                /* no-op */
-              }
-            }}
-            eventClick={(info) => {
-              setDetalle({
-                id: info.event.id,
-                title: info.event.title,
-                fecha: info.event.startStr?.slice(0, 10),
-                tipo: info.event.extendedProps?.tipo,
-                observaciones: info.event.extendedProps?.observaciones || "",
-                lote: info.event.extendedProps?.lote,
-                lote_nombre: info.event.extendedProps?.lote_nombre,
-                raw: info.event.extendedProps?.raw,
-              });
-            }}
-          />
-        </div>
-
-        {/* Leyenda */}
-        <div className="mt-3 d-flex flex-wrap gap-3">
-          {ACTIVIDADES.map((k) => (
-            <div key={k} className="d-flex align-items-center gap-2">
+            <span key={k}>
               <span
-                style={{
-                  display: "inline-block",
-                  width: 14,
-                  height: 14,
-                  borderRadius: 3,
-                  background: COLOR_MAP[k],
-                }}
-              />
-              <small>{LABEL_MAP[k]}</small>
-            </div>
+                className="legend-dot"
+                style={{ background: COLOR_MAP[k] }}
+              />{" "}
+              <small className="text-muted">{LABEL_MAP[k]}</small>
+            </span>
           ))}
+        </div>
+      </div>
+
+      <Card.Body className="p-0">
+        {/* Mensajes */}
+        <div className="px-4 pt-3">
+          {okTxt && (
+            <Alert variant="success" className="py-2">
+              {okTxt}
+            </Alert>
+          )}
+          {errorTxt && (
+            <Alert
+              variant="danger"
+              className="py-2"
+              style={{ whiteSpace: "pre-wrap" }}
+            >
+              {errorTxt}
+            </Alert>
+          )}
+        </div>
+
+        <div className="position-relative px-2 pb-3">
+          {loading && (
+            <div className="loading-overlay">
+              <div className="d-flex align-items-center gap-2">
+                <Spinner animation="border" size="sm" />
+                <span className="fw-semibold text-success">
+                  Cargando calendario…
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Calendario envuelto para conservar esquinas redondeadas abajo */}
+          <div className="px-3">
+            <div
+              style={{
+                overflow: "hidden",
+                borderBottomLeftRadius: "1.4rem",
+                borderBottomRightRadius: "1.4rem",
+              }}
+            >
+              <FullCalendar
+                plugins={[dayGridPlugin, interactionPlugin]}
+                initialView="dayGridMonth"
+                height="auto"
+                firstDay={1}
+                locale="es"
+                fixedWeekCount={false}
+                showNonCurrentDates={false}
+                headerToolbar={{
+                  left: "prev,next today",
+                  center: "title",
+                  right: "",
+                }}
+                events={eventosFiltrados}
+                datesSet={onDatesSet}
+                dateClick={(info) => openForm({ dateStr: info.dateStr })}
+                eventClick={(info) => {
+                  setDetalle({
+                    id: info.event.id,
+                    title: info.event.title,
+                    fecha: info.event.startStr?.slice(0, 10),
+                    tipo: info.event.extendedProps?.tipo,
+                    observaciones:
+                      info.event.extendedProps?.observaciones || "",
+                    lote: info.event.extendedProps?.lote,
+                    lote_nombre: info.event.extendedProps?.lote_nombre,
+                    raw: info.event.extendedProps?.raw,
+                  });
+                }}
+                eventContent={renderEventContent}
+                dayMaxEventRows={4}
+                moreLinkContent={(arg) => `${arg.num} más`}
+              />
+            </div>
+          </div>
+
+          {/* Empty state visual cuando no hay eventos filtrados */}
+          {!loading && eventosFiltrados.length === 0 && (
+            <div className="text-center py-5">
+              <div className="mb-2">
+                <Badge bg="light" text="dark" className="border">
+                  Sin resultados
+                </Badge>
+              </div>
+              <p className="text-muted mb-2">
+                No hay actividades para el rango y filtros seleccionados.
+              </p>
+              <div className="d-flex gap-2 justify-content-center">
+                <Button
+                  size="sm"
+                  variant="outline-secondary"
+                  onClick={() => setFiltroActividades(new Set(ACTIVIDADES))}
+                >
+                  Limpiar filtros
+                </Button>
+                <Button
+                  size="sm"
+                  variant="success"
+                  onClick={() => openForm({})}
+                >
+                  + Crear actividad
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </Card.Body>
 
-      {/* Modal detalle */}
+      {/* Modal detalle (header temático) */}
       <Modal show={!!detalle} onHide={() => setDetalle(null)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>
+        <Modal.Header closeButton style={headerStyle(detalle?.tipo || "otra")}>
+          <Modal.Title className="d-flex align-items-center gap-2">
+            <span
+              className="legend-dot"
+              style={{ background: COLOR_MAP[detalle?.tipo || "otra"] }}
+            />
             {LABEL_MAP[detalle?.tipo || "otra"] || "Evento"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p className="mb-1">
             <strong>Fecha: </strong>
-            {detalle?.fecha}
+            {detalle?.fecha || "-"}
           </p>
           <p className="mb-1">
             <strong>Lote: </strong>
@@ -523,7 +618,7 @@ export default function Calendario() {
               ? `#${detalle.lote}`
               : "-"}
           </p>
-          <p className="mb-1">
+          <p className="mb-0">
             <strong>Observaciones: </strong>
             {detalle?.observaciones || "—"}
           </p>
@@ -536,7 +631,7 @@ export default function Calendario() {
                 dateStr: detalle?.fecha,
                 presetCampo: campo,
                 presetLote: detalle?.lote || lote || "",
-                presetTipo: "otra",
+                presetTipo: detalle?.tipo || "otra",
               });
               setDetalle(null);
             }}
@@ -549,7 +644,7 @@ export default function Calendario() {
         </Modal.Footer>
       </Modal>
 
-      {/* Modal alta rápida tarea/comentario */}
+      {/* Modal alta rápida */}
       <Modal show={showForm} onHide={() => setShowForm(false)} centered>
         <Form onSubmit={submitNuevaTarea}>
           <Modal.Header closeButton>
@@ -622,7 +717,7 @@ export default function Calendario() {
                 <Form.Control
                   as="textarea"
                   rows={3}
-                  placeholder="Notas, comentario o detalles de la tarea…"
+                  placeholder="Notas, comentario o detalles…"
                   value={form.observaciones}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, observaciones: e.target.value }))
