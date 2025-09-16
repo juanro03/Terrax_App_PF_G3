@@ -53,6 +53,7 @@ const Calculadora = () => {
   const [productos, setProductos] = useState([
     { id: Date.now(), envase: "", producto: "", dosis: "", unidad: "L" },
   ]);
+
   const handleDescargarPDF = () => {
     const opt = {
       margin: 0.5,
@@ -447,6 +448,50 @@ const Calculadora = () => {
         <Card.Title className="fw-bold mb-4" style={{ color: verdeOscuro }}>
           Calculadora de Caldos
         </Card.Title>
+
+        {/* Estilos: Tabs verdes y botones cuadrados como en Productos */}
+        <style>{`
+          /* Tabs en verde */
+          .tab-terrax .nav-link { color: ${verde}; font-weight: 600; }
+          .tab-terrax .nav-link:hover, .tab-terrax .nav-link:focus { color: ${verdeOscuro}; }
+          .tab-terrax .nav-link.active, .tab-terrax .nav-item.show .nav-link {
+            color: ${verdeOscuro} !important;
+            border-color: ${verde} ${verde} transparent;
+          }
+
+          /* Botones cuadrados (consistente con Productos) */
+          .btn-sq { border-radius: 10px !important; }
+          .btn-terrax {
+            background: ${verde};
+            color: ${blanco};
+            border: 1px solid ${verde};
+            font-weight: 700;
+            border-radius: 10px;
+            padding: 10px 16px;
+          }
+          .btn-terrax:hover { background: ${verdeOscuro}; border-color: ${verdeOscuro}; }
+
+          .btn-terrax-outline {
+            background: ${blanco};
+            color: ${verde};
+            border: 1.5px solid ${verde};
+            font-weight: 700;
+            border-radius: 10px;
+            padding: 10px 16px;
+          }
+          .btn-terrax-outline:hover { background: ${verdeOscuro}; }
+
+          .btn-terrax-soft {
+            background: ${verdeClaro};
+            color: ${verdeOscuro};
+            border: 1.5px solid ${verdeOscuro};
+            font-weight: 700;
+            border-radius: 10px;
+            padding: 10px 16px;
+          }
+          .btn-terrax-soft:hover { filter: brightness(0.97); }
+        `}</style>
+
         {/* FORM PRINCIPAL */}
         <Form>
           <Row className="g-3 mb-4">
@@ -599,6 +644,7 @@ const Calculadora = () => {
                           <Button
                             variant="outline-danger"
                             size="sm"
+                            className="btn-sq"
                             onClick={() => eliminarProducto(p.id)}
                           >
                             <Trash2 size={16} />
@@ -609,10 +655,9 @@ const Calculadora = () => {
                   </tbody>
                 </Table>
                 <Button
-                  variant="success"
                   size="sm"
                   onClick={agregarProducto}
-                  className="mt-2 rounded-pill px-3"
+                  className="btn-terrax mt-2"
                 >
                   <Plus size={14} /> Agregar producto
                 </Button>
@@ -861,13 +906,8 @@ const Calculadora = () => {
             <Row>
               <Col className="text-end">
                 <Button
-                  variant="outline-success"
-                  className="rounded-pill px-4 shadow-sm"
+                  className="btn-terrax-outline"
                   onClick={limpiarRegistros}
-                  style={{
-                    fontWeight: "bold",
-                    borderColor: verde,
-                  }}
                 >
                   Limpiar registros
                 </Button>
@@ -889,7 +929,7 @@ const Calculadora = () => {
                 >
                   <thead>
                     <tr style={{ background: verde, color: blanco }}>
-                      <th>Bolsa (Kg)</th>
+                      <th>Bolsa</th>
                       <th>Producto</th>
                       <th>Dosis</th>
                       <th>Unidad</th>
@@ -957,7 +997,7 @@ const Calculadora = () => {
                             }
                             className="input-terrax"
                           >
-                            <option>Kg/ha</option>
+                            <option>kg/ha</option>
                             <option>g/ha</option>
                           </Form.Select>
                         </td>
@@ -965,6 +1005,7 @@ const Calculadora = () => {
                           <Button
                             variant="outline-danger"
                             size="sm"
+                            className="btn-sq"
                             onClick={() => eliminarProductoSolido(p.id)}
                           >
                             <Trash2 size={16} />
@@ -975,10 +1016,9 @@ const Calculadora = () => {
                   </tbody>
                 </Table>
                 <Button
-                  variant="success"
                   size="sm"
                   onClick={agregarProductoSolido}
-                  className="mt-2 rounded-pill px-3"
+                  className="btn-terrax mt-2"
                 >
                   <Plus size={14} /> Agregar línea
                 </Button>
@@ -1025,13 +1065,8 @@ const Calculadora = () => {
             <Row>
               <Col className="text-end">
                 <Button
-                  variant="outline-success"
-                  className="rounded-pill px-4 shadow-sm"
+                  className="btn-terrax-outline"
                   onClick={limpiarRegistros}
-                  style={{
-                    fontWeight: "bold",
-                    borderColor: verde,
-                  }}
                 >
                   Limpiar registros
                 </Button>
@@ -1177,13 +1212,7 @@ const Calculadora = () => {
             <Row className="gx-3">
               <Col md={6}>
                 <Button
-                  className="btn-terrax-light w-100 d-flex align-items-center justify-content-center rounded-pill"
-                  style={{
-                    background: "#e9fbe5",
-                    color: verdeOscuro,
-                    border: `1px solid ${verde}`,
-                    fontWeight: "bold",
-                  }}
+                  className="btn-terrax-soft w-100 d-flex align-items-center justify-content-center"
                   onClick={() => setShowResumen(true)}
                 >
                   <i className="bi bi-filetype-pdf me-2" /> Generar Receta
@@ -1191,12 +1220,7 @@ const Calculadora = () => {
               </Col>
               <Col md={6}>
                 <Button
-                  variant="outline-success"
-                  className="w-100 d-flex align-items-center justify-content-center rounded-pill"
-                  style={{
-                    fontWeight: "bold",
-                    borderColor: verde,
-                  }}
+                  className="btn-terrax-outline w-100 d-flex align-items-center justify-content-center"
                   onClick={limpiarObservaciones}
                 >
                   <i className="bi bi-backspace me-2" /> Limpiar
@@ -1220,23 +1244,17 @@ const Calculadora = () => {
                 <div ref={resumenRef}>{getResumenText()}</div>
               </Modal.Body>
               <Modal.Footer>
-                <Button
-                  variant="success"
-                  className="rounded-pill"
-                  onClick={handleDescargarPDF}
-                >
+                <Button className="btn-terrax" onClick={handleDescargarPDF}>
                   <i className="bi bi-download me-2" /> Descargar PDF
                 </Button>
                 <Button
-                  variant="outline-secondary"
-                  className="rounded-pill"
+                  className="btn-terrax-outline"
                   onClick={() => setShowResumen(false)}
                 >
                   Cerrar
                 </Button>
               </Modal.Footer>
             </Modal>
-            ;
           </Tab>
         </Tabs>
       </Card.Body>

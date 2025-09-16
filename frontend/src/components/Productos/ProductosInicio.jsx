@@ -1,9 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Row, Col } from "react-bootstrap";
+import { Row, Col } from "react-bootstrap";
 import { BsPlusCircle, BsSearch } from "react-icons/bs";
 
-// PALETA
+/** Estética Terrax (mismo verde, botones/cuadros con esquinas cuadradas suaves) */
 const verde = "#198754";
 const verdeClaro = "#e9fbe5";
 const verdeOscuro = "#155a36";
@@ -38,27 +38,23 @@ const ProductosInicio = () => {
   };
 
   return (
-    <Card
-      className="mx-auto my-5 shadow"
+    <div
+      className="terrax-card"
       style={{
-        maxWidth: 1160,
-        background: blanco,
-        borderRadius: "1.4rem",
-        border: "none",
+        /** cartulina blanca más alta desde el inicio */
+        minHeight: "80vh",
       }}
     >
-      <Card.Body className="p-4 p-sm-5">
+      <div
+        className="reportes-container"
+        style={{ width: "100%", alignItems: "stretch", padding: 0 }}
+      >
         {/* Título + subtítulo */}
-        <div className="mb-5">
-          <h2 className="fw-bold" style={{ color: verdeOscuro }}>
-            Mis Productos
-          </h2>
+        <div className="mb-4">
+          <h2 className="terrax-title">Mis Productos</h2>
           <p
             className="text-muted"
-            style={{
-              fontSize: "0.975rem",
-              marginTop: "0.8rem", // 👈 separa más el subtítulo del título
-            }}
+            style={{ fontSize: "0.975rem", marginTop: "0.8rem" }}
           >
             Gestioná tu catálogo: consultá, filtrá o sumá nuevos ítems.
           </p>
@@ -68,20 +64,21 @@ const ProductosInicio = () => {
         <Row className="g-4">
           {cards.map(({ title, desc, icon, route, primary }) => (
             <Col key={title} xs={12} md={6}>
-              <Card
+              <article
                 role="button"
                 tabIndex={0}
                 onClick={() => navigate(route)}
                 onKeyDown={(e) => handleKey(e, route)}
-                className="shadow-sm"
                 style={{
                   height: "100%",
-                  borderRadius: "1.2rem",
+                  borderRadius: "1rem",
                   border: `1px solid ${verde}20`,
-                  background: primary ? "#fefefe" : grisClaro,
+                  background: primary ? blanco : grisClaro,
+                  boxShadow: "0 2px 8px rgba(0,0,0,.06)",
                   transition:
                     "transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease",
                   cursor: "pointer",
+                  padding: "1rem 1.25rem",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-3px)";
@@ -92,25 +89,26 @@ const ProductosInicio = () => {
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = "none";
-                  e.currentTarget.style.boxShadow = "";
+                  e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,.06)";
                   e.currentTarget.style.border = `1px solid ${verde}20`;
                   e.currentTarget.style.background = primary
-                    ? "#fefefe"
+                    ? blanco
                     : grisClaro;
                 }}
               >
-                <Card.Body className="p-4 d-flex align-items-center">
+                <div className="d-flex align-items-center">
                   {/* Icon chip */}
                   <div
                     className="me-3 me-sm-4 d-inline-flex align-items-center justify-content-center"
                     aria-hidden="true"
                     style={{
-                      minWidth: 56,
-                      minHeight: 56,
-                      borderRadius: 16,
+                      width: 56,
+                      height: 56,
+                      borderRadius: "12px", // cuadrado suave
                       background: verdeClaro,
                       color: verde,
                       boxShadow: "inset 0 0 0 2px rgba(25,135,84,.15)",
+                      flexShrink: 0,
                     }}
                   >
                     {icon}
@@ -125,19 +123,20 @@ const ProductosInicio = () => {
                       >
                         {title}
                       </h5>
+
+                      {/* “Abrir” como botón cuadrado outline en el mismo verde */}
                       <span
-                        className="px-3 py-1 rounded-pill"
+                        className="btn-terrax-outline"
                         style={{
-                          fontSize: ".8rem",
-                          fontWeight: 600,
-                          background: verdeClaro,
-                          color: verdeOscuro,
-                          border: `1px solid ${verde}33`,
+                          padding: ".4rem .8rem",
+                          lineHeight: 1,
                         }}
+                        aria-hidden="true"
                       >
                         Abrir
                       </span>
                     </div>
+
                     <p
                       className="mb-0 mt-2 text-muted"
                       style={{ fontSize: ".95rem", lineHeight: 1.35 }}
@@ -145,13 +144,13 @@ const ProductosInicio = () => {
                       {desc}
                     </p>
                   </div>
-                </Card.Body>
-              </Card>
+                </div>
+              </article>
             </Col>
           ))}
         </Row>
-      </Card.Body>
-    </Card>
+      </div>
+    </div>
   );
 };
 

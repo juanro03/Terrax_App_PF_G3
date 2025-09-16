@@ -4,7 +4,7 @@ import { Card, Button, Form, Row, Col } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 
-// === PALETA / TOKENS (misma que Calculadora)
+// === PALETA / TOKENS
 const verde = "#198754";
 const verdeClaro = "#e9fbe5";
 const verdeOscuro = "#155a36";
@@ -100,7 +100,6 @@ const ProductosForm = () => {
   const [inputOtroTipo, setInputOtroTipo] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Handlers
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -149,7 +148,6 @@ const ProductosForm = () => {
     }
   };
 
-  // Inputs dinámicos
   const renderInputs = () => {
     if (categoriaSeleccionada === "SEMILLAS") {
       return (
@@ -214,7 +212,6 @@ const ProductosForm = () => {
 
     return (
       <>
-        {/* Fila 1: Nombre y Tipo al 50/50 en desktop */}
         <Col xs={12} md={6}>
           <Form.Label className="fw-semibold" style={{ color: verdeOscuro }}>
             Nombre
@@ -262,24 +259,18 @@ const ProductosForm = () => {
     );
   };
 
-  // === UI ===
   return (
-    <Card
-      className="mx-auto my-5 shadow"
+    <div
+      className="terrax-card"
       style={{
-        maxWidth: "1160px",
-        background: blanco,
-        borderRadius: "1.4rem",
-        border: "none",
+        minHeight: "85vh", // cartulina blanca siempre del mismo tamaño
       }}
     >
       <Card.Body>
-        {/* Título */}
         <Card.Title className="fw-bold mb-4" style={{ color: verdeOscuro }}>
           Registrar Productos — {categoriaSeleccionada}
         </Card.Title>
 
-        {/* IMPORTANTE: igualar alturas */}
         <Row className="g-4 align-items-stretch">
           {/* Sidebar categorías */}
           <Col md="auto" className="d-flex">
@@ -304,28 +295,15 @@ const ProductosForm = () => {
                 return (
                   <Button
                     key={cat.nombre}
-                    variant="light"
-                    className="mb-3 w-100 rounded-pill"
-                    onClick={() => setCategoriaSeleccionada(cat.nombre)}
+                    className="btn-terrax mb-3 w-100"
                     style={{
                       backgroundColor: active ? verde : blanco,
                       color: active ? blanco : verdeOscuro,
                       border: active
                         ? `1px solid ${verde}`
                         : "1px solid #d9e4dd",
-                      boxShadow: active ? "0 2px 6px rgba(0,0,0,0.15)" : "none",
-                      fontWeight: active ? 700 : 500,
-                      height: 48,
-                      transition: "all .2s ease-in-out",
                     }}
-                    onMouseEnter={(e) => {
-                      if (!active)
-                        e.currentTarget.style.backgroundColor = verdeClaro;
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!active)
-                        e.currentTarget.style.backgroundColor = blanco;
-                    }}
+                    onClick={() => setCategoriaSeleccionada(cat.nombre)}
                   >
                     {cat.nombre}
                   </Button>
@@ -337,7 +315,6 @@ const ProductosForm = () => {
           {/* Panel derecho */}
           <Col className="d-flex flex-column">
             <div className="flex-fill d-flex flex-column">
-              {/* Header de acción */}
               <Row className="align-items-center mb-3">
                 <Col>
                   <h5
@@ -352,10 +329,7 @@ const ProductosForm = () => {
                 </Col>
                 <Col className="text-end">
                   <Button
-                    variant="outline-success"
-                    size="sm"
-                    className="rounded-pill d-inline-flex align-items-center"
-                    style={{ fontWeight: "bold", borderColor: verde }}
+                    className="btn-terrax-outline"
                     onClick={() => navigate("/productos")}
                   >
                     <FaArrowLeft className="me-2" /> Volver
@@ -363,30 +337,18 @@ const ProductosForm = () => {
                 </Col>
               </Row>
 
-              {/* Form principal (no comprime los campos) */}
               <Card
                 className="p-4 mb-3 rounded-4 shadow-sm"
                 style={{ background: grisClaro, border: "none" }}
               >
                 <Form onSubmit={handleSubmit}>
-                  {/* Fila 1: campos */}
                   <Row className="g-3">{renderInputs()}</Row>
-
-                  {/* Fila 2: botón separado */}
                   <Row className="mt-3">
                     <Col className="text-end">
                       <Button
                         type="submit"
                         disabled={submitting}
-                        className="rounded-pill shadow-sm"
-                        style={{
-                          backgroundColor: verde,
-                          color: blanco,
-                          border: "none",
-                          fontWeight: "bold",
-                          paddingInline: "24px",
-                          height: 44,
-                        }}
+                        className="btn-terrax"
                       >
                         {submitting ? "Guardando..." : "Agregar"}
                       </Button>
@@ -395,7 +357,6 @@ const ProductosForm = () => {
                 </Form>
               </Card>
 
-              {/* Resumen / preview */}
               <Card
                 className="p-3 rounded-4 shadow-sm"
                 style={{ background: blanco, border: `1px solid ${verde}20` }}
@@ -420,7 +381,6 @@ const ProductosForm = () => {
                     </>
                   )}
                 </Row>
-
                 <Row className="pt-2" style={{ color: grisOscuro }}>
                   {categoriaSeleccionada === "SEMILLAS" ? (
                     <>
@@ -442,26 +402,16 @@ const ProductosForm = () => {
               </Card>
             </div>
 
-            {/* Botones de navegación al final */}
             <Row className="mt-4">
               <Col className="d-flex justify-content-end gap-3">
                 <Button
-                  variant="outline-success"
-                  className="rounded-pill px-4 shadow-sm d-flex align-items-center"
-                  style={{ fontWeight: "bold", borderColor: verde }}
+                  className="btn-terrax-outline"
                   onClick={() => navigate("/productos")}
                 >
                   <i className="bi bi-house-door me-2"></i> Volver al Inicio
                 </Button>
-
                 <Button
-                  variant="success"
-                  className="rounded-pill px-4 shadow-sm d-flex align-items-center"
-                  style={{
-                    fontWeight: "bold",
-                    backgroundColor: verde,
-                    border: "none",
-                  }}
+                  className="btn-terrax"
                   onClick={() => navigate("/productos/ver")}
                 >
                   <i className="bi bi-card-list me-2"></i> Ver Mis Productos
@@ -471,7 +421,7 @@ const ProductosForm = () => {
           </Col>
         </Row>
       </Card.Body>
-    </Card>
+    </div>
   );
 };
 
