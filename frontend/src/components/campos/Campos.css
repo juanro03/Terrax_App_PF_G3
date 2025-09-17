@@ -191,7 +191,7 @@ input[type="file"]::file-selector-button:hover {
 
 /* Caja blanca contenedora (igual a Usuarios) */
 .campos-shell {
-  max-width: 1400px;
+  max-width: 1200px;
   background: #fff;
   border-radius: 1.4rem;
   border: none;
@@ -219,7 +219,7 @@ input[type="file"]::file-selector-button:hover {
 
 .campos-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.274);
+  box-shadow: 0 14px 28px #0000002a;
 }
 
 /* Responsivo: 3, 2, 1 columnas */
@@ -233,3 +233,31 @@ input[type="file"]::file-selector-button:hover {
   .campos-card { flex-basis: 100%; max-width: 520px; }
 }
 
+.campos-header{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 100px;
+}
+
+.campos-title{
+  margin: 0;
+  text-align: left !important;
+}
+
+/* Contiene ambos botones y los empuja a la derecha */
+.header-actions{
+  margin-left: auto;           /* mueve el bloque de botones a la derecha */
+  display: flex;
+  gap: 8px;                    /* “pegados” pero con un respiro */
+}
+
+/* Responsive: apila prolijo en pantallas chicas */
+@media (max-width: 576px){
+  .campos-header{
+    flex-wrap: wrap;
+  }
+  .header-actions{
+    margin-left: 0;
+  }
+}

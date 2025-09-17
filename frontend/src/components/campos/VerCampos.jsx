@@ -57,17 +57,26 @@ const VerCampos = () => {
       {/* Caja blanca central tipo “Usuarios” */}
       <div className="mx-auto my-5 shadow campos-shell">
         <div className="p-4 p-sm-5">
-          {/* Título */}
-          <h2 className="text-3xl fw-bold mb-3 text-center">Campos Registrados</h2>
+          {/* Header: título a la izquierda, botones a la derecha */}
+          <div className="campos-header">
+            <h2 className="campos-title text-3xl fw-bold mb-0">Campos Registrados</h2>
 
-          {/* Botón Agregar centrado */}
-          <div className="text-center mb-3">
-            <button
-              className="btn btn-success fw-semibold px-4 py-2 rounded-3"
-              onClick={() => setShowCrear(true)}
-            >
-              + Agregar Campo
-            </button>
+            <div className="header-actions">
+              <button
+                className="btn btn-success fw-semibold px-4 py-2 rounded-3"
+                onClick={() => setShowCrear(true)}
+              >
+                + Agregar Campo
+              </button>
+
+              <button
+                className="btn btn-outline-success fw-semibold px-4 py-2 rounded-3"
+                onClick={() => setMostrarModal(true)}
+              >
+                Solicitar Servicio
+              </button>
+            </div>
+
           </div>
 
           {/* Filtros / buscador */}
@@ -87,14 +96,6 @@ const VerCampos = () => {
               onClick={() => setFiltroTexto("")}
             >
               Limpiar
-            </button>
-
-            <button
-              className="btn btn-success"
-              style={{ height: 38 }}
-              onClick={() => setMostrarModal(true)}
-            >
-              Solicitar Servicio
             </button>
           </div>
 

@@ -216,8 +216,7 @@ const Reportes = () => {
 
   return (
     <Card
-      className="mx-auto my-5 shadow"
-      style={{ maxWidth: 1600, background: blanco, borderRadius: "1.4rem", border: "none" }}
+      className="mx-auto my-5 reportes-shell"
     >
       <Card.Body className="p-4 p-sm-5">
         <div className="reportes-container">

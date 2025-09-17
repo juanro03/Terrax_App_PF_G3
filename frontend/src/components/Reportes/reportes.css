@@ -10,6 +10,15 @@
 }
 
 /* ===== CONTENEDOR GENERAL ===== */
+
+.reportes-shell{
+  max-width: 1400px;
+  background: #ffffff;
+  border-radius: 1.4rem;
+  border: none;
+}
+
+
 .reportes-container {
   display: flex;
   flex-direction: column;
