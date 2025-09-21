@@ -19,7 +19,7 @@ const TYPE_META = {
   RIEGO:         { label: "Riego",                  bg: "#e6f3fb", dot: "#5aa6d6" },
   FITOSANITARIA: { label: "Aplicación Fitosanitaria", bg: "#e8f2ea", dot: "#4f8f67" },
   COSECHA:       { label: "Cosecha",                bg: "#fff5d7", dot: "#cc9a00" },
-  OTRA:          { label: "Tarea",                  bg: "#f3f5f7", dot: "#8792a1" },
+  OTRA:          { label: "Otros",                  bg: "#f3f5f7", dot: "#8792a1" }, // <-- label cambiado a 'Otros'
 };
 
 // para mapear strings del backend -> claves de arriba
@@ -33,6 +33,7 @@ const mapTipo = (raw) => {
   if (s.includes("riego")) return "RIEGO";
   if (s.includes("fitosan")) return "FITOSANITARIA";
   if (s.includes("cosech")) return "COSECHA";
+  if (s.includes("otro") || s.includes("otra")) return "OTRA"; // explícito para 'otros' / 'otra'
   return "OTRA";
 };
 
@@ -42,6 +43,7 @@ const FIELD_LABELS = {
   fecha: "Fecha",
   descripcion: "Descripción",
   observaciones: "Observaciones",
+  actividad_libre: "Actividad (otros)",
   // siembra / cobertura
   cultivo: "Cultivo",
   variedad: "Variedad",
@@ -80,6 +82,7 @@ const TIPO_OPTIONS = [
   { key: "RIEGO", label: "Riego" },
   { key: "FITOSANITARIA", label: "Aplicación Fitosanitaria" },
   { key: "COSECHA", label: "Cosecha" },
+  { key: "OTRA", label: "Otros" }, // <-- opción para filtrar 'Otros'
 ];
 
 export default function TrazabilidadAgricola() {
@@ -125,12 +128,14 @@ export default function TrazabilidadAgricola() {
       });
       const normalized = (Array.isArray(data) ? data : []).map((it, idx) => {
         const t = mapTipo(it.tipo);
+        // prioridad para la descripción: descripcion -> actividad_libre -> observaciones
+        const desc = it.descripcion || it.actividad_libre || it.observaciones || null;
         return {
           id: it.id || `${t}-${idx}-${it.fecha}`,
           tipo: t,
-            // mostrar dd/mm/aaaa
+          // mostrar dd/mm/aaaa
           fecha: it.fecha,
-          descripcion: it.descripcion || null,
+          descripcion: desc,
           raw: it, // me guardo todo para detalle
         };
       });
@@ -200,7 +205,7 @@ export default function TrazabilidadAgricola() {
       ],
       FITOSANITARIA: ["producto_aplicar", "plaga_maleza", "observaciones"],
       COSECHA: ["rinde", "unidad_rinde", "observaciones"],
-      OTRA: ["descripcion", "observaciones"],
+      OTRA: ["actividad_libre", "descripcion", "observaciones"], // <-- incluir actividad_libre
     };
 
     const keys = preferredByType[ev.tipo] || ["descripcion", "observaciones"];
@@ -213,6 +218,8 @@ export default function TrazabilidadAgricola() {
     // si quedó vacío, al menos muestro la descripción
     if (pairs.length <= 1 && r.descripcion) {
       pairs.push(["descripcion", r.descripcion]);
+    } else if (pairs.length === 0 && r.observaciones) {
+      pairs.push(["observaciones", r.observaciones]);
     }
 
     return pairs;

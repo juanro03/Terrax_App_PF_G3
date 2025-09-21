@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from lotes.models import Lote
 
 class Tarea(models.Model):
@@ -8,7 +9,7 @@ class Tarea(models.Model):
         ('laboreo', 'Laboreos de Lote'),
         ('riego', 'Riego'),
         ('fitosanitaria', 'Aplicación Fitosanitaria'),
-        ('otra', 'Otra'),
+        ('otros', 'Otros'),  # <-- clave 'otros' (coincide con frontend)
     ]
     DOSIS_TIPO_CHOICES = [
         ('fija', 'Fija'),
@@ -21,6 +22,14 @@ class Tarea(models.Model):
     tipo = models.CharField(max_length=30, choices=TIPO_CHOICES)
     fecha = models.DateField()
     observaciones = models.TextField(blank=True)
+
+    # Campo libre para "Otros" (titulo/resumen corto)
+    actividad_libre = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text="Título o breve descripción cuando tipo = 'Otros'"
+    )
 
     # FERTILIZACIÓN
     tipo_fertilizante = models.CharField(max_length=100, blank=True, null=True)
@@ -48,5 +57,28 @@ class Tarea(models.Model):
 
     creado_en = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['-fecha', '-creado_en']
+
     def __str__(self):
-        return f"{self.tipo} - {self.lote.nombre} ({self.fecha})"
+        lote_nombre = getattr(self.lote, 'nombre', str(self.lote))
+        return f"{self.get_tipo_display()} - {lote_nombre} ({self.fecha})"
+
+    def clean(self):
+        """
+        Validaciones por tipo:
+         - Si tipo == 'otros' requerir al menos actividad_libre o observaciones.
+         - Podés extender y agregar validaciones por fertilización, riego, etc.
+        """
+        super().clean()
+        if self.tipo == 'otros':
+            if not (self.actividad_libre and self.actividad_libre.strip()) and not (self.observaciones and self.observaciones.strip()):
+                raise ValidationError("Para actividades de tipo 'Otros' se requiere un título corto (actividad_libre) o observaciones.")
+
+        # Ejemplo opcional: obligar fecha (ya es required por campo), o validaciones específicas:
+        # if self.tipo == 'fertilizacion' and not self.tipo_fertilizante:
+        #     raise ValidationError("En Fertilización se debe indicar el tipo de fertilizante.")
+
+    # Si querés correr clean() en cada save
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)

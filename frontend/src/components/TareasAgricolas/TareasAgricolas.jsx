@@ -14,6 +14,7 @@ const actividades = [
   "Laboreos de Lote",
   "Riego",
   "Aplicación Fitosanitaria",
+  "Otros",
 ];
 
 // Mapa actividad (UI) -> key del modelo
@@ -23,6 +24,7 @@ const TIPO_MAP = {
   "Laboreos de Lote": "laboreo",
   Riego: "riego",
   "Aplicación Fitosanitaria": "fitosanitaria",
+  Otros: "otros",
 };
 
 // Opciones para "Tipo de laboreo"
@@ -107,6 +109,9 @@ export default function ActividadesAgricolas() {
     observaciones: "",
   });
 
+  // Otros
+  const [otros, setOtros] = useState({ fecha: "", observaciones: "" });
+
   // ====== Carga de listas ======
   useEffect(() => {
     axios
@@ -170,6 +175,8 @@ export default function ActividadesAgricolas() {
         mapa: false,
         observaciones: "",
       });
+    if (actividad === "Otros")
+      setOtros({ fecha: "", observaciones: "" });
   };
 
   const handleNuevaTareaMismoLote = () => {
@@ -266,6 +273,10 @@ export default function ActividadesAgricolas() {
           .filter(Boolean)
           .join(" | ");
         formData.append("observaciones", obs);
+      } else if (actividad === "Otros") {
+        if (!otros.fecha) throw new Error("La fecha es obligatoria.");
+        formData.append("fecha", otros.fecha);
+        formData.append("observaciones", otros.observaciones || "");
       }
 
       await axios.post("/api/tareas/", formData, {
@@ -295,8 +306,9 @@ export default function ActividadesAgricolas() {
         (actividad === "Riego" && riego.fecha) ||
         (actividad === "Laboreos de Lote" && laboreo.fecha) ||
         (actividad === "Manejo de Malezas" && maleza.fecha) ||
-        (actividad === "Aplicación Fitosanitaria" && fito.fecha))
-  );
+        (actividad === "Aplicación Fitosanitaria" && fito.fecha) ||
+        (actividad === "Otros" && otros.fecha && otros.observaciones && otros.observaciones.trim()))
+);
 
   return (
     <Card
@@ -423,7 +435,8 @@ export default function ActividadesAgricolas() {
                   setActividad(v);
                   // Reset del formulario de esa actividad
                   setFertVista("variable");
-                  limpiarFormularioActividad();
+                  // Limpiar el formulario especifico que corresponda
+                  setTimeout(limpiarFormularioActividad, 0);
                 }}
                 required
                 className="input-terrax"
@@ -854,6 +867,31 @@ export default function ActividadesAgricolas() {
                   onChange={(e) =>
                     setFito({ ...fito, observaciones: e.target.value })
                   }
+                />
+              </Col>
+            </Row>
+          )}
+
+          {/* OTROS */}
+          {actividad === "Otros" && (
+            <Row className="g-3">
+              <Col md={4}>
+                <Form.Label>Fecha</Form.Label>
+                <Form.Control
+                  type="date"
+                  value={otros.fecha}
+                  onChange={(e) => setOtros({ ...otros, fecha: e.target.value })}
+                />
+              </Col>
+              <Col md={12}>
+                <Form.Label>Observaciones</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={otros.observaciones}
+                  onChange={(e) =>
+                    setOtros({ ...otros, observaciones: e.target.value })}
+                    required
                 />
               </Col>
             </Row>
