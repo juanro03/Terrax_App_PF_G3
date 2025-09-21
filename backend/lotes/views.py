@@ -1,137 +1,226 @@
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework import viewsets
-from rest_framework.permissions import AllowAny
-from .models import Lote
-from .serializers import LoteSerializer
-from .models import Siembra
-from .serializers import SiembraSerializer
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView
-from .models import Cosecha
-from .serializers import CosechaSerializer
-from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Campania
-from .serializers import CampaniaSerializer
-from .serializers import CoberturaSerializer
-from .models import Cobertura
-from django.utils.dateparse import parse_date
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.apps import apps
+from django.utils.dateparse import parse_date
+
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
+
 from tareas.models import Tarea
 
+from .models import (
+    Lote,
+    Siembra,
+    Cosecha,
+    Campania,
+    Cobertura,
+)
+from .serializers import (
+    LoteSerializer,
+    SiembraSerializer,
+    CosechaSerializer,
+    CampaniaSerializer,
+    CoberturaSerializer,
+)
+
+# =========================
+#   LOTES
+# =========================
 class LoteViewSet(viewsets.ModelViewSet):
     queryset = Lote.objects.all()
     serializer_class = LoteSerializer
-    permission_classes = [AllowAny]  #permiso abierto para pruebas (IsAuthenticated para pedir autenticacion)
-    
-    @action(detail=False, methods=['get'], url_path='por-campo/(?P<campo_id>[^/.]+)')
+    permission_classes = [AllowAny]  # Cambiá a IsAuthenticated si lo necesitás
+
+    @action(detail=False, methods=["get"], url_path=r"por-campo/(?P<campo_id>[^/.]+)")
     def obtener_lotes_por_campo(self, request, campo_id=None):
         """
-        Devuelve todos los lotes que pertenecen a un campo específico.
-        Endpoint: /api/lotes/por-campo/<campo_id>/
+        GET /api/lotes/por-campo/<campo_id>/
         """
         lotes = Lote.objects.filter(campo_id=campo_id)
         serializer = self.get_serializer(lotes, many=True)
         return Response(serializer.data)
-    
+
+
+# =========================
+#   SIEMBRAS
+# =========================
 class SiembraViewSet(viewsets.ModelViewSet):
     queryset = Siembra.objects.all()
     serializer_class = SiembraSerializer
 
-    @action(detail=False, methods=['get'], url_path='por-lote/(?P<lote_id>[^/.]+)')
+    # Filtros /api/siembras/?start=&end=&campo=&lote=
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        start = self.request.query_params.get("start")
+        end = self.request.query_params.get("end")
+        campo = self.request.query_params.get("campo")
+        lote = self.request.query_params.get("lote")
+
+        if campo:
+            qs = qs.filter(lote__campo_id=campo)
+        if lote:
+            qs = qs.filter(lote_id=lote)
+        if start:
+            qs = qs.filter(fecha__gte=start)
+        if end:
+            qs = qs.filter(fecha__lt=end)
+
+        return qs.select_related("lote").order_by("fecha", "id")
+
+    @action(detail=False, methods=["get"], url_path=r"por-lote/(?P<lote_id>[^/.]+)")
     def obtener_por_lote(self, request, lote_id=None):
-        try:
-            siembra = Siembra.objects.get(lote__id=lote_id)
-            serializer = self.get_serializer(siembra)
-            return Response(serializer.data)
-        except Siembra.DoesNotExist:
-            return Response({"error": "No hay siembra registrada aún."}, status=status.HTTP_404_NOT_FOUND)
-        
-class CosechaCreateView(CreateAPIView):
+        """
+        GET /api/siembras/por-lote/<lote_id>/
+        Devuelve la ÚLTIMA siembra (por fecha) del lote.
+        """
+        siembra = (
+            Siembra.objects.filter(lote_id=lote_id)
+            .order_by("-fecha", "-id")
+            .first()
+        )
+        if not siembra:
+            return Response(
+                {"error": "No hay siembra registrada aún."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = self.get_serializer(siembra)
+        return Response(serializer.data)
+
+
+# =========================
+#   COSECHAS  (GET + POST multipart)
+# =========================
+class CosechaViewSet(viewsets.ModelViewSet):
+    """
+    - GET  /api/cosechas/            (lista con filtros)
+    - GET  /api/cosechas/<id>/       (detalle)
+    - POST /api/cosechas/            (crear, admite archivo_rendimiento)
+    """
     queryset = Cosecha.objects.all()
     serializer_class = CosechaSerializer
     parser_classes = [MultiPartParser, FormParser]
 
-    def post(self, request, *args, **kwargs):
-        print("DATA:", request.data)
-        print("FILES:", request.FILES)
+    def get_queryset(self):
+        qs = super().get_queryset()
 
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            print("ERRORES DEL SERIALIZER:", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        start = self.request.query_params.get("start")
+        end = self.request.query_params.get("end")
+        campo = self.request.query_params.get("campo")
+        lote = self.request.query_params.get("lote")
 
+        if campo:
+            qs = qs.filter(lote__campo_id=campo)
+        if lote:
+            qs = qs.filter(lote_id=lote)
+        if start:
+            qs = qs.filter(fecha__gte=start)
+        if end:
+            qs = qs.filter(fecha__lt=end)
+
+        return qs.select_related("lote").order_by("fecha", "id")
+
+
+# =========================
+#   FINALIZAR CAMPAÑA / HISTORIAL
+# =========================
 class FinalizarCampaniaView(APIView):
     def post(self, request, lote_id):
         try:
-            # Obtener la siembra asociada
             siembra = Siembra.objects.get(lote_id=lote_id)
-
-            # Obtener la última cosecha asociada
-            cosecha = Cosecha.objects.filter(lote_id=lote_id).order_by('-fecha').first()
-
-            if not cosecha:
-                return Response({"error": "No se encontró una cosecha asociada al lote."}, status=404)
-
-            # Crear el historial con los datos de siembra + cosecha
-            historial = Campania.objects.create(
-                lote=siembra.lote,
-                fecha_siembra=siembra.fecha,
-                cultivo=siembra.cultivo,
-                variedad=siembra.variedad,
-                densidad=siembra.densidad,
-                unidad_densidad=siembra.unidad_densidad,
-                ventana_cosecha=siembra.ventana_cosecha,
-                analisis_suelo=siembra.analisis_suelo,
-
-                fecha_cosecha=cosecha.fecha,
-                rinde=cosecha.rinde,
-                archivo_rendimiento=cosecha.archivo_rendimiento,
+        except Siembra.DoesNotExist:
+            return Response(
+                {"error": "No se encontró una siembra asociada al lote."}, status=404
             )
 
-            # Eliminar la siembra actual
-            siembra.delete()
+        cosecha = Cosecha.objects.filter(lote_id=lote_id).order_by("-fecha", "-id").first()
+        if not cosecha:
+            return Response(
+                {"error": "No se encontró una cosecha asociada al lote."}, status=404
+            )
 
-            return Response({"mensaje": "Campaña finalizada y registrada en historial."}, status=200)
+        Campania.objects.create(
+            lote=siembra.lote,
+            fecha_siembra=siembra.fecha,
+            cultivo=siembra.cultivo,
+            variedad=siembra.variedad,
+            densidad=siembra.densidad,
+            unidad_densidad=siembra.unidad_densidad,
+            ventana_cosecha=siembra.ventana_cosecha,
+            analisis_suelo=siembra.analisis_suelo,
+            fecha_cosecha=cosecha.fecha,
+            rinde=cosecha.rinde,
+            archivo_rendimiento=cosecha.archivo_rendimiento,
+        )
 
-        except Siembra.DoesNotExist:
-            return Response({"error": "No se encontró una siembra asociada al lote."}, status=404)
+        siembra.delete()
+        return Response({"mensaje": "Campaña finalizada y registrada en historial."}, status=200)
+
+
 class HistorialPorLoteView(APIView):
     def get(self, request, lote_id):
-        historial = Campania.objects.filter(lote_id=lote_id).order_by('-fecha_siembra')
+        historial = Campania.objects.filter(lote_id=lote_id).order_by("-fecha_siembra", "-id")
         serializer = CampaniaSerializer(historial, many=True)
         return Response(serializer.data)
 
+
+# =========================
+#   COBERTURAS
+# =========================
 class CoberturaViewSet(viewsets.ModelViewSet):
     queryset = Cobertura.objects.all()
     serializer_class = CoberturaSerializer
 
-    @action(detail=False, methods=["get"], url_path='por-lote/(?P<lote_id>[^/.]+)')
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        start = self.request.query_params.get("start")
+        end = self.request.query_params.get("end")
+        campo = self.request.query_params.get("campo")
+        lote = self.request.query_params.get("lote")
+
+        if campo:
+            qs = qs.filter(lote__campo_id=campo)
+        if lote:
+            qs = qs.filter(lote_id=lote)
+        if start:
+            qs = qs.filter(fecha__gte=start)
+        if end:
+            qs = qs.filter(fecha__lt=end)
+
+        return qs.select_related("lote").order_by("fecha", "id")
+
+    @action(detail=False, methods=["get"], url_path=r"por-lote/(?P<lote_id>[^/.]+)")
     def por_lote(self, request, lote_id=None):
-        try:
-            cobertura = Cobertura.objects.get(lote_id=lote_id)
-            serializer = self.get_serializer(cobertura)
-            return Response(serializer.data)
-        except Cobertura.DoesNotExist:
-            return Response({"error": "No hay cobertura registrada."}, status=status.HTTP_404_NOT_FOUND)
-        
+        """
+        GET /api/coberturas/por-lote/<lote_id>/
+        Devuelve la ÚLTIMA cobertura (por fecha) del lote.
+        """
+        cobertura = (
+            Cobertura.objects.filter(lote_id=lote_id)
+            .order_by("-fecha", "-id")
+            .first()
+        )
+        if not cobertura:
+            return Response(
+                {"error": "No hay cobertura registrada."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = self.get_serializer(cobertura)
+        return Response(serializer.data)
+
+
+# =========================
+#   TRAZABILIDAD (Timeline)
+# =========================
+
 def _get_model(app_label, model_name):
     try:
         return apps.get_model(app_label, model_name)
     except LookupError:
         return None
-
-def _first_attr(obj, names):
-    """Devuelve el primer atributo existente en obj de la lista names, o None."""
-    for n in names:
-        if hasattr(obj, n):
-            return getattr(obj, n)
-    return None
 
 def _join_nonempty(parts, sep=" "):
     return sep.join([str(p) for p in parts if p not in (None, "", "None")]) or None
@@ -139,7 +228,7 @@ def _join_nonempty(parts, sep=" "):
 class TrazabilidadView(APIView):
     """
     GET /api/trazabilidad/?lote=<id>&inicio=YYYY-MM-DD&fin=YYYY-MM-DD
-    Respuesta: [{id, tipo, fecha, descripcion}, ...]
+    Respuesta: [{id, tipo, fecha, descripcion, source_model, source_pk}, ...]
     """
     permission_classes = [IsAuthenticatedOrReadOnly]
 
@@ -159,10 +248,9 @@ class TrazabilidadView(APIView):
             Model = _get_model(model_label, model_name)
             if not Model:
                 return
-            model_slug = model_slug or model_name.lower()  # p.ej. 'siembra', 'cobertura'
+            model_slug = model_slug or model_name.lower()
             date_fields = date_fields or ["fecha", "fecha_evento", "fecha_realizacion", "fecha_aplicacion"]
 
-            # detectar campo fecha
             model_field_names = [f.name for f in Model._meta.get_fields()]
             fecha_field = next((f for f in date_fields if f in model_field_names), None)
             if not fecha_field:
@@ -200,19 +288,16 @@ class TrazabilidadView(APIView):
                     "tipo": tipo,
                     "fecha": fecha_val,
                     "descripcion": descripcion,
-                    "source_model": model_slug,   # <- NUEVO
-                    "source_pk": obj.id,         # <- NUEVO
+                    "source_model": model_slug,
+                    "source_pk": obj.id,
                 })
 
-        # === SIEMBRA ===
+        # Siembra / Cobertura / Cosecha
         collect("lotes", "Siembra", "SIEMBRA", desc_fields=["cultivo", "variedad", "densidad"])
-
-        # === COBERTURA ===
         collect("lotes", "Cobertura", "COBERTURA", desc_fields=["descripcion", "cultivo_cobertura", "variedad", "densidad"])
-        # === COSECHA ===
         collect("lotes", "Cosecha", "COSECHA", desc_fields=["rinde", "unidad_rinde", "observaciones"])
 
-         # === TAREAS (fertilización, malezas, laboreo, riego, fitosanitaria, otra) ===
+        # Tareas
         tipo_map = {
             "fertilizacion": "FERTILIZACION",
             "maleza": "MALEZAS",
@@ -230,7 +315,6 @@ class TrazabilidadView(APIView):
         for t in tareas_qs:
             tipo = tipo_map.get(t.tipo, "OTRA")
 
-            # armamos descripción según el tipo
             if t.tipo == "fertilizacion":
                 parts = [
                     t.tipo_fertilizante,
@@ -251,7 +335,7 @@ class TrazabilidadView(APIView):
             elif t.tipo == "fitosanitaria":
                 parts = [
                     t.tipo_fitosanitario,
-                    t.producto_aplicar or t.plaga_maleza,  # usa lo que tengas cargado
+                    t.producto_aplicar or t.plaga_maleza,
                     _join_nonempty([t.lkg_por_ha, "L/Kg/Ha"]),
                     t.observaciones,
                 ]
@@ -267,7 +351,7 @@ class TrazabilidadView(APIView):
                     _join_nonempty([t.operario, "operario"]),
                     t.observaciones,
                 ]
-            else:  # "otra"
+            else:
                 parts = [t.observaciones]
 
             descripcion = " - ".join([p for p in parts if p and str(p).strip()])
@@ -280,6 +364,6 @@ class TrazabilidadView(APIView):
                 "source_model": "tarea",
                 "source_pk": t.id,
             })
-        # Orden cronológico
+
         eventos.sort(key=lambda e: (e["fecha"] or "", e["id"]))
         return Response(eventos, status=200)

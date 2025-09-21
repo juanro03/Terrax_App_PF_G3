@@ -28,6 +28,8 @@ const COLOR_MAP = {
   riego: "#79beecff",
   fitosanitaria: "#54ad6f",
   otra: "#a2a5a3ff",
+  siembra: "#887847ff", // Inicio de Siembra
+  cosecha: "#ff7f50", // Cosecha
 };
 // Labels legibles por tipo
 const LABEL_MAP = {
@@ -37,22 +39,42 @@ const LABEL_MAP = {
   riego: "Riego",
   fitosanitaria: "Aplicación Fitosanitaria",
   otra: "Anotación",
+  siembra: "Inicio de Siembra",
+  cosecha: "Cosecha",
 };
 const ACTIVIDADES = Object.keys(LABEL_MAP);
 const TIPO_OPTS = Object.entries(LABEL_MAP).map(([key, label]) => ({
   key,
   label,
 }));
+// Opciones del formulario: excluimos siembra/cosecha (vienen de sus propios endpoints)
+const FORM_TIPO_OPTS = TIPO_OPTS.filter(
+  (op) => !["siembra", "cosecha"].includes(op.key)
+);
 
 // ====== Estilos UI/UX adicionales ======
 const styles = `
+  /* redondeo de la franja superior (toolbar) de la tarjeta */
+  .calendar-toolbar {
+    border-top-left-radius: 1.4rem;
+    border-top-right-radius: 1.4rem;
+  }
+
+  /* redondeo del grid del calendario (abajo ya estaba; sumo arriba por si querés continuidad) */
+  .fc .fc-scrollgrid {
+    border-top-left-radius: 1.4rem;
+    border-top-right-radius: 1.4rem;
+    border-bottom-left-radius: 1.4rem;
+    border-bottom-right-radius: 1.4rem;
+    overflow: hidden; /* mantiene los bordes prolijos */
+  }
   /* Tipografía más clara del calendario y encabezados */
   .fc .fc-toolbar-title { font-weight: 700; color: #0f5132; letter-spacing: .2px; }
   .fc .fc-col-header-cell-cushion, .fc .fc-daygrid-day-number { color: #111; }
 
-  /* Eventos con pastilla redondeada y fondo cremita (sobrescribe celeste default) */
+  /* Eventos con pastilla redondeada y fondo cremita */
   .fc .fc-h-event, .fc .fc-daygrid-event, .fc-event {
-    background: #f9f5e9ff !important; /* cremita */
+    background: #f9f5e9ff !important;
     border: none !important;
     border-radius: 12px !important;
     padding: 2px 6px !important;
@@ -110,6 +132,8 @@ const styles = `
     padding: 12px 16px;
     box-shadow: 0 10px 24px rgba(25,135,84,.28);
   }
+    
+  .fc .fc-toolbar-title::first-letter { text-transform: uppercase; }
 
   /* Multiselect dropdown ancho y scrolleable, encima del calendario */
   .filter-dropdown .dropdown-menu {
@@ -132,11 +156,54 @@ const styles = `
     position: absolute; inset: 0; display: grid; place-items: center;
     background: rgba(255,255,255,.6); z-index: 5; border-radius: 1.4rem;
   }
+  
+  /* --- Fix domingo pegado al borde (LTR) --- */
+  .fc .fc-daygrid-day-events { margin: 0 4px 2px; }                /* margen horizontal general */
+  .fc .fc-daygrid-event { max-width: 100%; box-sizing: border-box; }/* no se desborda */
+  .fc .fc-daygrid-day-frame { padding: 2px 4px 4px; }               /* padding más chico general */
+
+  /* última columna (domingo) con un poco más de aire a la derecha */
+  .fc-direction-ltr .fc-daygrid-day:last-child .fc-daygrid-day-frame { padding-right: 8px; }
+  .fc-direction-ltr .fc-daygrid-day:last-child .fc-daygrid-day-events { margin-right: 8px; }
+
+  /* header de domingo con aire a la derecha también */
+  .fc-direction-ltr .fc-col-header-cell:last-child .fc-col-header-cell-cushion { padding-right: 8px; }
+
+  /* numerito del día: evitar que se superponga cuando hay poco ancho */
+  .fc .fc-daygrid-day-top { padding: 2px 6px; gap: 2px; }
+
+  /* por las dudas, aseguramos border-box para las celdas */
+  .fc .fc-daygrid-day, .fc .fc-daygrid-day-frame, .fc .fc-daygrid-event { box-sizing: border-box; }
+
+  .fc .fc-scrollgrid {
+  border-bottom-left-radius: 1.4rem;
+  border-bottom-right-radius: 1.4rem;
+  overflow: hidden; /* acá sí, dentro del calendario */
+}
+
+/* Domingo: dar aire estable, aunque se re-renderice el mes */
+.fc .fc-daygrid-day.fc-day-sun .fc-daygrid-day-frame { padding-right: 16px; }
+.fc .fc-daygrid-day.fc-day-sun .fc-daygrid-day-events { margin-right: 16px; }
+.fc .fc-col-header-cell.fc-day-sun .fc-col-header-cell-cushion { padding-right: 16px; }
+
+/* Evitar que el contenido del chip “empuje” el ancho y choque el borde */
+.event-chip { min-width: 0; }
+.event-chip .text, .event-chip .sub {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Redondeo y clipping dentro del propio grid del calendario */
+.fc .fc-scrollgrid {
+  border-bottom-left-radius: 1.4rem;
+  border-bottom-right-radius: 1.4rem;
+  overflow: hidden;
+}
+
 `;
 
 function MultiSelectActividades({ selected, onChange }) {
-  const allSelected = selected.size === ACTIVIDADES.length;
-
   const toggleOne = (k) => {
     const next = new Set(selected);
     if (next.has(k)) next.delete(k);
@@ -238,7 +305,152 @@ export default function Calendario() {
       .catch(() => setLotes([]));
   }, [campo]);
 
-  // ======= Helpers =======
+  // ======= Helpers: mapear a eventos =======
+  const mapTareaToEvent = (t) => {
+    const tipo = t?.tipo || "otra";
+    const color = COLOR_MAP[tipo] || COLOR_MAP.otra;
+    const loteLabel = t?.lote_nombre || (t?.lote ? `Lote ${t.lote}` : "Lote");
+    return {
+      id: String(t.id ?? `${tipo}-${t.fecha}-${t.lote ?? ""}-${Math.random()}`),
+      title: `${LABEL_MAP[tipo] || "Tarea"} · ${loteLabel}`,
+      start: t.fecha,
+      allDay: true,
+      extendedProps: {
+        tipo,
+        color,
+        observaciones: t.observaciones || "",
+        lote: t.lote,
+        lote_nombre: t.lote_nombre,
+        raw: t,
+      },
+    };
+  };
+
+  const mapSiembraToEvent = (s) => {
+    const loteLabel = s?.lote_nombre || (s?.lote ? `Lote ${s.lote}` : "Lote");
+    return {
+      id: `siembra-${s.id}`,
+      title: `Siembra · ${loteLabel}`,
+      start: s.fecha, // fecha de siembra
+      allDay: true,
+      extendedProps: {
+        tipo: "siembra",
+        color: COLOR_MAP.siembra,
+        lote: s.lote,
+        lote_nombre: loteLabel,
+        observaciones: "",
+        raw: s,
+      },
+    };
+  };
+
+  const mapCosechaToEvent = (c) => {
+    const loteLabel = c?.lote_nombre || (c?.lote ? `Lote ${c.lote}` : "Lote");
+    return {
+      id: `cosecha-${c.id}`,
+      title: `Cosecha · ${loteLabel}`,
+      start: c.fecha, // fecha de cosecha
+      allDay: true,
+      extendedProps: {
+        tipo: "cosecha",
+        color: COLOR_MAP.cosecha,
+        lote: c.lote,
+        lote_nombre: loteLabel,
+        observaciones: c.rinde ? `Rinde: ${c.rinde}` : "",
+        raw: c,
+      },
+    };
+  };
+
+  // ======= Fetch de eventos (tareas + siembras + cosechas) =======
+  const fetchEventos = async ({ startStr, endStr }) => {
+    setLoading(true);
+    setErrorTxt("");
+    try {
+      const params = {};
+      if (startStr) params.start = startStr;
+      if (endStr) params.end = endStr;
+      if (campo) params.campo = campo;
+      if (lote) params.lote = lote;
+
+      // 1) Tareas
+      const { data: tareas } = await axios.get("/api/tareas/", { params });
+      // 2) Siembras
+      const { data: siembras } = await axios.get("/api/siembras/", { params });
+      // 3) Cosechas
+      const { data: cosechas } = await axios.get("/api/cosechas/", { params });
+
+      const enRango = (it) =>
+        !startStr || !endStr ? true : it.fecha >= startStr && it.fecha < endStr;
+
+      const eventosTareas = (Array.isArray(tareas) ? tareas : [])
+        .filter(enRango)
+        .filter((t) => filtroActividades.has(t.tipo || "otra"))
+        .map(mapTareaToEvent);
+
+      const eventosSiembras = (Array.isArray(siembras) ? siembras : [])
+        .filter(enRango)
+        .map(mapSiembraToEvent);
+
+      const eventosCosechas = (Array.isArray(cosechas) ? cosechas : [])
+        .filter(enRango)
+        .map(mapCosechaToEvent);
+
+      setEventos([...eventosTareas, ...eventosSiembras, ...eventosCosechas]);
+    } catch (err) {
+      const msg = err?.response?.data
+        ? typeof err.response.data === "string"
+          ? err.response.data
+          : JSON.stringify(err.response.data)
+        : err?.message || "Error desconocido";
+      setErrorTxt(`No se pudieron cargar las actividades: ${msg}`);
+      setEventos([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ======= Eventos filtrados =======
+  const eventosFiltrados = useMemo(
+    () =>
+      eventos.filter((ev) =>
+        filtroActividades.has(ev.extendedProps?.tipo || "otra")
+      ),
+    [eventos, filtroActividades]
+  );
+
+  // ======= Rango de fechas del calendario =======
+  const onDatesSet = (arg) => {
+    const startStr = arg?.startStr?.slice(0, 10);
+    const endStr = arg?.endStr?.slice(0, 10);
+    rangoRef.current = { startStr, endStr };
+    fetchEventos({ startStr, endStr });
+  };
+
+  const handleRefresh = () => fetchEventos(rangoRef.current || {});
+
+  // ======= Helpers UI =======
+  const renderEventContent = (info) => {
+    const tipo = info.event.extendedProps?.tipo || "otra";
+    const color = info.event.extendedProps?.color || COLOR_MAP[tipo];
+    const [titulo, sub] = info.event.title.split(" · ");
+    return (
+      <div className="event-chip" style={{ "--evcolor": color }}>
+        <div className="bar" />
+        <div className="d-flex flex-column py-1">
+          <div className="text">{titulo}</div>
+          {sub && <div className="sub">{sub}</div>}
+        </div>
+      </div>
+    );
+  };
+
+  const headerStyle = (tipo) => ({
+    background: `${COLOR_MAP[tipo] || "#198754"}10`,
+    borderBottom: `2px solid ${COLOR_MAP[tipo] || "#198754"}`,
+  });
+
+  // ======= Form helpers =======
   const openForm = ({
     dateStr = "",
     presetCampo = campo,
@@ -311,98 +523,6 @@ export default function Calendario() {
     }
   };
 
-  // Adaptador de tareas -> eventos FullCalendar
-  const mapTareaToEvent = (t) => {
-    const tipo = t?.tipo || "otra";
-    const color = COLOR_MAP[tipo] || COLOR_MAP.otra;
-    const loteLabel = t?.lote_nombre || (t?.lote ? `Lote ${t.lote}` : "Lote");
-    return {
-      id: String(t.id ?? `${tipo}-${t.fecha}-${t.lote ?? ""}-${Math.random()}`),
-      title: `${LABEL_MAP[tipo] || "Tarea"} · ${loteLabel}`,
-      start: t.fecha,
-      allDay: true,
-      extendedProps: {
-        tipo,
-        color,
-        observaciones: t.observaciones || "",
-        lote: t.lote,
-        lote_nombre: t.lote_nombre,
-        raw: t,
-      },
-    };
-  };
-
-  const fetchEventos = async ({ startStr, endStr }) => {
-    setLoading(true);
-    setErrorTxt("");
-    try {
-      const params = {};
-      if (startStr) params.start = startStr;
-      if (endStr) params.end = endStr;
-      if (campo) params.campo = campo;
-      if (lote) params.lote = lote;
-
-      const { data } = await axios.get("/api/tareas/", { params });
-      const enRango = (it) =>
-        !startStr || !endStr ? true : it.fecha >= startStr && it.fecha < endStr;
-      const filtradas = (Array.isArray(data) ? data : [])
-        .filter(enRango)
-        .filter((t) => filtroActividades.has(t.tipo || "otra"))
-        .map(mapTareaToEvent);
-
-      setEventos(filtradas);
-    } catch (err) {
-      const msg = err?.response?.data
-        ? typeof err.response.data === "string"
-          ? err.response.data
-          : JSON.stringify(err.response.data)
-        : err?.message || "Error desconocido";
-      setErrorTxt(`No se pudieron cargar las tareas: ${msg}`);
-      setEventos([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const eventosFiltrados = useMemo(
-    () =>
-      eventos.filter((ev) =>
-        filtroActividades.has(ev.extendedProps?.tipo || "otra")
-      ),
-    [eventos, filtroActividades]
-  );
-
-  const onDatesSet = (arg) => {
-    const startStr = arg?.startStr?.slice(0, 10);
-    const endStr = arg?.endStr?.slice(0, 10);
-    rangoRef.current = { startStr, endStr };
-    fetchEventos({ startStr, endStr });
-  };
-
-  const handleRefresh = () => fetchEventos(rangoRef.current || {});
-
-  // Render rico de evento
-  const renderEventContent = (info) => {
-    const tipo = info.event.extendedProps?.tipo || "otra";
-    const color = info.event.extendedProps?.color || COLOR_MAP[tipo];
-    const [titulo, sub] = info.event.title.split(" · ");
-    return (
-      <div className="event-chip" style={{ "--evcolor": color }}>
-        <div className="bar" />
-        <div className="d-flex flex-column py-1">
-          <div className="text">{titulo}</div>
-          {sub && <div className="sub">{sub}</div>}
-        </div>
-      </div>
-    );
-  };
-
-  // Modal detalle: header temático por tipo
-  const headerStyle = (tipo) => ({
-    background: `${COLOR_MAP[tipo] || "#198754"}10`,
-    borderBottom: `2px solid ${COLOR_MAP[tipo] || "#198754"}`,
-  });
-
   return (
     <Card
       className="mx-auto my-4 shadow position-relative"
@@ -411,7 +531,7 @@ export default function Calendario() {
         background: "#fff",
         borderRadius: "1.4rem",
         border: "none",
-        overflow: "visible", // permite que el dropdown no se recorte
+        overflow: "visible",
       }}
     >
       <style>{styles}</style>
@@ -456,16 +576,6 @@ export default function Calendario() {
               selected={filtroActividades}
               onChange={setFiltroActividades}
             />
-            <Button variant="outline-success" onClick={handleRefresh}>
-              {loading ? (
-                <>
-                  <Spinner animation="border" size="sm" className="me-2" />
-                  Cargando…
-                </>
-              ) : (
-                "Actualizar"
-              )}
-            </Button>
             <Button variant="success" onClick={() => openForm({})}>
               + Nuevo
             </Button>
@@ -521,7 +631,6 @@ export default function Calendario() {
           <div className="px-3">
             <div
               style={{
-                overflow: "hidden",
                 borderBottomLeftRadius: "1.4rem",
                 borderBottomRightRadius: "1.4rem",
               }}
@@ -571,7 +680,8 @@ export default function Calendario() {
                 </Badge>
               </div>
               <p className="text-muted mb-2">
-                No hay actividades para el rango y filtros seleccionados.
+                No hay actividades en este mes para el rango y filtros
+                seleccionados.
               </p>
               <div className="d-flex gap-2 justify-content-center">
                 <Button
@@ -586,7 +696,7 @@ export default function Calendario() {
                   variant="success"
                   onClick={() => openForm({})}
                 >
-                  + Crear actividad
+                  + Crear anotación
                 </Button>
               </div>
             </div>
@@ -631,7 +741,10 @@ export default function Calendario() {
                 dateStr: detalle?.fecha,
                 presetCampo: campo,
                 presetLote: detalle?.lote || lote || "",
-                presetTipo: detalle?.tipo || "otra",
+                presetTipo:
+                  detalle?.tipo && ["siembra", "cosecha"].includes(detalle.tipo)
+                    ? "otra"
+                    : detalle?.tipo || "otra",
               });
               setDetalle(null);
             }}
@@ -672,7 +785,7 @@ export default function Calendario() {
                   }
                   required
                 >
-                  {TIPO_OPTS.map((op) => (
+                  {FORM_TIPO_OPTS.map((op) => (
                     <option key={op.key} value={op.key}>
                       {op.label}
                     </option>
