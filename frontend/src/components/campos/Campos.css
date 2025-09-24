@@ -1,263 +1,154 @@
-body {
-    background-color: #f0fdf4 !important; 
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
+/* ===========================
+   Variables & Base
+   =========================== */
+:root{
+  --bg-app: #e9fbe5;
+  --surface: #ffffff;
+  --text-strong: #14532d;  /* Verde oscuro */
+  --text-muted: #475569;
+  --shadow-sm: 0 2px 10px rgba(0,0,0,.08);
+  --shadow-md: 0 14px 28px rgba(0,0,0,.08);
+  --radius-lg: 1.4rem;
+  --gap-sm: 8px;
+  --gap-md: 12px;
+  --gap-lg: 20px;
 }
 
-/* Contenedor del formulario */
-.form-card {
-    background-color: #198754;
-    color: white;
-    border-radius: 20px;
-    padding: 40px;
-    max-width: 1000px;
-    margin: 40px auto;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-}
-
-/* Etiquetas */
-.form-label {
-    font-weight: 600;
-    color: #ffffff;
-    margin-bottom: 8px;
-    display: block;
-}
-
-/* Inputs */
-.form-control {
-    border-radius: 12px;
-    border: 1px solid #c2e9dc;
-    background-color: #e8fdf0;
-    color: #333;
-    padding: 12px 15px;
-    font-size: 15px;
-    width: 100%;
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
-}
-
-.form-control:focus {
-    background-color: #d4fae2;
-    border-color: #38b98a;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(56, 185, 138, 0.3);
-}
-
-/* Botón guardar */
-.btn-guardar {
-    background-color: #00bf63;
-    color: white;
-    border: none;
-    border-radius: 30px;
-    padding: 12px 35px;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 191, 99, 0.3);
-}
-
-.btn-guardar:hover {
-    background-color: #059669;
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(0, 191, 99, 0.4);
-}
-
-/* Título */
-h2 {
-    text-align: center;
-    font-weight: 800;
-    margin-bottom: 30px;
-    color: #ffffff;
-    font-size: 36px;
-    font-family: 'Poppins', sans-serif;
-    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Ajustes adicionales */
-.bg-white {
-    background-color: #117256 !important;
-}
-
-.btn-success {
-    background-color: #00bf63;
-}
-
-button {
-    transition: all 0.3s ease;
-}
-.alert-success {
-  background-color: #d4edda;
-  color: #155724;
-  padding: 10px 15px;
-  margin-bottom: 15px;
-  border-radius: 5px;
-  border: 1px solid #c3e6cb;
-}
-
-.card {
-  border-radius: 16px;
-  overflow: hidden;
-  transition: transform 0.2s ease;
-}
-.card:hover {
-  transform: scale(1.02);
-}
-.card-title {
-  font-weight: 1000;
-  color: #ffffff;
-}
-.card-text {
-  color: #ffffff;
-  text-align: center;
-}
-
-input[type="file"]::file-selector-button {
-background-color: #087507;
-color: white !important;
-border: none;
-padding: 6px 12px;
-border-radius: 4px;
-cursor: pointer;
-}
-
-input[type="file"]::file-selector-button:hover {
-  background-color: #087507;
-}
-
-.modal-label {
-  color: #000 !important;
-}
-
-/* === Mostrar botones sobre imagen al pasar el mouse === */
-
-.campo-card {
-  position: relative;
-  overflow: hidden;
-}
-
-.campo-card .imagen-container {
-  position: relative;
-}
-
-.campo-card .botones-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  background-color: rgba(0, 0, 0, 0.3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 15px;
-}
-
-.campo-card:hover .botones-overlay {
-  opacity: 1;
-}
-
-.card.bg-verde {
-  background-color: #198754; /* mismo verde que .bg-success */
-}
-.card {
-  border-radius: 16px;
-  transition: transform 0.2s ease;
-}
-
-.card:hover {
-  transform: scale(1.02);
-}
-
-.card-title {
-  font-weight: 700;
-  color: #117256;
-}
-
-.card-text {
-  color: #117256;
-  text-align: center;
-}
-
-
-/* Fondo general como Usuarios */
-.campos-page {
-  background-color: #e9fbe5;
+.campos-page{
+  background-color: var(--bg-app);
   min-height: 100vh;
   padding: 20px;
 }
 
-/* Caja blanca contenedora (igual a Usuarios) */
-.campos-shell {
-  max-width: 1200px;
-  background: #fff;
-  border-radius: 1.4rem;
+/* Caja blanca contenedora, igual para otras secciones (Lotes/Reportes) */
+.section-shell{
+  max-width: 1400px;
+  margin: 2rem auto;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   border: none;
 }
 
-/* === GRID de tarjetas (flex, 4 por fila) === */
-.campos-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;   /* centrado del conjunto */
-  gap: 20px;                 /* separación uniforme */
-  max-width: 1280px;         /* ancho pensado para 4 cards (~300px) + 3 gaps */
-  margin: 0 auto;
-}
-
-/* Cada tarjeta ocupa 25% menos el gap → 4 por fila */
-.campos-card {
-  border-radius: 16px;
-  overflow: hidden;
-  background: #fff;                               /* Asegura contraste de la sombra */ 
-  flex: 0 1 calc(25% - 15px);   /* 4 columnas */
-  max-width: 300px;             /* no más anchas de 300 */
-  min-width: 240px;             /* evita que achiquen de más */
-}
-
-.campos-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 28px #0000002a;
-}
-
-/* Responsivo: 3, 2, 1 columnas */
-@media (max-width: 1200px) {
-  .campos-card { flex-basis: calc(33.333% - 14px); }
-}
-@media (max-width: 900px) {
-  .campos-card { flex-basis: calc(50% - 10px); }
-}
-@media (max-width: 600px) {
-  .campos-card { flex-basis: 100%; max-width: 520px; }
-}
-
-.campos-header{
+/* ===========================
+   Header estándar reutilizable
+   =========================== */
+.section-header{
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 100px;
+  flex-wrap: wrap;
+  gap: var(--gap-md);
+  margin-bottom: 1.5rem;
 }
 
-.campos-title{
+.section-title{
   margin: 0;
-  text-align: left !important;
+  font-weight: 800;
+  font-size: 1.75rem;
+  color: var(--text-strong);
+  flex: 0 0 auto;
 }
 
-/* Contiene ambos botones y los empuja a la derecha */
-.header-actions{
-  margin-left: auto;           /* mueve el bloque de botones a la derecha */
+/* Zona central (buscador) ocupa el espacio flexible disponible */
+.section-search{
+  flex: 1 1 auto;
   display: flex;
-  gap: 8px;                    /* “pegados” pero con un respiro */
+  gap: var(--gap-sm);
+  justify-content: center;
+  min-width: 240px;
+}
+
+.section-search .search-input{
+  max-width: 520px;
+  width: 100%;
+  height: 38px;
+  background: #fff;
+}
+
+/* Acciones a la derecha */
+.section-actions{
+  display: flex;
+  gap: var(--gap-sm);
+  flex: 0 0 auto;
 }
 
 /* Responsive: apila prolijo en pantallas chicas */
-@media (max-width: 576px){
-  .campos-header{
-    flex-wrap: wrap;
+@media (max-width: 768px){
+  .section-header{
+    flex-direction: column;
+    align-items: stretch;
   }
-  .header-actions{
-    margin-left: 0;
+  .section-actions{
+    justify-content: flex-end;
   }
+}
+
+/* ===========================
+   Grid reusable (4 → 3 → 2 → 1)
+   =========================== */
+.card-grid{
+  display: grid;
+  gap: var(--gap-lg);
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1200px){
+  .card-grid{ grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 900px){
+  .card-grid{ grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px){
+  .card-grid{ grid-template-columns: 1fr; }
+}
+
+/* ===========================
+   Tarjetas
+   =========================== */
+.item-card{
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform .18s ease, box-shadow .18s ease;
+  cursor: pointer;
+}
+
+.item-card:hover{
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Encabezado de tarjeta (usa el verde de Bootstrap para consistencia) */
+.item-card__header{
+  background: var(--bs-success, #198754);
+  color: #fff;
+  text-align: center;
+  font-weight: 700;
+  padding: .6rem .75rem;
+}
+
+/* Imagen de tarjeta */
+.item-card__image{
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Cuerpo y pie de tarjeta */
+.item-card__body{
+  padding: 12px;
+  background: #f1f5f9; /* gris muy claro */
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 14px;
+}
+
+.item-card__footer{
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 10px;
+  background: #f1f5f9;
 }

@@ -4,31 +4,43 @@ import "./Campos.css";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import ModalCrearCampo from "./ModalCrearCampo";
 import ModalEditarCampo from "./ModalEditarCampo";
-import { useNavigate } from "react-router-dom";
 import SolicitarServicio from "./SolicitarServicio";
+import { useNavigate } from "react-router-dom";
 
 const VerCampos = () => {
   const [campos, setCampos] = useState([]);
+  const [filtroTexto, setFiltroTexto] = useState("");
+  const [mostrarModalServicio, setMostrarModalServicio] = useState(false);
+
   const [showCrear, setShowCrear] = useState(false);
   const [showEditar, setShowEditar] = useState(false);
   const [campoSeleccionado, setCampoSeleccionado] = useState(null);
-  const [filtroTexto, setFiltroTexto] = useState("");
-  const [mostrarModal, setMostrarModal] = useState(false);
+
   const navigate = useNavigate();
 
-  useEffect(() => { fetchCampos(); }, []);
+  /* ===== Data ===== */
+  useEffect(() => {
+    fetchCampos();
+  }, []);
 
   const fetchCampos = async () => {
     try {
       const { data } = await axios.get("http://127.0.0.1:8000/api/campos/");
-      setCampos(data);
+      setCampos(data || []);
     } catch (e) {
       console.error("Error al obtener los campos:", e);
     }
   };
 
+  /* ===== Actions ===== */
+  const handleEditar = (campo) => {
+    setCampoSeleccionado(campo);
+    setShowEditar(true);
+  };
+
   const handleDelete = async (id) => {
-    if (!window.confirm("¿Estás seguro de eliminar este campo?")) return;
+    const ok = window.confirm("¿Estás seguro de eliminar este campo?");
+    if (!ok) return;
     try {
       await axios.delete(`http://127.0.0.1:8000/api/campos/${id}/`);
       fetchCampos();
@@ -37,120 +49,127 @@ const VerCampos = () => {
     }
   };
 
-  const handleEditar = (campo) => {
-    setCampoSeleccionado(campo);
-    setShowEditar(true);
-  };
-
-  // lista filtrada
+  /* ===== Filtering ===== */
   const lista = campos.filter((c) => {
-    const t = filtroTexto.toLowerCase();
+    const t = filtroTexto.trim().toLowerCase();
+    if (!t) return true;
     return (
-      c.nombre.toLowerCase().includes(t) ||
-      c.localidad.toLowerCase().includes(t) ||
-      c.provincia.toLowerCase().includes(t)
+      c.nombre?.toLowerCase().includes(t) ||
+      c.localidad?.toLowerCase().includes(t) ||
+      c.provincia?.toLowerCase().includes(t)
     );
   });
 
+  /* ===== Render ===== */
   return (
     <div className="campos-page">
-      {/* Caja blanca central tipo “Usuarios” */}
-      <div className="mx-auto my-5 shadow campos-shell">
+      <div className="section-shell">
         <div className="p-4 p-sm-5">
-          {/* Header: título a la izquierda, botones a la derecha */}
-          <div className="campos-header">
-            <h2 className="campos-title text-3xl fw-bold mb-0">Campos Registrados</h2>
+          {/* Header estándar reutilizable */}
+          <header className="section-header" aria-label="Cabecera de Campos">
+            <h1 className="section-title">Campos Registrados</h1>
 
-            <div className="header-actions">
+            <div className="section-search">
+              <input
+                className="form-control search-input"
+                type="text"
+                value={filtroTexto}
+                onChange={(e) => setFiltroTexto(e.target.value)}
+                placeholder="Buscar por nombre o ubicación"
+                aria-label="Buscar campos por nombre o ubicación"
+              />
               <button
-                className="btn btn-success fw-semibold px-4 py-2 rounded-3"
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => setFiltroTexto("")}
+                aria-label="Limpiar búsqueda"
+              >
+                Limpiar
+              </button>
+            </div>
+
+            <div className="section-actions">
+              <button
+                type="button"
+                className="btn btn-outline-success fw-semibold px-3 py-2"
+                onClick={() => setMostrarModalServicio(true)}
+              >
+                Solicitar Servicio
+              </button>
+              <button
+                type="button"
+                className="btn btn-success fw-semibold px-3 py-2"
                 onClick={() => setShowCrear(true)}
               >
                 + Agregar Campo
               </button>
-
-              <button
-                className="btn btn-outline-success fw-semibold px-4 py-2 rounded-3"
-                onClick={() => setMostrarModal(true)}
-              >
-                Solicitar Servicio
-              </button>
             </div>
+          </header>
 
-          </div>
-
-          {/* Filtros / buscador */}
-          <div className="d-flex justify-content-center flex-wrap gap-2 mb-4 w-100">
-            <input
-              type="text"
-              className="form-control"
-              style={{ maxWidth: 480, minWidth: 260, height: 38, backgroundColor: "#d1fae5" }}
-              placeholder="Buscar por nombre o ubicación"
-              value={filtroTexto}
-              onChange={(e) => setFiltroTexto(e.target.value)}
-            />
-
-            <button
-              className="btn btn-outline-secondary"
-              style={{ height: 38 }}
-              onClick={() => setFiltroTexto("")}
-            >
-              Limpiar
-            </button>
-          </div>
-
-          {/* Grid (filas de a 4 con flex) */}
-          <div className="campos-grid">
+          {/* Grid de tarjetas: 4 / 3 / 2 / 1 cols (responsive) */}
+          <section className="card-grid" aria-label="Listado de campos">
             {lista.map((campo) => (
-              <div
+              <article
                 key={campo.id}
-                className="card campos-card"
-                onClick={() => navigate(`/campos/${campo.id}/lotes`)}
+                className="item-card"
                 role="button"
+                tabIndex={0}
+                onClick={() => navigate(`/campos/${campo.id}/lotes`)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") navigate(`/campos/${campo.id}/lotes`);
+                }}
+                aria-label={`Abrir lots del campo ${campo.nombre}`}
               >
-                {/* Encabezado */}
-                <div className="card-header bg-success text-white text-center fw-bold">
-                  {campo.nombre}
-                </div>
+                <div className="item-card__header">{campo.nombre}</div>
 
-                {/* Imagen */}
                 <img
+                  className="item-card__image"
                   src={campo.imagen_satelital}
                   alt={`Imagen del campo ${campo.nombre}`}
-                  className="card-img-top"
-                  style={{ height: 180, objectFit: "cover", borderRadius: 0 }}
+                  loading="lazy"
                 />
 
-                {/* Localidad */}
-                <div className="card-body text-dark text-center" style={{ padding: 12, background: "#eeeeeeff" }}>
-                  <p className="card-text text-dark m-0" style={{ fontSize: 14 }}>
-                    {campo.localidad}, {campo.provincia}
-                  </p>
+                <div className="item-card__body">
+                  {campo.localidad && campo.provincia ? (
+                    <p className="m-0">
+                      {campo.localidad}, {campo.provincia}
+                    </p>
+                  ) : (
+                    <p className="m-0 text-muted">Ubicación no disponible</p>
+                  )}
                 </div>
 
-                {/* Acciones */}
-                <div className="card-footer d-flex justify-content-center gap-4" style={{ background: "#eeeeeeff", padding: 10 }}>
+                <div
+                  className="item-card__footer"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <button
+                    type="button"
                     className="btn btn-outline-primary btn-sm"
-                    onClick={(e) => { e.stopPropagation(); handleEditar(campo); }}
                     title="Editar"
+                    aria-label={`Editar ${campo.nombre}`}
+                    onClick={() => handleEditar(campo)}
                   >
                     <FaEdit />
                   </button>
                   <button
+                    type="button"
                     className="btn btn-outline-danger btn-sm"
-                    onClick={(e) => { e.stopPropagation(); handleDelete(campo.id); }}
                     title="Eliminar"
+                    aria-label={`Eliminar ${campo.nombre}`}
+                    onClick={() => handleDelete(campo.id)}
                   >
                     <FaTrash />
                   </button>
                 </div>
-              </div>
+              </article>
             ))}
-          </div>
+          </section>
 
           {/* Modales */}
-          {mostrarModal && <SolicitarServicio onClose={() => setMostrarModal(false)} />}
+          {mostrarModalServicio && (
+            <SolicitarServicio onClose={() => setMostrarModalServicio(false)} />
+          )}
 
           <ModalCrearCampo
             show={showCrear}
