@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Carrusel from "./Carrusel";
-import WeatherWidget from "./WeatherWidget";
+import Clima from "./Clima";
 import DolarWidget from "./DolarWidget";
 import PreciosGranos from "./PreciosGranos";
 import GeoConsentBanner from "../common/GeoConsentBanner";
@@ -78,25 +78,6 @@ const Inicio = () => {
 
   return (
     <div className="inicio-wrapper">
-      {/* Sólo estilos/ajustes, sin cambiar posiciones */}
-      <style>{`
-        /* Botón verde cuadrado */
-        .inicio-wrapper .btn-terrax{
-          background:${VERDE}!important;color:#fff!important;border:1px solid ${VERDE}!important;
-          font-weight:700!important;border-radius:10px!important;padding:10px 16px!important;line-height:1.2!important;
-        }
-        .inicio-wrapper .btn-terrax:hover{background:${VERDE_OSCURO}!important;border-color:${VERDE_OSCURO}!important}
-
-        /* Tarjetas: misma estética y alturas mínimas */
-        .inicio-wrapper .card-shadow-sm{box-shadow:0 4px 14px rgba(0,0,0,.06)!important;border:1px solid rgba(25,135,84,.12)!important;border-radius:16px!important;background:#fff!important}
-        .inicio-wrapper .dash-equal .card{min-height:260px!important}
-        /* Si algún widget trae min-height/height agresivo, lo normalizamos dentro del col marcado como .dash-fix */
-        .inicio-wrapper .dash-fix *{min-height:initial!important;height:auto!important}
-
-        /* Evitar que css globales pisen el grid */
-        .inicio-wrapper .container,.inicio-wrapper .row,.inicio-wrapper .col{position:relative}
-      `}</style>
-
       {/* HERO */}
       <section style={{ color: TEXTO, padding: "3rem 0" }}>
         <Container fluid className="px-0">
@@ -104,10 +85,8 @@ const Inicio = () => {
             <Col lg={10}>
               <GeoConsentBanner />
               <div className="px-3 px-md-4 px-lg-5">
-                <h1 className="display-4" style={{ letterSpacing: ".2px" }}>
-                  Bienvenido a Terrax
-                </h1>
-                <p className="lead" style={{ letterSpacing: ".2px" }}>
+                <h1 className="display-4">Bienvenido a Terrax</h1>
+                <p className="lead">
                   Gestiona tus lotes agrícolas, monitorea índices y planifica tu
                   producción en un solo lugar.
                 </p>
@@ -149,11 +128,11 @@ const Inicio = () => {
         </Row>
       </Container>
 
-      {/* WIDGETS — Mismo orden que tenías: Weather, Dólar, Precios, NDVI */}
+      {/* SECCIÓN DE WIDGETS */}
       <Container style={{ padding: "2rem 0" }}>
         <Row className="g-4 justify-content-center dash-equal">
           <Col md={6} className="dash-fix">
-            <WeatherWidget />
+            <Clima />
           </Col>
           <Col md={4} className="dash-fix">
             <DolarWidget />

@@ -1,0 +1,109 @@
+.clima-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  text-align: center;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.clima-buscador {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.clima-buscador input {
+  width: 70%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.clima-buscador button {
+  margin-left: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background-color: #198754;
+  color: #fff;
+  cursor: pointer;
+}
+
+.clima-buscador button:hover {
+  background-color: #145c32;
+}
+
+.clima-dropdown {
+  position: absolute;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  top: 40px;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+  text-align: left;
+  padding: 6px;
+  font-size: 0.9rem;
+}
+
+.clima-opcion {
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.clima-opcion:hover {
+  background: #f0fdf4;
+}
+
+.clima-principal h4 {
+  margin: 10px 0;
+  font-weight: bold;
+  color: #198754;
+}
+
+.clima-temp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 10px 0;
+  color: #333;
+}
+
+.clima-detalles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.clima-pronostico {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.clima-dia {
+  background: #f9f9f9;
+  border-radius: 12px;
+  padding: 12px;
+  width: 90px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.clima-dia:hover {
+  background: #e9fbe5;
+  transform: scale(1.05);
+}
+
+.clima-dia.activo {
+  background: #d1fae5;
+  border: 2px solid #198754;
+}
