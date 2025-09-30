@@ -1,3 +1,4 @@
+/* Card principal (si querés más ancha) */
 .clima-card {
   background: #fff;
   border-radius: 16px;
@@ -5,105 +6,93 @@
   padding: 20px;
   text-align: center;
   font-family: "Segoe UI", sans-serif;
+
+  /* opcional: hacerla más ancha y centrada */
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
+/* ===== Buscador (input y dropdown mismo ancho, centrados) ===== */
 .clima-buscador {
   position: relative;
-  margin-bottom: 15px;
+  margin: 0 auto 15px;
+  max-width: 700px;   /* controla el ancho del input y del dropdown */
+  width: 100%;
 }
 
 .clima-buscador input {
-  width: 70%;
+  width: 100%;        /* ahora 100% del contenedor */
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid #ccc;
 }
 
-.clima-buscador button {
-  margin-left: 8px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: none;
-  background-color: #198754;
-  color: #fff;
-  cursor: pointer;
-}
-
-.clima-buscador button:hover {
-  background-color: #145c32;
-}
-
 .clima-dropdown {
   position: absolute;
+  top: 42px;
+  left: 0;
+  right: 0;           /* igual ancho que el input */
+  width: 100%;
   background: white;
   border: 1px solid #ddd;
   border-radius: 8px;
-  top: 40px;
-  left: 0;
-  width: 100%;
   z-index: 10;
   text-align: left;
   padding: 6px;
   font-size: 0.9rem;
 }
 
-.clima-opcion {
-  padding: 6px 10px;
-  cursor: pointer;
-}
-.clima-opcion:hover {
-  background: #f0fdf4;
-}
-
-.clima-principal h4 {
-  margin: 10px 0;
-  font-weight: bold;
-  color: #198754;
-}
-
-.clima-temp {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin: 10px 0;
-  color: #333;
-}
-
+/* ===== Panel principal (iconos grandes alineados) ===== */
 .clima-detalles {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
+  gap: 16px;
   margin-top: 10px;
   font-size: 0.95rem;
   color: #555;
 }
+.detalle-con-icono {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
+/* ===== Tarjetas de días ===== */
 .clima-pronostico {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(90px, 1fr));
   gap: 15px;
   margin-top: 20px;
 }
+.clima-dia { background: #f9f9f9; border-radius: 12px; padding: 12px; cursor: pointer;
+  transition: transform 0.2s, background 0.2s, box-shadow 0.2s; border: 1px solid transparent; }
+.clima-dia:hover { background: #e9fbe5; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.08); }
+.clima-dia.activo { background: #d1fae5; border: 2px solid #198754; }
 
-.clima-dia {
-  background: #f9f9f9;
-  border-radius: 12px;
-  padding: 12px;
-  width: 90px;
-  cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
+.dia-temp { margin-top: 6px; font-weight: 700; color: #333; }
+.dia-minmax { margin-top: 2px; font-size: 0.85rem; color: #666; }
+
+/* ===== Tira horaria arriba de los días ===== */
+.clima-horaria {
+  margin: 16px 0 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 8px;
+  overflow: visible;
+  padding-bottom: 0;
 }
+.clima-hour { width: 100%; border: 1px solid #ddd; background: #fff; border-radius: 12px; padding: 8px 6px;
+  text-align: center; cursor: pointer; transition: background .2s, border-color .2s, transform .2s; }
+.clima-hour:hover { background: #f0fdf4; transform: translateY(-1px); }
+.clima-hour.activo { background: #e9fbe5; border-color: #198754; }
+.clima-hour .hora { display:block; font-size:12px; margin-bottom:2px; color:#444; }
+.clima-hour .temp { display:block; font-weight:700; color:#222; }
 
-.clima-dia:hover {
-  background: #e9fbe5;
-  transform: scale(1.05);
+/* Responsivo (igual que tenías) */
+@media (max-width: 768px) {
+  .clima-pronostico { grid-template-columns: repeat(4, minmax(90px, 1fr)); }
 }
-
-.clima-dia.activo {
-  background: #d1fae5;
-  border: 2px solid #198754;
+@media (max-width: 576px) {
+  .clima-pronostico { grid-template-columns: repeat(3, minmax(90px, 1fr)); }
 }

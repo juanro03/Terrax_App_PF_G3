@@ -131,7 +131,7 @@ const Inicio = () => {
       {/* SECCIÓN DE WIDGETS */}
       <Container style={{ padding: "2rem 0" }}>
         <Row className="g-4 justify-content-center dash-equal">
-          <Col md={6} className="dash-fix">
+          <Col md={8} className="dash-fix">
             <Clima />
           </Col>
           <Col md={4} className="dash-fix">
