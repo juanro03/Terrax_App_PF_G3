@@ -89,6 +89,136 @@
 .clima-hour .hora { display:block; font-size:12px; margin-bottom:2px; color:#444; }
 .clima-hour .temp { display:block; font-weight:700; color:#222; }
 
+
+/* ===== Pestañas ===== */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.tab {
+  background: #f3f7f5;
+  border: 1px solid #cfe9de;
+  color: #117256;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.tab.active {
+  background: #d1fae5;
+  border-color: #198754;
+}
+
+
+/* ===== Histórico (precipitaciones / heladas) ===== */
+.month-row {
+  display: flex;
+  flex-direction: column;  /* apila las filas */
+  gap: 6px;                /* pequeño espacio entre filas */
+}
+
+.hist-tab { margin-top: 6px; }
+.hist-sub { color:#666; margin-bottom: 10px; }
+.hist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+.hist-card {
+  background: #f9f9f9;
+  border: 1px solid #e7e7e7;
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+}
+.hist-card.lluvia {
+  display: flex;
+  justify-content: space-between; /* fecha a la izquierda, valor a la derecha */
+  align-items: center;
+  background: #f3f8ff;
+  border: 1px solid #b3d4ff;
+  border-radius: 8px;
+  padding: 8px 14px;
+  min-width: 240px; /* ancho mínimo más agradable */
+}
+
+.hist-card.helada { border-color: #cde7ff; background: #f4faff; }
+.hist-card.lluvia .hist-date {
+  font-size: 0.95rem;
+  color: #333;
+  margin: 0;
+}
+
+.hist-card.lluvia .hist-value {
+  font-weight: 700;
+  color: #1e3a8a;
+  font-size: 0.95rem;
+}
+.hist-foot { margin-top: 10px; color:#444; }
+.error { color:#b91c1c; }
+
+/* ===== Precipitaciones en 3 columnas ===== */
+.months-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;           /* espacio entre columnas */
+  align-items: start;
+  margin-top: 8px;
+}
+
+.month-col { min-width: 0; } /* evita overflow en columnas estrechas */
+
+.month-title {
+  margin: 6px 0 8px;
+  font-size: 1rem;
+  text-transform: capitalize;
+  color: #116c4f;
+  text-align: left;
+}
+
+/* Lista de filas dentro de cada mes */
+.month-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;           /* pequeño espacio entre filas */
+}
+
+/* Filas (día a la izquierda, mm a la derecha) */
+.hist-card.lluvia.fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f3f8ff;
+  border: 1px solid #b3d4ff;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.hist-card.lluvia.fila .hist-date {
+  font-size: 0.95rem;
+  color: #333;
+  margin: 0;
+}
+
+.hist-card.lluvia.fila .hist-value {
+  font-weight: 700;
+  color: #1e3a8a;
+  font-size: 0.95rem;
+}
+
+/* Responsivo: 2 columnas en tablets, 1 columna en móviles */
+@media (max-width: 900px) {
+  .months-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .months-grid { grid-template-columns: 1fr; }
+}
+
+
 /* Responsivo (igual que tenías) */
 @media (max-width: 768px) {
   .clima-pronostico { grid-template-columns: repeat(4, minmax(90px, 1fr)); }
