@@ -19,8 +19,8 @@ const API_KEY = "bb506ce6bfb32335624845c3512d3a72";
 const getWeatherIcon = (main, size = 60) => {
   const map = {
     Clear: { Comp: WiDaySunny, color: "#facc15" },        // amarillo
-    Clouds: { Comp: WiCloudy, color: "#9ca3af" },        // gris
-    Rain: { Comp: WiRain, color: "#3b82f6" },        // azul
+    Clouds: { Comp: WiCloudy, color: "#9ca3af" },         // gris
+    Rain: { Comp: WiRain, color: "#3b82f6" },             // azul
     Snow: { Comp: WiSnow, color: "#60a5fa" },
     Thunderstorm: { Comp: WiThunderstorm, color: "#f59e0b" },
     Fog: { Comp: WiFog, color: "#9ca3af" },
@@ -44,7 +44,7 @@ const formatearHora = (fechaISO) => {
 const getMinMaxDia = (dia) => {
   const items = dia?.horas?.length ? dia.horas : [dia.resumen];
   let min = Infinity, max = -Infinity;
-  items.forEach(h => {
+  items.forEach((h) => {
     const tmin = h.main?.temp_min ?? h.main?.temp ?? h.temp ?? 0;
     const tmax = h.main?.temp_max ?? h.main?.temp ?? h.temp ?? 0;
     if (tmin < min) min = tmin;
@@ -57,16 +57,16 @@ const Clima = () => {
   const [ciudadTexto, setCiudadTexto] = useState("Alta Italia,AR");
   const [displayCiudad, setDisplayCiudad] = useState("Alta Italia,AR");
 
-  const [daily, setDaily] = useState([]);            // días con horas
+  const [daily, setDaily] = useState([]); // días con horas
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
   const [selectedHour, setSelectedHour] = useState(null);
 
   // ubicación
-  const [coords, setCoords] = useState(null);        // {lat, lon}
+  const [coords, setCoords] = useState(null); // {lat, lon}
 
   // histórico últimos 3 meses
-  const [rainDays, setRainDays] = useState([]);      // [{date, precip}]
-  const [frostDays, setFrostDays] = useState([]);    // [{date, tmin}]
+  const [rainDays, setRainDays] = useState([]); // [{date, precip}]
+  const [frostDays, setFrostDays] = useState([]); // [{date, tmin}]
   const [loadingHist, setLoadingHist] = useState(false);
   const [histError, setHistError] = useState(null);
 
@@ -82,8 +82,12 @@ const Clima = () => {
 
   // === Buscar ciudades (geocoding) ===
   const buscarCiudad = async (query) => {
-    if (!query) { setResultados([]); return; }
-    setCargandoBusqueda(true); setErrorBusqueda(null);
+    if (!query) {
+      setResultados([]);
+      return;
+    }
+    setCargandoBusqueda(true);
+    setErrorBusqueda(null);
     try {
       const res = await axios.get(
         `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=5&appid=${API_KEY}`
@@ -101,7 +105,8 @@ const Clima = () => {
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setResultados([]); setErrorBusqueda(null);
+        setResultados([]);
+        setErrorBusqueda(null);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -124,8 +129,12 @@ const Clima = () => {
 
       // 2) Actual + forecast
       const [weatherRes, forecastRes] = await Promise.all([
-        axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`),
-        axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`),
+        axios.get(
+          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`
+        ),
+        axios.get(
+          `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`
+        ),
       ]);
 
       // 3) Agrupar forecast por día
@@ -159,7 +168,7 @@ const Clima = () => {
       };
 
       // /forecast ≈ hoy + 4 posteriores
-      const posteriores = dailyArr.filter(d => d.fecha !== hoyFecha).slice(0, 4);
+      const posteriores = dailyArr.filter((d) => d.fecha !== hoyFecha).slice(0, 4);
       setDaily([hoy, ...posteriores]);
       setSelectedDayIdx(0);
       setSelectedHour(null);
@@ -172,19 +181,24 @@ const Clima = () => {
     }
   };
 
-  useEffect(() => { fetchClima(ciudadTexto); }, [ciudadTexto]);
+  useEffect(() => {
+    fetchClima(ciudadTexto);
+  }, [ciudadTexto]);
 
   // === Histórico últimos 3 meses (Open-Meteo Archive API)
   const fetchHistorico = async (lat, lon) => {
     if (!lat || !lon) return;
-    setLoadingHist(true); setHistError(null);
+    setLoadingHist(true);
+    setHistError(null);
     try {
       const end = new Date(); // hoy
       const start = new Date();
       start.setMonth(end.getMonth() - 3); // últimos 3 meses
       const fmt = (d) => d.toISOString().slice(0, 10);
 
-      const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${fmt(start)}&end_date=${fmt(end)}&daily=precipitation_sum,temperature_2m_min&timezone=auto`;
+      const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${fmt(
+        start
+      )}&end_date=${fmt(end)}&daily=precipitation_sum,temperature_2m_min&timezone=auto`;
 
       const res = await axios.get(url);
       const { time = [], precipitation_sum = [], temperature_2m_min = [] } = res.data?.daily || {};
@@ -242,7 +256,7 @@ const Clima = () => {
     <div className="clima-card">
       {/* ===== Tabs ===== */}
       <div className="tabs">
-        {["clima", "precipitaciones", "heladas"].map(tab => (
+        {["clima", "precipitaciones", "heladas"].map((tab) => (
           <button
             key={tab}
             className={`tab ${activeTab === tab ? "active" : ""}`}
@@ -259,13 +273,17 @@ const Clima = () => {
           type="text"
           placeholder="Buscar ciudad..."
           value={busqueda}
-          onChange={(e) => { setBusqueda(e.target.value); buscarCiudad(e.target.value); }}
+          onChange={(e) => {
+            setBusqueda(e.target.value);
+            buscarCiudad(e.target.value);
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && resultados.length > 0) {
               const r = resultados[0];
               const nombreCiudad = `${r.name}${r.state ? "," + r.state : ""},${r.country}`;
               setCiudadTexto(nombreCiudad);
-              setBusqueda(""); setResultados([]);
+              setBusqueda("");
+              setResultados([]);
             }
           }}
         />
@@ -280,10 +298,13 @@ const Clima = () => {
                 onClick={() => {
                   const nombreCiudad = `${r.name}${r.state ? "," + r.state : ""},${r.country}`;
                   setCiudadTexto(nombreCiudad);
-                  setBusqueda(""); setResultados([]); setErrorBusqueda(null);
+                  setBusqueda("");
+                  setResultados([]);
+                  setErrorBusqueda(null);
                 }}
               >
-                {r.name}{r.state ? `, ${r.state}` : ""}, {r.country}
+                {r.name}
+                {r.state ? `, ${r.state}` : ""}, {r.country}
               </div>
             ))}
           </div>
@@ -302,10 +323,10 @@ const Clima = () => {
             <p>{panel.desc}</p>
             <div className="clima-detalles">
               <span className="detalle-con-icono">
-                <WiHumidity size={28} color="#198754" /> {panel.humidity}% Humedad
+                <WiHumidity size={40} color="#3b82f6" /> {panel.humidity}% Humedad
               </span>
               <span className="detalle-con-icono">
-                <WiStrongWind size={28} color="#198754" /> {panel.wind} m/s Viento
+                <WiStrongWind size={40} color="#9ca3af" /> {panel.wind} m/s Viento
               </span>
             </div>
           </div>
@@ -336,7 +357,10 @@ const Clima = () => {
                 <div
                   key={idx}
                   className={`clima-dia ${idx === selectedDayIdx ? "activo" : ""}`}
-                  onClick={() => { setSelectedDayIdx(idx); setSelectedHour(null); }}
+                  onClick={() => {
+                    setSelectedDayIdx(idx);
+                    setSelectedHour(null);
+                  }}
                 >
                   <p>{idx === 0 ? "Hoy" : formatearFechaCorta(d.fecha)}</p>
                   {getWeatherIcon(d.resumen.weather?.[0]?.main ?? "Clear", 50)}
@@ -353,9 +377,7 @@ const Clima = () => {
       {activeTab === "precipitaciones" && (
         <div className="hist-tab">
           <h4>{displayCiudad}</h4>
-          <p className="hist-sub">
-            Días con precipitación &gt; 5 mm en los últimos 3 meses
-          </p>
+          <p className="hist-sub">Días con precipitación &gt; 5 mm en los últimos 3 meses</p>
 
           {loadingHist && <p>Cargando...</p>}
           {histError && <p className="error">{histError}</p>}
@@ -383,15 +405,26 @@ const Clima = () => {
                   return f.toLocaleDateString("es-ES", { month: "long", year: "numeric" });
                 };
 
+                // Cantidad de meses para clase dinámica (centrado cuando hay 1 o 2)
+                const cantMeses = mesesOrdenadosAsc.length;
+                const gridClass =
+                  cantMeses === 3 ? "meses-3" : cantMeses === 2 ? "meses-2" : "meses-1";
+
                 return (
-                  <div className="months-grid">
+                  <div className={`months-grid ${gridClass}`}>
                     {mesesOrdenadosAsc.map((mkey) => (
                       <div key={mkey} className="month-col">
                         <h5 className="month-title">{nombreMes(mkey)}</h5>
                         <div className="month-list">
                           {grupos[mkey].map((d, i) => (
                             <div key={i} className="hist-card lluvia fila">
-                              <span className="hist-date">{new Date(d.date).toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" })}</span>
+                              <span className="hist-date">
+                                {new Date(d.date).toLocaleDateString("es-ES", {
+                                  weekday: "short",
+                                  day: "numeric",
+                                  month: "short",
+                                })}
+                              </span>
                               <span className="hist-value">{d.precip.toFixed(1)} mm</span>
                             </div>
                           ))}
@@ -402,9 +435,7 @@ const Clima = () => {
                 );
               })()}
 
-              <div className="hist-foot">
-                Total días con lluvia &gt; 5 mm: {rainDays.length}
-              </div>
+              <div className="hist-foot">Total días con lluvia &gt; 5 mm: {rainDays.length}</div>
             </>
           )}
         </div>
