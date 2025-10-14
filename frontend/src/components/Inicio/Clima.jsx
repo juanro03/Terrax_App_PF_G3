@@ -12,6 +12,8 @@ import {
   WiHumidity,
   WiStrongWind,
 } from "react-icons/wi";
+import useUserLocation from "../../hooks/useUserLocation.js";
+
 
 const API_KEY = "bb506ce6bfb32335624845c3512d3a72";
 
@@ -54,8 +56,8 @@ const getMinMaxDia = (dia) => {
 };
 
 const Clima = () => {
-  const [ciudadTexto, setCiudadTexto] = useState("Alta Italia,AR");
-  const [displayCiudad, setDisplayCiudad] = useState("Alta Italia,AR");
+  const [ciudadTexto, setCiudadTexto] = useState("Buenos Aires,AR");
+  const [displayCiudad, setDisplayCiudad] = useState("Buenos Aires,AR");
 
   const [daily, setDaily] = useState([]); // días con horas
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
@@ -63,6 +65,7 @@ const Clima = () => {
 
   // ubicación
   const [coords, setCoords] = useState(null); // {lat, lon}
+  const { status, coords: geoCoords, request } = useUserLocation();
 
   // histórico últimos 3 meses
   const [rainDays, setRainDays] = useState([]); // [{date, precip}]
@@ -100,6 +103,80 @@ const Clima = () => {
       setCargandoBusqueda(false);
     }
   };
+
+  const fetchClimaFromCoords = async (lat, lon) => {
+    try {
+      // Nombre legible (reverse geocoding)
+      let nombre = "Ubicación actual";
+      try {
+        const rev = await axios.get(
+          `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${API_KEY}`
+        );
+        if (rev.data?.length) {
+          const l = rev.data[0];
+          nombre = [l.name, l.state, l.country].filter(Boolean).join(", ");
+        }
+      } catch (e) {
+        console.warn("Reverse geocoding falló:", e?.message || e);
+      }
+      setDisplayCiudad(nombre);
+      setCoords({ lat, lon });
+
+      // Clima actual + pronóstico
+      const [weatherRes, forecastRes] = await Promise.all([
+        axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`),
+        axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`),
+      ]);
+
+      // Construir daily
+      const diasMap = {};
+      forecastRes.data.list.forEach((item) => {
+        const fecha = item.dt_txt.split(" ")[0];
+        (diasMap[fecha] ||= []).push(item);
+      });
+
+      const dailyArr = Object.keys(diasMap).map((fecha) => {
+        const horas = diasMap[fecha];
+        const resumen =
+          horas.find((h) => h.dt_txt.includes("12:00:00")) ||
+          horas[Math.floor(horas.length / 2)];
+        return { fecha, resumen, horas };
+      });
+
+      const hoyFecha = new Date().toISOString().split("T")[0];
+      const hoy = {
+        fecha: hoyFecha,
+        resumen: {
+          main: weatherRes.data.main,
+          weather: weatherRes.data.weather,
+          wind: weatherRes.data.wind,
+          dt_txt: new Date().toISOString(),
+        },
+        horas: dailyArr[0]?.horas || [],
+        isToday: true,
+      };
+      const posteriores = dailyArr.filter((d) => d.fecha !== hoyFecha).slice(0, 4);
+
+      setDaily([hoy, ...posteriores]);
+      setSelectedDayIdx(0);
+      setSelectedHour(null);
+      setActiveTab("clima");
+
+      // Histórico
+      fetchHistorico(lat, lon);
+    } catch (e) {
+      console.error("Error al obtener clima desde coords:", e);
+    }
+  };
+
+  //si el usuario acepta los permisos de ubicación, se carga su ubicación
+  useEffect(() => {
+    if (status === "granted" && geoCoords?.lat && geoCoords?.lon) {
+      fetchClimaFromCoords(geoCoords.lat, geoCoords.lon);
+    }
+    // No fuerces el fallback acá. Tu estado inicial ya arranca en Buenos Aires
+    // y el otro efecto (dependiente de ciudadTexto) lo carga. Evitamos pisarnos.
+  }, [status, geoCoords]);
 
   // cerrar dropdown si clickeo fuera
   useEffect(() => {

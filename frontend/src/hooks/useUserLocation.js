@@ -1,10 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 
-/**
- * Maneja permiso + coordenadas del usuario.
- * - Guarda en localStorage: geoConsent ("granted" | "denied") y geoCoords ({lat, lon})
- * - Reintenta sólo si el usuario lo pide (gesto explícito)
- */
+
 export default function useUserLocation() {
   const [status, setStatus] = useState(
     localStorage.getItem("geoConsent") || "unknown"

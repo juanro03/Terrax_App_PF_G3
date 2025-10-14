@@ -6,3 +6,6 @@ python-decouple>=3.8  # Para variables de entorno
 Pillow>=10.0  # Para manejo de imágenes
 dj-rest-auth>=2.2
 django-allauth>=0.54
+beautifulsoup4>=4.12.3
+lxml>=5.2
+html5lib>=1.1

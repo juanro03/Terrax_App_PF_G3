@@ -1,50 +1,106 @@
-/* mantené la card como está; solo cambiamos la tabla */
-.card-terrax .table {
-  background: var(--verde-claro);
-  border-radius: .75rem;          /* esquinas redondeadas */
-  overflow: hidden;               /* que el radius afecte filas */
-  margin-bottom: 0;
+/* === GRID principal tipo "panel BCR" === */
+.granos-grid{
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
 }
 
-/* celdas con el mismo fondo y bordes suaves */
-.card-terrax .table thead th,
-.card-terrax .table tbody td {
-  background: var(--verde-claro);
-  border-color: rgba(0, 0, 0, .05);
-}
-
-/* encabezados un pelín más tenues para contraste */
-.card-terrax .table thead th {
-  color: #3b6651;                 /* opcional: tono verdoso para títulos */
+.titulo{
+  color: #000;
+  margin: 0 0 20px 10px;
+  font-size: 1.4rem;
   font-weight: 600;
 }
-/* Hacé que TODO lo que hay dentro de la tabla use el verde claro */
-.terrax-table{
-  --bs-table-bg: var(--verde-claro);
-  --bs-table-striped-bg: var(--verde-claro);
-  --bs-table-hover-bg: var(--verde-claro);
-  --bs-table-border-color: rgba(0,0,0,.06);
 
-  background: var(--verde-claro);
-  border-radius: .75rem;
-  overflow: hidden;      /* para que el radius afecte a filas */
-  margin-bottom: 0;
+@media (max-width: 1200px){ .granos-grid{ grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px){  .granos-grid{ grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 460px){  .granos-grid{ grid-template-columns: 1fr; } }
+
+/* === Tarjeta individual === */
+.grano-tile{
+  --tile-bg: var(--verde-claro);
+  --tile-fg: #0f2720;
+  --tile-muted: rgba(0,0,0,.45);
+  background: var(--tile-bg);
+  color: var(--tile-fg);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(0,0,0,.08);
+  border: 1px solid rgba(0,0,0,.06);
+  transition: transform .15s ease, box-shadow .15s ease;
 }
 
-/* Bootstrap aplica el fondo a cada celda con un selector muy específico;
-   lo igualamos para asegurarlo en todos los <th>/<td> */
-.terrax-table > :not(caption) > * > *{
-  background-color: var(--verde-claro) !important;
+.grano-tile:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(0,0,0,.12);
 }
 
-/* Encabezados con un tono más oscuro si querés contraste */
-.terrax-table thead th{
-  color: #3b6651;
+/* Barra superior con acento por producto */
+.grano-tile .tile-head{
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  color: #fff;
+  font-weight: 700;
+}
+
+.tile-icon{ font-size: 1.2rem; }
+.tile-title{ font-size: .95rem; line-height: 1; margin: 0; letter-spacing: .3px; }
+
+/* Cuerpo */
+.grano-tile .tile-body{
+  padding: 14px;
+  background: var(--tile-bg);
+}
+
+.tile-price{
+  font-weight: 800;
+  font-size: 1.85rem;
+  line-height: 1.1;
+  letter-spacing: .3px;
+  margin-bottom: 8px;
+}
+
+.tile-price.sc{
+  color: var(--tile-muted);
+  font-weight: 700;
+}
+
+/* fila secundaria */
+.tile-sub{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: .95rem;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0,0,0,.12);
+}
+
+.tile-sub .sub-label{
+  color: var(--tile-muted);
   font-weight: 600;
-  border-bottom-color: rgba(0,0,0,.06);
 }
 
-/* Bordes suaves entre filas */
-.terrax-table tbody td{
-  border-top-color: rgba(0,0,0,.06);
+.tile-sub .sub-value{
+  font-weight: 700;
 }
+
+/* === Colores de acento por producto (barra superior con gradiente) === */
+.grano-tile.trigo .tile-head{
+  background: linear-gradient(90deg,#a56b2c 0%, #c88f55 100%);
+}
+.grano-tile.maiz .tile-head{
+  background: linear-gradient(90deg,#d8a200 0%, #f0c447 100%);
+}
+.grano-tile.girasol .tile-head{
+  background: linear-gradient(90deg,#c79e00 0%, #ffd54d 100%);
+}
+.grano-tile.soja .tile-head{
+  background: linear-gradient(90deg,#177c52 0%, #24a071 100%);
+}
+.grano-tile.sorgo .tile-head{
+  background: linear-gradient(90deg,#b2472d 0%, #d36b51 100%);
+}
+
