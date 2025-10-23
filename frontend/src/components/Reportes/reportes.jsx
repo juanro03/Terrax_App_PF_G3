@@ -7,6 +7,7 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 
 import Filtros from "./Filtros";
 import ModalCrearReporte from "./ModalCrearReporte";
+import ModalEditarReporte from "./ModalEditarReporte";
 import Anotaciones from "./Anotaciones";
 
 const API = "http://127.0.0.1:8000/api";
@@ -24,6 +25,8 @@ const Reportes = () => {
   const [rol, setRol] = useState("");
 
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [reporteAEditar, setReporteAEditar] = useState(null);
 
   const [nuevoReporte, setNuevoReporte] = useState({
     productor: "",
@@ -159,6 +162,40 @@ const Reportes = () => {
         });
       })
       .catch((err) => console.error(err));
+  };
+
+  const handleEditarClick = (e, reporte) => {
+    e.stopPropagation();
+    // Aseguramos que los campos relacionados sean solo IDs
+    const reporteParaEditar = {
+      ...reporte,
+      productor: reporte.productor,
+      campo: reporte.campo,
+      lote: reporte.lote,
+    };
+    setReporteAEditar(reporteParaEditar);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateReporte = (datosActualizados) => {
+    const formData = new FormData();
+    Object.entries(datosActualizados).forEach(([key, value]) => {
+      // Si el archivo no es una instancia de File, es la URL antigua, no la enviamos.
+      if (key === "archivo_pdf" && !(value instanceof File)) return;
+      formData.append(key, value);
+    });
+
+    axios
+      .patch(`${API}/reportes/${reporteAEditar.id}/`, formData, {
+        headers: { ...headers, "Content-Type": "multipart/form-data" },
+      })
+      .then((res) => {
+        setReportes((prev) => prev.map((r) => (r.id === res.data.id ? res.data : r)));
+        if (reporteSel?.id === res.data.id) setReporteSel(res.data);
+        setShowEditModal(false);
+        setReporteAEditar(null);
+      })
+      .catch((err) => console.error("Error al actualizar el reporte:", err));
   };
 
   const handleEliminar = (id) => {
@@ -353,7 +390,7 @@ const Reportes = () => {
                           <button
                             className="btn-terrax-outline"
                             title="Editar"
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={(e) => handleEditarClick(e, r)}
                           >
                             <FaEdit />
                           </button>
@@ -437,6 +474,17 @@ const Reportes = () => {
           campos={campos}
           lotes={lotes}
         />
+
+        {reporteAEditar && (
+          <ModalEditarReporte
+            show={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            onUpdate={handleUpdateReporte}
+            reporteAEditar={reporteAEditar}
+            usuarios={usuarios}
+            campos={campos}
+          />
+        )}
       </div>
     </div>
   );

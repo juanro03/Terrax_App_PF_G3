@@ -60,6 +60,7 @@ const Anotaciones = ({ reporteSel, loteSel, cargandoLote }) => {
         y: parseFloat(a.y_pct),
         color: a.color,
         text: a.texto,
+        creado_en: a.creado_en,
       }));
       setPins(mapped);
     } catch (e) {
@@ -84,6 +85,7 @@ const Anotaciones = ({ reporteSel, loteSel, cargandoLote }) => {
       y: parseFloat(data.y_pct),
       color: data.color,
       text: data.texto,
+      creado_en: data.creado_en,
     };
   };
 
@@ -232,7 +234,20 @@ const Anotaciones = ({ reporteSel, loteSel, cargandoLote }) => {
                         onMouseLeave={() => setHoveredPinAside(null)}
                       >
                         <span className="comentario-dot" style={{ background: p.color }} />
-                        <span className="comentario-text">{p.text}</span>
+                        <div className="comentario-content">
+                          <span className="comentario-text">{p.text}</span>
+                          {p.creado_en && (
+                            <small className="comentario-date">
+                              {new Date(p.creado_en).toLocaleString("es-AR", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </small>
+                          )}
+                        </div>
                         <button
                           className="comentario-del"
                           onClick={async () => {
@@ -436,7 +451,21 @@ const Anotaciones = ({ reporteSel, loteSel, cargandoLote }) => {
                       onMouseLeave={() => setHoveredPinModal(null)}
                     >
                       <span className="comentario-dot" style={{ background: p.color }} />
-                      <span className="comentario-text">{p.text}</span>
+                      <div className="comentario-content">
+                        <span className="comentario-text">{p.text}</span>
+                        {p.creado_en && (
+                          <small className="comentario-date">
+                            {new Date(p.creado_en).toLocaleString("es-AR", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </small>
+                        )}
+                      </div>
+
                       <button
                         className="comentario-del"
                         title="Eliminar"

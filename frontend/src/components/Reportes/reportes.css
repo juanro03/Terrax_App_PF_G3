@@ -46,7 +46,7 @@
   margin: 3rem auto;
   max-width: 1150px;
 
-  /* 🔑 altura mínima para que la cartulina siempre sea alta */
+  /*  altura mínima para que la cartulina siempre sea alta */
   min-height: 95vh; /* ocupa 80% de la altura visible */
   display: flex;
   flex-direction: column;
