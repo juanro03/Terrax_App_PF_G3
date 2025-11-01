@@ -4,7 +4,9 @@ import "./reportes.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { FaEdit, FaTrash } from "react-icons/fa";
-
+import {
+  Card,
+} from "react-bootstrap";
 import Filtros from "./Filtros";
 import ModalCrearReporte from "./ModalCrearReporte";
 import ModalEditarReporte from "./ModalEditarReporte";
@@ -279,8 +281,8 @@ const Reportes = () => {
       backgroundColor: s.isSelected
         ? "#dff3e6"
         : s.isFocused
-        ? "#edf8f1"
-        : null,
+          ? "#edf8f1"
+          : null,
       color: "#111827",
     }),
     singleValue: (p) => ({ ...p, color: TX_GREEN }),
@@ -289,7 +291,18 @@ const Reportes = () => {
   };
 
   return (
-    <div className="terrax-card">
+    <Card
+      className="mx-auto my-5 shadow"
+      style={{
+        maxWidth: 1200,
+        padding: "2rem",
+        margin: "3rem",
+        background: "#fff",
+        borderRadius: "1.4rem",
+        transform: "none",
+        transition: "none"
+      }}
+    >
       {/* wrapper para que selects/inputs ocupen el mismo ancho que la tarjeta */}
       <div className="reportes-container" style={{ width: "100%" }}>
         <h2 className="terrax-title">Reportes</h2>
@@ -363,11 +376,9 @@ const Reportes = () => {
                 ];
                 const mes = meses[fechaObj.getMonth()];
                 const anio2 = fechaObj.getFullYear().toString().slice(-2);
-                const cabecera = `${dia} ${mes} ${anio2} - ${
-                  r.campo_nombre || obtenerNombreCampo(r.campo)
-                } - ${r.lote_nombre || obtenerNombreLote(r.lote)} - ${
-                  r.nombre
-                }`;
+                const cabecera = `${dia} ${mes} ${anio2} - ${r.campo_nombre || obtenerNombreCampo(r.campo)
+                  } - ${r.lote_nombre || obtenerNombreLote(r.lote)} - ${r.nombre
+                  }`;
 
                 const isSel = reporteSel?.id === r.id;
 
@@ -486,7 +497,7 @@ const Reportes = () => {
           />
         )}
       </div>
-    </div>
+    </Card>
   );
 };
 

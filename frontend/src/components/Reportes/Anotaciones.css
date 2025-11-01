@@ -58,14 +58,10 @@
 
 /* ==== Imagen del lote en panel derecho ==== */
 .registros-imgWrap {
-  background: #dff3db;
   border-radius: 18px;
-  padding: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
-  border: 1px solid rgba(25, 135, 84, .2);
 }
 
 .registros-img {

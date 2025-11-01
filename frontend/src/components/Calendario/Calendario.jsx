@@ -532,6 +532,8 @@ export default function Calendario() {
         borderRadius: "1.4rem",
         border: "none",
         overflow: "visible",
+        transform: "none",       
+        transition: "none"
       }}
     >
       <style>{styles}</style>

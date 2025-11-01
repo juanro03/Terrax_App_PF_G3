@@ -107,8 +107,8 @@ export default function ActividadesAgricolas() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const tipoKey = TIPO_MAP[actividad];
-    if (!tipoKey) { setMensajeOk(false); setMensaje("Actividad inválida."); setTimeout(()=>setMensaje(""),3500); return; }
-    if (!lote) { setMensajeOk(false); setMensaje("Selecciona un lote."); setTimeout(()=>setMensaje(""),3500); return; }
+    if (!tipoKey) { setMensajeOk(false); setMensaje("Actividad inválida."); setTimeout(() => setMensaje(""), 3500); return; }
+    if (!lote) { setMensajeOk(false); setMensaje("Selecciona un lote."); setTimeout(() => setMensaje(""), 3500); return; }
 
     const formData = new FormData();
     formData.append("lote", lote);
@@ -167,7 +167,7 @@ export default function ActividadesAgricolas() {
       }
 
       await axios.post("/api/tareas/", formData, { headers: { "Content-Type": "multipart/form-data" } });
-      setMensajeOk(true); 
+      setMensajeOk(true);
       setMensaje("¡Actividad registrada correctamente!");
       setRefreshKey((k) => k + 1);
 
@@ -193,7 +193,15 @@ export default function ActividadesAgricolas() {
   );
 
   return (
-    <Card className="mx-auto my-5 shadow" style={{ maxWidth: 1160, background: blanco, borderRadius: "1.4rem", border: "none" }}>
+    <Card className="mx-auto my-5 shadow"
+      style={{
+        maxWidth: 1160,
+        background: blanco,
+        borderRadius: "1.4rem",
+        border: "none",
+        transform: "none",
+        transition: "none"
+      }}>
       <Card.Body>
         <Card.Title className="fw-bold mb-3" style={{ color: verdeOscuro }}>
           Registrar Actividad Agrícola
@@ -437,14 +445,14 @@ export default function ActividadesAgricolas() {
           <div className="d-flex align-items-center mt-4 gap-2">
             <Button variant="success" type="submit" disabled={!canSubmit}>Registrar Actividad</Button>
             <Button type="button" variant="outline-danger" onClick={limpiarFormularioActividad} disabled={!actividad}>Limpiar</Button>
-            
+
           </div>
         </Form>
 
         {showTraz && (
           <div className="mt-4 p-3 rounded-4" style={{ background: "#f3fbf6", border: "1px solid #d9efe3" }}>
             <h5 className="fw-bold mb-3" style={{ color: verdeOscuro }}>Trazabilidad Agrícola</h5>
-            <TrazabilidadEmbed campos={campos} lotes={lotes} refreshKey={refreshKey}/>
+            <TrazabilidadEmbed campos={campos} lotes={lotes} refreshKey={refreshKey} />
 
           </div>
         )}

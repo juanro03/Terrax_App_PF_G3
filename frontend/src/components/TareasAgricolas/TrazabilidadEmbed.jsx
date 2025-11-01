@@ -40,15 +40,15 @@ const getEndpointFor = (model, id) => {
 
 // ---------- Meta UI ----------
 const TYPE_META = {
-  SIEMBRA:       { label: "Siembra",                  bg: "#eaf7ec", dot: "#56a66a" },
-  COBERTURA:     { label: "Cobertura",                bg: "#f7ecd8", dot: "#c49a54" },
-  FERTILIZACION: { label: "Fertilización",            bg: "#efe2fb", dot: "#7f57c2" },
-  MALEZAS:       { label: "Manejo de Malezas",        bg: "#fde7ef", dot: "#cf5f86" },
-  LABOREO:       { label: "Laboreos de Lote",         bg: "#f1e7de", dot: "#a37a60" },
-  RIEGO:         { label: "Riego",                    bg: "#e6f3fb", dot: "#5aa6d6" },
+  SIEMBRA: { label: "Siembra", bg: "#eaf7ec", dot: "#56a66a" },
+  COBERTURA: { label: "Cobertura", bg: "#f7ecd8", dot: "#c49a54" },
+  FERTILIZACION: { label: "Fertilización", bg: "#efe2fb", dot: "#7f57c2" },
+  MALEZAS: { label: "Manejo de Malezas", bg: "#fde7ef", dot: "#cf5f86" },
+  LABOREO: { label: "Laboreos de Lote", bg: "#f1e7de", dot: "#a37a60" },
+  RIEGO: { label: "Riego", bg: "#e6f3fb", dot: "#5aa6d6" },
   FITOSANITARIA: { label: "Aplicación Fitosanitaria", bg: "#e8f2ea", dot: "#4f8f67" },
-  COSECHA:       { label: "Cosecha",                  bg: "#fff5d7", dot: "#cc9a00" },
-  OTRA:          { label: "Tarea",                    bg: "#f3f5f7", dot: "#8792a1" },
+  COSECHA: { label: "Cosecha", bg: "#fff5d7", dot: "#cc9a00" },
+  OTRA: { label: "Tarea", bg: "#f3f5f7", dot: "#8792a1" },
 };
 
 const mapTipo = (raw) => {
@@ -110,12 +110,12 @@ const EDITABLE_BY_TYPE = {
   RIEGO: ["tipo_riego", "volumen", "observaciones", "descripcion"],
   LABOREO: ["tipo_laboreo", "operario", "observaciones", "descripcion"],
   FERTILIZACION: [
-    "tipo_fertilizante","de","producto_aplicar","concentracion","fabricante",
-    "litros_por_ha","hectareas_aplicadas","observaciones","descripcion",
+    "tipo_fertilizante", "de", "producto_aplicar", "concentracion", "fabricante",
+    "litros_por_ha", "hectareas_aplicadas", "observaciones", "descripcion",
   ],
   MALEZAS: [
-    "tipo_fitosanitario","plaga_maleza","producto_aplicar","fabricante",
-    "lkg_por_ha","hectareas_aplicadas","observaciones","descripcion",
+    "tipo_fitosanitario", "plaga_maleza", "producto_aplicar", "fabricante",
+    "lkg_por_ha", "hectareas_aplicadas", "observaciones", "descripcion",
   ],
   FITOSANITARIA: ["producto_aplicar", "plaga_maleza", "observaciones", "descripcion"],
   COSECHA: ["rinde", "unidad_rinde", "observaciones", "descripcion"],
@@ -160,8 +160,9 @@ export default function TrazabilidadEmbed({
   const [lote, setLote] = useState(loteProp || "");
   const [tipo, setTipo] = useState("");
 
-  const [desde, setDesde] = useState(dayjs().subtract(12, "month").format("YYYY-MM-DD"));
-  const [hasta, setHasta] = useState(dayjs().format("YYYY-MM-DD"));
+  const [desde, setDesde] = useState("");
+  const [hasta, setHasta] = useState("");
+
 
   // data
   const [allTasks, setAllTasks] = useState([]);   // /api/tareas/
@@ -187,11 +188,32 @@ export default function TrazabilidadEmbed({
   }, [camposProp]);
 
   useEffect(() => {
-    if (lotesProp) return;
-    setLote("");
-    if (!campo) return setLotes([]);
-    axios.get(`/api/lotes/por-campo/${campo}/`).then((r) => setLotes(r.data)).catch(() => setLotes([]));
-  }, [campo, lotesProp]);
+
+    setLotes([]); // limpiar para evitar ver lotes viejos
+    if (!campo) return;
+    const fetchLotes = async () => {
+      try {
+        const { data } = await axios.get(`/api/lotes/por-campo/${campo}/`);
+        setLotes(data || []);
+        const loteIds = new Set((data || []).map((l) => String(l.id)));
+        if (!loteIds.has(String(lote))) {
+          setLote("");
+        }
+      }
+      catch {
+        setLotes([]);
+        setLote("");
+      }
+    };
+    fetchLotes();
+  }, [campo]);
+
+
+  useEffect(() => {
+    if (!campo) setLote(""); // si el campo vuelve a "Todos", resetea lote
+  }, [campo]);
+
+
 
   // normalizador
   const normalizeFromTarea = (it, idx) => {
@@ -209,22 +231,22 @@ export default function TrazabilidadEmbed({
 
   // carga inicial: TODAS
   useEffect(() => {
-  const loadTasks = async () => {
-    setLoading(true);
-    try {
-      const { data } = await axios.get("/api/tareas/");
-      const normalized = (Array.isArray(data) ? data : []).map(normalizeFromTarea);
-      setAllTasks(normalized);
-      setExpanded(new Set());
-    } catch (e) {
-      console.error(e);
-      setAllTasks([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-  loadTasks();
-}, [refreshKey]);
+    const loadTasks = async () => {
+      setLoading(true);
+      try {
+        const { data } = await axios.get("/api/tareas/");
+        const normalized = (Array.isArray(data) ? data : []).map(normalizeFromTarea);
+        setAllTasks(normalized);
+        setExpanded(new Set());
+      } catch (e) {
+        console.error(e);
+        setAllTasks([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadTasks();
+  }, [refreshKey]);
 
   // filtrado local
   const filtered = useMemo(() => {
@@ -233,19 +255,23 @@ export default function TrazabilidadEmbed({
 
     return allTasks
       .filter((ev) => {
+        // tipo
         if (tipo && ev.tipo !== tipo) return false;
 
-        if (campo) {
+        // campo
+        if (campo && lotes.length > 0) {
           const loteId = ev?.raw?.lote ?? ev?.raw?.lote_id ?? null;
-          const lotesDeCampo = new Set(lotes.map((l) => l.id));
-          if (!lotesDeCampo.has(loteId)) return false;
+          const lotesDeCampo = new Set(lotes.map((l) => String(l.id)));
+          if (!lotesDeCampo.has(String(loteId))) return false;
         }
 
+        // lote
         if (lote) {
           const loteId = String(ev?.raw?.lote ?? ev?.raw?.lote_id ?? "");
           if (String(loteId) !== String(lote)) return false;
         }
 
+        // fechas
         if (dDesde || dHasta) {
           const f = ev.fecha ? dayjs(ev.fecha) : null;
           if (!f) return false;
@@ -257,6 +283,7 @@ export default function TrazabilidadEmbed({
       })
       .sort((a, b) => dayjs(a.fecha).valueOf() - dayjs(b.fecha).valueOf());
   }, [allTasks, tipo, campo, lote, desde, hasta, lotes]);
+
 
   // helpers UI
   const toggleRow = (id) => {
@@ -278,12 +305,12 @@ export default function TrazabilidadEmbed({
       RIEGO: ["tipo_riego", "volumen", "observaciones"],
       LABOREO: ["tipo_laboreo", "operario", "observaciones"],
       FERTILIZACION: [
-        "tipo_fertilizante","de","producto_aplicar","concentracion","fabricante",
-        "litros_por_ha","hectareas_aplicadas","observaciones",
+        "tipo_fertilizante", "de", "producto_aplicar", "concentracion", "fabricante",
+        "litros_por_ha", "hectareas_aplicadas", "observaciones",
       ],
       MALEZAS: [
-        "tipo_fitosanitario","plaga_maleza","producto_aplicar","fabricante",
-        "lkg_por_ha","hectareas_aplicadas","observaciones",
+        "tipo_fitosanitario", "plaga_maleza", "producto_aplicar", "fabricante",
+        "lkg_por_ha", "hectareas_aplicadas", "observaciones",
       ],
       FITOSANITARIA: ["producto_aplicar", "plaga_maleza", "observaciones"],
       COSECHA: ["rinde", "unidad_rinde", "observaciones"],
@@ -394,13 +421,14 @@ export default function TrazabilidadEmbed({
           <Form.Select
             value={lote}
             onChange={(e) => onLoteChange(e.target.value)}
-            disabled={!campo}
+            disabled={!campo} // deshabilita si no hay campo
             className="input-terrax"
             style={{ minWidth: 210 }}
           >
             <option value="">Todos</option>
             {lotes.map((l) => <option key={l.id} value={l.id}>{l.nombre}</option>)}
           </Form.Select>
+
         </Col>
 
         <Col md="auto">
@@ -444,7 +472,7 @@ export default function TrazabilidadEmbed({
           <thead style={{ background: "#e9f6ee" }}>
             <tr>
               <th style={{ width: 140 }}>Fecha</th>
-              <th style={{ width: 280 }}>Tipo</th>
+              <th style={{ width: 280 }}>Tipo de tarea</th>
               <th className="text-center" style={{ width: 210 }}>Acciones</th>
 
             </tr>
@@ -479,7 +507,7 @@ export default function TrazabilidadEmbed({
                       />
                       <span
                         className="badge"
-                        style={{ background: pillBg, color: pillFg, fontWeight: 600, fontSize: "0.95rem",padding: "0.45em 0.9em",  letterSpacing: "0.3px" }}
+                        style={{ background: pillBg, color: pillFg, fontWeight: 600, fontSize: "0.95rem", padding: "0.45em 0.9em", letterSpacing: "0.3px" }}
                       >
                         {meta.label}
                       </span>

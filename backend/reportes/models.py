@@ -20,7 +20,6 @@ class Reporte(models.Model):
 
 
 class Anotacion(models.Model):
-    # 🔁 AHORA apunta al LOTE (ya no al reporte)
     lote = models.ForeignKey(
         Lote, on_delete=models.CASCADE, related_name="anotaciones"
     )

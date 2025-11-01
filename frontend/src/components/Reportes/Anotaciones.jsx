@@ -141,9 +141,10 @@ const Anotaciones = ({ reporteSel, loteSel, cargandoLote }) => {
                     <span className="bullet"></span>
                     {new Date(reporteSel.fecha_reporte).toLocaleDateString("es-AR", {
                       day: "2-digit",
-                      month: "short",
-                      year: "2-digit",
-                    })}{" "}
+                      month: "2-digit",
+                      year: "numeric",
+                    })}
+                    {" "}
                     — {reporteSel.nombre}
                   </div>
                   <div className="rs-right">

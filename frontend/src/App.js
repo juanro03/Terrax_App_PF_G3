@@ -23,7 +23,7 @@ import ProductosForm from "./components/Productos/ProductosForm";
 import Reportes from "./components/Reportes/reportes.jsx";
 import HistorialCampania from "./components/lotes/HistorialCampania";
 import TareasAgricolas from "./components/TareasAgricolas/TareasAgricolas";
-import TrazabilidadAgricola from "./components/TareasAgricolas/TrazabilidadAgricola";
+import TrazabilidadEmbed from "./components/TareasAgricolas/TrazabilidadEmbed";
 
 
 function AppContent() {
@@ -73,7 +73,7 @@ function AppContent() {
           <Route path="/productos/agregar" element={<ProductosForm />} />
           <Route path="/productos/ver" element={<ProductosLista />} />
           <Route path="/reportes" element={<Reportes />} />
-          <Route path="/tareas/trazabilidad" element={<TrazabilidadAgricola />} />
+          <Route path="/tareas/trazabilidad" element={<TrazabilidadEmbed />} />
 
           <Route
             path="/usuarios"

@@ -17,7 +17,7 @@ const DetalleLote = () => {
     archivo: null,
   });
   const location = useLocation();
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
 
   // viene desde VerLotes si lo pasaste en navigate(..., { state })
   const [campoInfo, setCampoInfo] = useState({
@@ -38,7 +38,7 @@ const DetalleLote = () => {
         try {
           const { data: campo } = await axios.get(`http://127.0.0.1:8000/api/campos/${campoId}/`);
           campoNombre = campo.nombre;
-        } catch {}
+        } catch { }
         setCampoInfo({ id: campoId, nombre: campoNombre });
       } catch (e) {
         console.error("No pude obtener el campo del lote", e);
@@ -324,49 +324,49 @@ const DetalleLote = () => {
     });
   }, [siembra.fechaEstimadaCosechaISO]);
 
-  
+
   return (
     <div className="container-fluid p-4" style={{ backgroundColor: "#f0fdf4" }}>
       <div className="d-flex align-items-center flex-wrap gap-3 mb-3">
-      <button
-        type="button"
-        className="btn btn-outline-success btn-sm d-inline-flex align-items-center"
-        onClick={handleBack}
-        disabled={!campoInfo.id}
-      >
-        <FaArrowLeft className="me-2" />
-        Volver
-      </button>
-
-      <nav aria-label="breadcrumb">
-        <ol className="breadcrumb m-0">
-          <li className="breadcrumb-item"><Link to="/campos">Campos</Link></li>
-          <li className="breadcrumb-item">
-            {campoInfo.id ? (
-              <Link to={`/campos/${campoInfo.id}/lotes`}>{campoInfo.nombre || "Campo"}</Link>
-            ) : (
-              <span>{campoInfo.nombre || "Campo"}</span>
-            )}
-          </li>
-          <li className="breadcrumb-item active" aria-current="page">{loteNombre}</li>
-        </ol>
-      </nav>
-
-      <div className="ms-auto d-flex align-items-center gap-2">
-        <button className="btn btn-success">Actual</button>
         <button
-          className="btn btn-outline-success"
-          onClick={() =>
-            navigate(`/lotes/${loteId}/trazabilidad`, {
-              state: { campoId: campoInfo.id, campoNombre: campoInfo.nombre, loteNombre },
-            })
-          }
+          type="button"
+          className="btn btn-outline-success btn-sm d-inline-flex align-items-center"
+          onClick={handleBack}
+          disabled={!campoInfo.id}
         >
-          Historial
+          <FaArrowLeft className="me-2" />
+          Volver
         </button>
-        <button className="btn btn-outline-success">Reportes</button>
+
+        <nav aria-label="breadcrumb">
+          <ol className="breadcrumb m-0">
+            <li className="breadcrumb-item"><Link to="/campos">Campos</Link></li>
+            <li className="breadcrumb-item">
+              {campoInfo.id ? (
+                <Link to={`/campos/${campoInfo.id}/lotes`}>{campoInfo.nombre || "Campo"}</Link>
+              ) : (
+                <span>{campoInfo.nombre || "Campo"}</span>
+              )}
+            </li>
+            <li className="breadcrumb-item active" aria-current="page">{loteNombre}</li>
+          </ol>
+        </nav>
+
+        <div className="ms-auto d-flex align-items-center gap-2">
+          <button className="btn btn-success">Actual</button>
+          <button
+            className="btn btn-outline-success"
+            onClick={() =>
+              navigate(`/lotes/${loteId}/trazabilidad`, {
+                state: { campoId: campoInfo.id, campoNombre: campoInfo.nombre, loteNombre },
+              })
+            }
+          >
+            Historial
+          </button>
+          <button className="btn btn-outline-success">Reportes</button>
+        </div>
       </div>
-    </div>
 
 
 
@@ -375,7 +375,12 @@ const DetalleLote = () => {
         <div className="col-md-6 d-flex flex-column justify-content-between">
           <div className="d-flex flex-column h-100">
             {/* Estado del Lote */}
-            <div className="card p-3 mb-4" style={{ borderRadius: "15px" }}>
+            <div className="card p-3 mb-4"
+              style={{
+                borderRadius: "15px",
+                transform: "none",
+                transition: "none"
+              }}>
               <h5 className="fw-bold mb-3">Estado del Lote</h5>
               <div className="btn-group" role="group">
                 <button
@@ -399,7 +404,12 @@ const DetalleLote = () => {
             </div>
 
             {/* Siembra */}
-            <div className="card p-3 shadow-sm flex-grow-1 d-flex flex-column justify-content-between" style={{ borderRadius: "15px" }}>
+            <div className="card p-3 shadow-sm flex-grow-1 d-flex flex-column justify-content-between"
+              style={{
+                borderRadius: "15px",
+                transform: "none",
+                transition: "none"
+              }}>
               <div>
                 <h5 className="fw-bold mb-3">Siembra</h5>
                 <div className="mb-2">
@@ -439,46 +449,46 @@ const DetalleLote = () => {
                         <option key={index} value={variedad}>
                           {variedad}
                         </option>
-                    ))}
+                      ))}
 
                   </select>
                 </div>
 
                 {/* Densidad con unidad */}
                 <div className="mb-2">
-                    <label className="form-label">Densidad</label>
-                    <div className="input-group">
-                        <input
-                        type="text"
-                        name="densidad"
-                        className="form-control"
-                        value={siembra.densidad || ""}
-                        onChange={handleSiembraChange}
-                        style={{ height: "48px" }}
-                        />
-                        <button
-                        type="button"
-                        className={`btn ${unidadDensidad === "Kg/Ha" ? "btn-success" : "btn-outline-success"}`}
-                        onClick={() => {
-                            setUnidadDensidad("Kg/Ha");
-                            setSiembra((prev) => ({ ...prev, unidad: "Kg/Ha" }));
-                        }}
-                        style={{ height: "48px" }}
-                        >
-                        Kg/Ha
-                        </button>
-                        <button
-                        type="button"
-                        className={`btn ${unidadDensidad === "Pl/Ha" ? "btn-success" : "btn-outline-success"}`}
-                        onClick={() => {
-                            setUnidadDensidad("Pl/Ha");
-                            setSiembra((prev) => ({ ...prev, unidad: "Pl/Ha" }));
-                        }}
-                        style={{ height: "48px" }}
-                        >
-                        Pl/Ha
-                        </button>
-                    </div>
+                  <label className="form-label">Densidad</label>
+                  <div className="input-group">
+                    <input
+                      type="text"
+                      name="densidad"
+                      className="form-control"
+                      value={siembra.densidad || ""}
+                      onChange={handleSiembraChange}
+                      style={{ height: "48px" }}
+                    />
+                    <button
+                      type="button"
+                      className={`btn ${unidadDensidad === "Kg/Ha" ? "btn-success" : "btn-outline-success"}`}
+                      onClick={() => {
+                        setUnidadDensidad("Kg/Ha");
+                        setSiembra((prev) => ({ ...prev, unidad: "Kg/Ha" }));
+                      }}
+                      style={{ height: "48px" }}
+                    >
+                      Kg/Ha
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn ${unidadDensidad === "Pl/Ha" ? "btn-success" : "btn-outline-success"}`}
+                      onClick={() => {
+                        setUnidadDensidad("Pl/Ha");
+                        setSiembra((prev) => ({ ...prev, unidad: "Pl/Ha" }));
+                      }}
+                      style={{ height: "48px" }}
+                    >
+                      Pl/Ha
+                    </button>
+                  </div>
                 </div>
                 <div className="mb-2">
                   <label className="form-label">Fecha estimada de cosecha</label>
@@ -542,9 +552,14 @@ const DetalleLote = () => {
           </div>
         </div>
         {/* Columna derecha */}
-        <div className="col-md-6">         
+        <div className="col-md-6">
           {/* Cosecha */}
-          <div className="card p-3 shadow-sm mb-3" style={{ borderRadius: "15px" }}>
+          <div className="card p-3 shadow-sm mb-3" 
+          style={{
+            borderRadius: "15px",
+            transform: "none",
+            transition: "none"
+          }}>
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h5 className="fw-bold">Cosecha</h5>
               <button
@@ -610,7 +625,7 @@ const DetalleLote = () => {
               />
             </div>
           </div>
-                  
+
           {/* Botón Agregar Cobertura */}
           {!mostrarCobertura && (
             <button
@@ -685,7 +700,7 @@ const DetalleLote = () => {
                 </button>
               </div>
             </div>
-          )}     
+          )}
         </div>   {/* Fin de la columna derecha */}
       </div>     {/* Fin del row */}
       {showConfirmEnd && (
@@ -717,7 +732,7 @@ const DetalleLote = () => {
           </div>
         </div>
       )}
-    </div>       
+    </div>
   );
 };
 

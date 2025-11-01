@@ -291,9 +291,9 @@ const Calculadora = () => {
                 <td>
                   {p.envase
                     ? (
-                        (parseFloat(p.dosis) * parseFloat(hectareas)) /
-                        parseFloat(p.envase)
-                      ).toFixed(1)
+                      (parseFloat(p.dosis) * parseFloat(hectareas)) /
+                      parseFloat(p.envase)
+                    ).toFixed(1)
                     : "—"}
                 </td>
               </tr>
@@ -442,6 +442,8 @@ const Calculadora = () => {
         background: blanco,
         borderRadius: "1.4rem",
         border: "none",
+        transform: "none",       
+        transition: "none"
       }}
     >
       <Card.Body>
@@ -1051,9 +1053,9 @@ const Calculadora = () => {
                         <td>
                           {p.envase
                             ? (
-                                (parseFloat(p.dosis) * parseFloat(hectareas)) /
-                                parseFloat(p.envase)
-                              ).toFixed(1)
+                              (parseFloat(p.dosis) * parseFloat(hectareas)) /
+                              parseFloat(p.envase)
+                            ).toFixed(1)
                             : "—"}
                         </td>
                       </tr>
@@ -1178,9 +1180,8 @@ const Calculadora = () => {
                                 <td>
                                   <Form.Control
                                     size="sm"
-                                    className={`shadow-sm rounded input-terrax ${
-                                      isInvalid ? "is-invalid" : ""
-                                    }`}
+                                    className={`shadow-sm rounded input-terrax ${isInvalid ? "is-invalid" : ""
+                                      }`}
                                     type={type}
                                     min={min}
                                     value={values[idx]}

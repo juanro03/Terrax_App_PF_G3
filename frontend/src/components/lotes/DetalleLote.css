@@ -44,11 +44,14 @@ body {
 
 /* === Tarjetas (Cards) === */
 .card {
+  transform: "none";        
+  transition: "none";
   background-color: var(--verde-claro);
   border-radius: 15px;
   border: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   color: var(--fuente-oscura);
+  
 }
 
 /* === Inputs === */

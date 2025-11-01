@@ -35,15 +35,13 @@
   gap: 1rem;
 }
 
-/* ===== TITULARES / WRAPPER (estética Terrax) ===== */
 /* ===== CONTENEDOR PRINCIPAL (card blanca) ===== */
 .terrax-card {
   background: var(--blanco);
   border-radius: 1.5rem;
   border: none;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  padding: 2rem;
-  margin: 3rem auto;
+
   max-width: 1150px;
 
   /*  altura mínima para que la cartulina siempre sea alta */

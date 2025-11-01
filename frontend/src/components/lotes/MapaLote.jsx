@@ -13,9 +13,6 @@ const MapWithDraw = ({ onPoligonoCreado, coordenadasIniciales, mapContainerRef  
   const drawnItems = useRef(new L.FeatureGroup());
   const drawControlRef = useRef(null);
 
-
-
-
   useEffect(() => {
     if (!map || drawControlRef.current) return;
 

@@ -31,7 +31,7 @@
 .widget .clima-card {
   max-width: none;
   width: 100%;
-  margin: 0;
+  margin: 0s;
 }
 
 /* Widgets hijos ocupan todo el ancho de su contenedor */
