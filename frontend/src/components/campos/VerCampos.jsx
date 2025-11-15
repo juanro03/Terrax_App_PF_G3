@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "../../axiosconfig";
 import "./Campos.css";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { Button} from "react-bootstrap";
 import ModalCrearCampo from "./ModalCrearCampo";
 import ModalEditarCampo from "./ModalEditarCampo";
 import { useNavigate } from "react-router-dom";
@@ -94,19 +95,19 @@ const VerCampos = () => {
           >
             Limpiar
           </button>
-        <button
-      className="btn btn-success btn-sm"
-      style={{
-        height: "32px",
-        borderRadius: "8px",
-        padding: "6px 12px",
-        border: "1px solid #ced4da",
+          <button
+            className="btn btn-success btn-sm"
+            style={{
+              height: "32px",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              border: "1px solid #ced4da",
 
-      }}
-      onClick={() => setMostrarModal(true)}
-    >
-      Solicitar Servicio
-    </button>
+            }}
+            onClick={() => setMostrarModal(true)}
+          >
+            Solicitar Servicio
+          </button>
         </div>
 
         <button className="btn btn-outline-success" onClick={() => setShowCrear(true)}>
@@ -114,8 +115,8 @@ const VerCampos = () => {
         </button>
       </div>
 
-{mostrarModal && <SolicitarServicio onClose={() => setMostrarModal(false)} />}
-  
+      {mostrarModal && <SolicitarServicio onClose={() => setMostrarModal(false)} />}
+
       <div className="row justify-content-center">
         <div className="container mt-4">
           <div className="row">
@@ -169,33 +170,43 @@ const VerCampos = () => {
                     className="card-footer d-flex justify-content-center gap-4"
                     style={{ backgroundColor: "#f8f9fa", padding: "10px" }}
                   >
-                    <button
-                      className="btn btn-outline-primary btn-sm"
+                    <Button
+                      variant="outline-success"
+                      size="sm"
+                      className="rounded-circle"
+                      style={{ width: 34, height: 34, borderWidth: 2 }}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleEditar(campo);
                       }}
+                      title="Editar"
                     >
-                      <FaEdit />
-                    </button>
-                    <button
-                      className="btn btn-outline-danger btn-sm"
+                      <i className="bi bi-pencil" />
+                    </Button>
+
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      className="rounded-circle"
+                      style={{ width: 34, height: 34, borderWidth: 2 }}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDelete(campo.id);
                       }}
+                      title="Eliminar"
                     >
-                      <FaTrash />
-                    </button>
+                      <i className="bi bi-trash" />
+                    </Button>
+
                   </div>
                 </div>
-                
+
               ))}
-              
+
           </div>
         </div>
       </div>
-              
+
       <ModalCrearCampo
         show={showCrear}
         onHide={() => setShowCrear(false)}
@@ -209,7 +220,7 @@ const VerCampos = () => {
           onSuccess={fetchCampos}
         />
       )}
-      
+
     </div>
   );
 };

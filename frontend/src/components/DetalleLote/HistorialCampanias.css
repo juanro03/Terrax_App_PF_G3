@@ -1,0 +1,144 @@
+.timeline-wrap {
+  position: relative;
+  margin: 0 auto;
+  max-width: 700px;
+}
+
+.timeline-wrap::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #bbf7d0;
+}
+
+.camp-card {
+  display: flex;
+  gap: 12px;
+  margin: 0 0 18px 0;
+  position: relative;
+}
+
+.camp-card__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #16a34a; /* verde */
+  margin-left: 12px;
+  flex: 0 0 12px;
+  transform: translateY(8px);
+  box-shadow: 0 0 0 4px #dcfce7; /* halo */
+}
+
+.camp-card__content {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+  flex: 1;
+}
+
+.camp-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.camp-card__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 5px 0px;
+}
+
+.camp-card__grid .label {
+  font-size: 15px; color: #040404; /* slate-500 */
+}
+.camp-card__grid .value {
+  font-weight: 600;
+}
+
+.camp-card__files {
+  margin-top: 10px;
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.file-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #f8fafc; border: 1px solid #e2e8f0; color: #0f172a;
+  padding: 6px 10px; border-radius: 8px; text-decoration: none;
+}
+.file-chip:hover { background: #eef2f7; }
+
+.empty-state { text-align: center; padding: 48px 16px; }
+.empty-title { font-weight: 700; font-size: 18px; }
+.empty-text { color: #64748b; margin-top: 6px; }
+
+
+.camp-divider {
+  border: 0;
+  border-top: 1px solid rgba(0, 8, 6, 0.776); /* verde suave */
+  margin: 12px 0 16px;
+}
+
+/* mismo ancho y centrado que las cards */
+.timeline-container {
+  max-width: 700px;      /* usa el mismo que tus .camp-card si ya lo tenés */
+  margin: 0 auto;
+}
+
+/* la barra ocupa el ancho del contenedor y su contenido se va a la derecha */
+.filters-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.filters-bar select {
+  min-width: 160px;
+}
+
+
+/* opcional: achicar el select y separarlo del borde derecho */
+.filters-bar .form-select,
+.filters-bar .form-control {
+  min-width: 160px;
+}
+
+.breadcrumb a {
+  color: #6b7280 !important;   
+  text-decoration: none !important;
+}
+
+.breadcrumb a:hover {
+  color: #4b5563 !important;   
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+  color: #6b7280 !important;   
+}
+
+.confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.confirm-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+  max-width: 420px;
+  width: 100%;
+}

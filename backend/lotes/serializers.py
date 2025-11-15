@@ -17,15 +17,11 @@ class SiembraSerializer(serializers.ModelSerializer):
     class Meta:
         model = Siembra
         fields = '__all__'
+
 class CosechaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cosecha
         fields = '__all__'
-    def validate_rinde(self, value):
-        pattern = r"^\d{1,3}(,\d{1,2})?\s?tn/ha$"
-        if not re.match(pattern, value.strip(), re.IGNORECASE):
-            raise serializers.ValidationError("El rinde debe tener el formato 'n,nn tn/ha', por ejemplo: 3,45 tn/ha.")
-        return value
 
 class CampaniaSerializer(serializers.ModelSerializer):
     class Meta:

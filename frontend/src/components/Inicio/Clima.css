@@ -68,9 +68,10 @@
 .clima-pronostico {
   /* reemplaza tu regla actual */
   display: grid;
-  grid-template-columns: repeat(5, minmax(90px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
+  grid-template-columns: repeat(5, minmax(70px, 150px));
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
 
   /* CLAVES para ocupar el espacio blanco */
   flex: 1 1 auto;          /* toma el resto de la altura */
@@ -96,13 +97,14 @@
 .clima-dia.activo { background: #d1fae5; border: 2px solid #198754; }
 
 .dia-temp { margin-top: 6px; font-size: 1.5rem; font-weight: 800; color: #333; }
-.dia-minmax { margin-top: 2px; font-size: 1.2rem; color: #666; }
+.dia-minmax { margin-top: 1px; font-size: 1.2rem; color: #666; }
 
 /* ===== Tira horaria arriba de los días ===== */
 .clima-horaria {
   margin: 16px 0 10px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(60px, 70px));
+  justify-content: center;
   gap: 8px;
   overflow: visible;
   padding-bottom: 0;
@@ -249,8 +251,6 @@
 @media (max-width: 600px) {
   .months-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
 }
-
-
 
 /* Responsivo (igual que tenías) */
 @media (max-width: 768px) {

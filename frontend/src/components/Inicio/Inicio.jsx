@@ -33,7 +33,7 @@ ChartJS.register(
 
 const VERDE = "#198754";
 const VERDE_OSCURO = "#155a36";
-const TEXTO = "#333333";
+const TEXTO = "#000000ff";
 const GRID = "#dddddd";
 
 const Inicio = () => {
@@ -47,14 +47,14 @@ const Inicio = () => {
   return (
     <div className="inicio-wrapper">
       {/* HERO */}
-      <section style={{ color: TEXTO, padding: "3rem 0" }}>
+      <section className="mb-5" style={{ color: TEXTO}}>
         <Container fluid>
           <Row className="justify-content-center">
             <Col lg={10}>
-              <GeoConsentBanner />
+              {/*<GeoConsentBanner />*/}
               <div >
-                <h1 className="display-4">Bienvenido a Terrax</h1>
-                <p className="lead">
+                <h1 className="display-4" style={{color: TEXTO}}>Bienvenido a Terrax</h1>
+                <p className="lead" style={{color: TEXTO}}>
                   Gestiona tus lotes agrícolas, monitorea índices y planifica tu
                   producción en un solo lugar.
                 </p>
@@ -88,7 +88,7 @@ const Inicio = () => {
       </section>
 
       {/* CARRUSEL */}
-      <Container fluid className="px-0">
+      <Container fluid className="px-0 mb-4">
         <Row className="justify-content-center">
           <Col lg={10}>
             <div className="carrusel-redondeado">
@@ -99,10 +99,10 @@ const Inicio = () => {
       </Container>
 
       {/* PRECIOS DE GRANOS (NUEVA SECCIÓN) */}
-      <Container fluid className="precios-granos-container px-0">
+      <Container fluid className="precios-granos-container px-0 mb-4">
         <Row className="justify-content-center">
           <Col lg={10}>
-            <div className="widget widget-auto no-padding">
+            <div className="widget widget-auto">
               <PreciosGranos />
             </div>
           </Col>
@@ -110,7 +110,7 @@ const Inicio = () => {
       </Container>
 
       {/* SECCIÓN DE WIDGETS (CLIMA + DÓLAR) */}
-      <Container fluid className="px-0" >
+      <Container fluid className="px-0 mb-4" >
         <Row className="justify-content-center">
           <Col lg={10}>
             <Row className="widgets-eq">

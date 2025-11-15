@@ -150,7 +150,7 @@ const Anotaciones = ({ reporteSel, loteSel, cargandoLote }) => {
                   <div className="rs-right">
                     <button
                       type="button"
-                      className={`btn btn-sm ${placingModeAside ? "btn-outline-danger" : "btn-success"} me-2`}
+                      className={`btn btn-sm ${placingModeAside ? "btn-outline-danger" : "btn-outline-success"} me-2`}
                       onClick={() => {
                         if (placingModeAside) {
                           setPlacingModeAside(false);
@@ -163,7 +163,7 @@ const Anotaciones = ({ reporteSel, loteSel, cargandoLote }) => {
                         }
                       }}
                     >
-                      {placingModeAside ? "Cancelar" : "Agregar Anotación"}
+                      {placingModeAside ? "Cancelar" : "Agregar"}
                     </button>
 
                     {/* Oculto "Expandir" si estoy colocando pin en el aside */}
@@ -382,7 +382,7 @@ const Anotaciones = ({ reporteSel, loteSel, cargandoLote }) => {
               <div className="d-flex justify-content-end mb-2">
                 <button
                   type="button"
-                  className={`btn btn-sm ${placingModeModal ? "btn-outline-danger" : "btn-success"}`}
+                  className={`btn btn-sm ${placingModeModal ? "btn-outline-danger" : "btn-outline-success"}`}
                   onClick={() => {
                     if (placingModeModal) {
                       setPlacingModeModal(false);
@@ -395,7 +395,7 @@ const Anotaciones = ({ reporteSel, loteSel, cargandoLote }) => {
                     }
                   }}
                 >
-                  {placingModeModal ? "Cancelar" : "Agregar Anotación"}
+                  {placingModeModal ? "Cancelar" : "Agregar anotación"}
                 </button>
               </div>
 

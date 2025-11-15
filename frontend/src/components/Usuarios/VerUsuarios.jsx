@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../axiosconfig";
 import "./Usuarios.css";
-import { FaEdit, FaTrash, FaPen } from "react-icons/fa";
+import { FaPen } from "react-icons/fa";
+import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import ModalEditarImagen from "./ModalEditarImagen";
 import ModalEditarPassword from "./ModalEditarPassword";
@@ -23,8 +24,9 @@ const VerUsuarios = () => {
   const navigate = useNavigate();
   const [showNotificarModal, setShowNotificarModal] = useState(false);
   const [usuarioParaNotificar, setUsuarioParaNotificar] = useState(null);
+  const [usuarioAConfirmar, setUsuarioAConfirmar] = useState(null);
+  const [showConfirmDesactivar, setShowConfirmDesactivar] = useState(false);
 
-  
   useEffect(() => {
     fetchUsuarios();
   }, []);
@@ -38,25 +40,24 @@ const VerUsuarios = () => {
     }
   };
 
-  const handleDesactivar = async (id) => {
-  if (window.confirm("¿Desactivar este usuario?")) {
-    try {
-      await axios.patch(`/api/usuarios/${id}/desactivar/`);
-      setUsuarios(u => u.map(x =>
-        x.id === id ? { ...x, is_active: false } : x
-      ));
-    } catch (e) { alert("No se pudo desactivar"); }
-  }
-};
+  const handleDesactivar = async (id) => {{
+      try {
+        await axios.patch(`/api/usuarios/${id}/desactivar/`);
+        setUsuarios(u => u.map(x =>
+          x.id === id ? { ...x, is_active: false } : x
+        ));
+      } catch (e) { alert("No se pudo desactivar"); }
+    }
+  };
 
-const handleActivar = async (id) => {
-  try {
-    await axios.patch(`/api/usuarios/${id}/activar/`);
-    setUsuarios(u => u.map(x =>
-      x.id === id ? { ...x, is_active: true } : x
-    ));
-  } catch (e) { alert("No se pudo activar"); }
-};
+  const handleActivar = async (id) => {
+    try {
+      await axios.patch(`/api/usuarios/${id}/activar/`);
+      setUsuarios(u => u.map(x =>
+        x.id === id ? { ...x, is_active: true } : x
+      ));
+    } catch (e) { alert("No se pudo activar"); }
+  };
 
   const abrirModalImagen = (usuario) => {
     setUsuarioSeleccionado(usuario);
@@ -115,7 +116,7 @@ const handleActivar = async (id) => {
 
           <select
             className="form-select form-select-sm"
-            style={{ width: "150px", height: "32px", backgroundColor: "#d1fae5",}}
+            style={{ width: "150px", height: "32px", backgroundColor: "#d1fae5", }}
             value={filtroRol}
             onChange={(e) => setFiltroRol(e.target.value)}
           >
@@ -208,46 +209,65 @@ const handleActivar = async (id) => {
                 </p>
               </div>
               <div className="card-footer d-flex justify-content-around">
-              {/* 1‑ Notificar */}
-              <button
-                className="btn btn-outline-success"
-                onClick={() => {
-                  setUsuarioParaNotificar(user);
-                  setShowNotificarModal(true);
-                }}
-              >
-                <FaEnvelope />
-              </button>
-
-              {/* 2‑ Editar */}
-              <button
-                className="btn btn-outline-primary"
-                onClick={() => abrirModalEditar(user)}
-              >
-                <FaEdit />
-              </button>
-
-              {/* 3‑ Activar/Suspender */}
-              {user.is_active ? (
-                /* Está activo → mostrar papelera para suspender */
-                <button
-                  className="btn btn-outline-danger"
-                  title="Suspender"
-                  onClick={() => handleDesactivar(user.id)}
+                {/* 1- Notificar */}
+                <Button
+                  variant="outline-success"
+                  size="sm"
+                  className="rounded-circle"
+                  style={{ width: 34, height: 34, borderWidth: 2 }}
+                  onClick={() => {
+                    setUsuarioParaNotificar(user);
+                    setShowNotificarModal(true);
+                  }}
+                  title="Enviar notificación"
                 >
-                  <FaTrash />
-                </button>
-              ) : (
-                /* Está inactivo → mostrar tick para habilitar */
-                <button
-                  className="btn btn-outline-success"
-                  title="Habilitar"
-                  onClick={() => handleActivar(user.id)}
+                  <i className="bi bi-envelope" />
+                </Button>
+
+                {/* 2- Editar */}
+                <Button
+                  variant="outline-success"
+                  size="sm"
+                  className="rounded-circle"
+                  style={{ width: 34, height: 34, borderWidth: 2 }}
+                  onClick={() => abrirModalEditar(user)}
+                  title="Editar usuario"
                 >
-                  ✅
-                </button>
-              )}
-            </div>
+                  <i className="bi bi-pencil" />
+                </Button>
+
+                {/* 3- Activar/Suspender */}
+                {user.is_active ? (
+                  // Está activo → mostrar ícono de suspensión (papelera)
+                  <Button
+                    variant="outline-danger"
+                    size="sm"
+                    className="rounded-circle"
+                    style={{ width: 34, height: 34, borderWidth: 2 }}
+                    title="Suspender usuario"
+                    onClick={() => {
+                      setUsuarioAConfirmar(user);
+                      setShowConfirmDesactivar(true);
+                    }}
+                  >
+                    <i className="bi bi-trash" />
+                  </Button>
+                ) : (
+                  // Está inactivo → mostrar ícono de habilitar (check)
+                  <Button
+                    variant="outline-success"
+                    size="sm"
+                    className="rounded-circle"
+                    style={{ width: 34, height: 34, borderWidth: 2 }}
+                    title="Habilitar usuario"
+                    onClick={() => handleActivar(user.id)}
+                  >
+                    <i className="bi bi-check-lg" />
+                  </Button>
+                )}
+
+
+              </div>
 
             </div>
           ))}
@@ -255,44 +275,77 @@ const handleActivar = async (id) => {
 
       {/* Modales */}
       {usuarioSeleccionado && (
-  <>
-    <ModalEditarImagen
-      show={showImgModal}
-      onHide={() => setShowImgModal(false)}
-      usuarioId={usuarioSeleccionado.id}
-      onSuccess={fetchUsuarios}
-      method="patch"
-    />
-    <ModalEditarPassword
-      show={showPassModal}
-      onHide={() => setShowPassModal(false)}
-      usuarioId={usuarioSeleccionado.id}
-      onSuccess={fetchUsuarios}
-      method="patch"
-    />
-    <ModalEditarUsuario
-      show={showEditarModal}
-      onHide={() => setShowEditarModal(false)}
-      usuario={usuarioSeleccionado}
-      onSuccess={fetchUsuarios}
-      method="patch"
-    />
-  </>
-)}
+        <>
+          <ModalEditarImagen
+            show={showImgModal}
+            onHide={() => setShowImgModal(false)}
+            usuarioId={usuarioSeleccionado.id}
+            onSuccess={fetchUsuarios}
+            method="patch"
+          />
+          <ModalEditarPassword
+            show={showPassModal}
+            onHide={() => setShowPassModal(false)}
+            usuarioId={usuarioSeleccionado.id}
+            onSuccess={fetchUsuarios}
+            method="patch"
+          />
+          <ModalEditarUsuario
+            show={showEditarModal}
+            onHide={() => setShowEditarModal(false)}
+            usuario={usuarioSeleccionado}
+            onSuccess={fetchUsuarios}
+            method="patch"
+          />
+        </>
+      )}
 
-{usuarioParaNotificar && (
-  <ModalNotificarUsuario
-    show={showNotificarModal}
-    onHide={() => setShowNotificarModal(false)}
-    usuarioId={usuarioParaNotificar.id}
-  />
-)}
+      {usuarioParaNotificar && (
+        <ModalNotificarUsuario
+          show={showNotificarModal}
+          onHide={() => setShowNotificarModal(false)}
+          usuarioId={usuarioParaNotificar.id}
+        />
+      )}
 
       <ModalCrearUsuario
         show={showCrearModal}
         onHide={() => setShowCrearModal(false)}
         onSuccess={fetchUsuarios}
       />
+
+      {showConfirmDesactivar && usuarioAConfirmar && (
+        <div
+          className="confirm-overlay"
+          onClick={(e) => e.target === e.currentTarget && setShowConfirmDesactivar(false)}
+        >
+          <div className="confirm-card p-4">
+            <h5 className="fw-bold mb-2">¿Estás seguro que quieres desactivar este usuario?</h5>
+            <p className="mb-4">
+              El usuario <strong>{usuarioAConfirmar.nombre || usuarioAConfirmar.username}</strong> perderá acceso a su cuenta.
+            </p>
+
+            <div className="d-flex justify-content-end gap-2">
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => setShowConfirmDesactivar(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={async () => {
+                  await handleDesactivar(usuarioAConfirmar.id);
+                  setShowConfirmDesactivar(false);
+                }}
+              >
+                Sí, desactivar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { Card, Button, Row, Col, Spinner, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaTrash, FaArrowLeft } from "react-icons/fa";
 
-// === PALETA / TOKENS (consistente Terrax)
+// === PALETA / TOKENS (consistente)
 const verde = "#198754";
 const verdeClaro = "#e9fbe5";
 const verdeOscuro = "#155a36";
@@ -67,14 +67,23 @@ const ProductosLista = () => {
   );
 
   return (
-    <div className="terrax-card" style={{ minHeight: "85vh" }}>
-      <Card.Body className="d-flex flex-column h-100">
+    <Card
+      className="mx-auto my-5 shadow"
+      style={{
+        maxWidth: "1160px",
+        background: blanco,
+        borderRadius: "1.4rem",
+        border: "none",
+      }}
+    >
+      <Card.Body>
         {/* Título */}
         <Card.Title className="fw-bold mb-4" style={{ color: verdeOscuro }}>
           Mis Productos — {categoriaSeleccionada}
         </Card.Title>
 
-        <Row className="g-4 flex-grow-1 align-items-stretch">
+        {/* Layout principal con alturas iguales */}
+        <Row className="g-4 align-items-stretch">
           {/* Sidebar categorías */}
           <Col md="auto" className="d-flex">
             <Card
@@ -96,9 +105,10 @@ const ProductosLista = () => {
               {categorias.map((cat) => {
                 const active = categoriaSeleccionada === cat.nombre;
                 return (
-                  <button
+                  <Button
                     key={cat.nombre}
-                    className="btn-terrax mb-3 w-100"
+                    variant="light"
+                    className="mb-3 w-100 rounded-pill"
                     onClick={() => setCategoriaSeleccionada(cat.nombre)}
                     style={{
                       backgroundColor: active ? verde : blanco,
@@ -106,10 +116,22 @@ const ProductosLista = () => {
                       border: active
                         ? `1px solid ${verde}`
                         : "1px solid #d9e4dd",
+                      boxShadow: active ? "0 2px 6px rgba(0,0,0,0.15)" : "none",
+                      fontWeight: active ? 700 : 500,
+                      height: 48,
+                      transition: "all .2s ease-in-out",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!active)
+                        e.currentTarget.style.backgroundColor = verdeClaro;
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!active)
+                        e.currentTarget.style.backgroundColor = blanco;
                     }}
                   >
                     {cat.nombre}
-                  </button>
+                  </Button>
                 );
               })}
             </Card>
@@ -117,6 +139,7 @@ const ProductosLista = () => {
 
           {/* Panel derecho */}
           <Col className="d-flex flex-column">
+            {/* Header de acción */}
             <Row className="align-items-center mb-3">
               <Col>
                 <h5
@@ -130,19 +153,23 @@ const ProductosLista = () => {
                 </h5>
               </Col>
               <Col className="text-end">
-                <button
-                  className="btn-terrax-outline"
+                <Button
+                  variant="outline-success"
+                  size="sm"
+                  className="rounded-pill d-inline-flex align-items-center"
+                  style={{ fontWeight: "bold", borderColor: verde }}
                   onClick={() => navigate("/productos")}
                 >
                   <FaArrowLeft className="me-2" /> Volver
-                </button>
+                </Button>
               </Col>
             </Row>
 
-            <div className="flex-fill d-flex flex-column">
+            {/* Contenido */}
+            <div className="flex-fill">
               {loading ? (
                 <div className="text-center py-5">
-                  <Spinner animation="border" style={{ color: verde }} />
+                  <Spinner animation="border" variant="success" />
                   <div className="text-muted mt-2">Cargando productos…</div>
                 </div>
               ) : error ? (
@@ -162,31 +189,51 @@ const ProductosLista = () => {
                     Podés cargar nuevos productos ahora mismo.
                   </p>
                   <div className="d-flex justify-content-center gap-3">
-                    <button
-                      className="btn-terrax-outline"
+                    <Button
+                      variant="outline-success"
+                      className="rounded-pill px-4"
+                      style={{ fontWeight: "bold", borderColor: verde }}
                       onClick={() => navigate("/productos")}
                     >
                       Ir a Inicio
-                    </button>
-                    <button
-                      className="btn-terrax"
+                    </Button>
+                    <Button
+                      variant="success"
+                      className="rounded-pill px-4"
+                      style={{
+                        fontWeight: "bold",
+                        backgroundColor: verde,
+                        border: "none",
+                      }}
                       onClick={() => navigate("/productos/agregar")}
                     >
                       Agregar producto
-                    </button>
+                    </Button>
                   </div>
                 </Card>
               ) : (
                 <>
+                  {/* grilla de productos */}
                   <Row className="g-3">
                     {productosFiltrados.map((prod) => (
                       <Col md={6} lg={4} key={prod.id}>
                         <Card
-                          className="shadow-sm h-100"
+                          className="shadow-sm rounded-4 h-100"
                           style={{
                             background: blanco,
                             border: `1px solid ${verde}20`,
-                            borderRadius: "1rem",
+                            transition:
+                              "transform .15s ease, box-shadow .15s ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform =
+                              "translateY(-2px)";
+                            e.currentTarget.style.boxShadow =
+                              "0 12px 22px rgba(0,0,0,.08)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "none";
+                            e.currentTarget.style.boxShadow = "";
                           }}
                         >
                           <Card.Body className="p-3 d-flex flex-column">
@@ -194,6 +241,9 @@ const ProductosLista = () => {
                               <h6
                                 className="fw-bold mb-0"
                                 style={{ color: verdeOscuro }}
+                                title={
+                                  prod.nombre || prod.cultivo || "Sin nombre"
+                                }
                               >
                                 {prod.nombre || prod.cultivo || (
                                   <em>Sin nombre</em>
@@ -206,7 +256,7 @@ const ProductosLista = () => {
 
                             <div className="mt-2" style={{ color: grisOscuro }}>
                               {prod.categoria === "SEMILLAS" ? (
-                                <>
+                                <div>
                                   <div>
                                     <strong>Cultivo:</strong>{" "}
                                     {prod.cultivo || "—"}
@@ -219,7 +269,7 @@ const ProductosLista = () => {
                                     <strong>Días madurez:</strong>{" "}
                                     {prod.dias_madurez || "—"}
                                   </div>
-                                </>
+                                </div>
                               ) : (
                                 <div>
                                   <strong>Tipo:</strong> {prod.tipo || "—"}
@@ -228,15 +278,17 @@ const ProductosLista = () => {
                             </div>
 
                             <div className="mt-auto pt-3 text-end">
-                              <button
-                                className="btn-terrax-outline"
+                              <Button
+                                variant="outline-danger"
+                                size="sm"
+                                className="rounded-pill"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleEliminar(prod.id);
                                 }}
                               >
                                 <FaTrash className="me-1" /> Eliminar
-                              </button>
+                              </Button>
                             </div>
                           </Card.Body>
                         </Card>
@@ -244,23 +296,32 @@ const ProductosLista = () => {
                     ))}
                   </Row>
 
-                  {/* Botones más abajo */}
-                  <Row className="mt-5">
+                  {/* Botones de navegación SOLO si hay productos */}
+                  <Row className="mt-4">
                     <Col className="d-flex justify-content-end gap-3">
-                      <button
-                        className="btn-terrax-outline d-flex align-items-center"
+                      <Button
+                        variant="outline-success"
+                        className="rounded-pill px-4 shadow-sm d-flex align-items-center"
+                        style={{ fontWeight: "bold", borderColor: verde }}
                         onClick={() => navigate("/productos/inicio")}
                       >
                         <i className="bi bi-house-door me-2"></i> Inicio
                         Productos
-                      </button>
-                      <button
-                        className="btn-terrax d-flex align-items-center"
+                      </Button>
+
+                      <Button
+                        variant="success"
+                        className="rounded-pill px-4 shadow-sm d-flex align-items-center"
+                        style={{
+                          fontWeight: "bold",
+                          backgroundColor: verde,
+                          border: "none",
+                        }}
                         onClick={() => navigate("/productos/agregar")}
                       >
                         <i className="bi bi-plus-circle me-2"></i> Agregar
                         producto
-                      </button>
+                      </Button>
                     </Col>
                   </Row>
                 </>
@@ -269,7 +330,7 @@ const ProductosLista = () => {
           </Col>
         </Row>
       </Card.Body>
-    </div>
+    </Card>
   );
 };
 

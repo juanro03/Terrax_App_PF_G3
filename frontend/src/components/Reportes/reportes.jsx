@@ -4,6 +4,8 @@ import "./reportes.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { Button } from "react-bootstrap";
+
 import {
   Card,
 } from "react-bootstrap";
@@ -399,23 +401,27 @@ const Reportes = () => {
                       {rol === "admin" && (
                         <div className="reporte-actions">
                           <button
-                            className="btn-terrax-outline"
+                            className="btn-round-outline"
                             title="Editar"
                             onClick={(e) => handleEditarClick(e, r)}
                           >
-                            <FaEdit />
+                            <i className="bi bi-pencil" />
                           </button>
+
                           <button
-                            className="btn-terrax-outline"
+                            className="btn-round-outline"
                             title="Eliminar"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleEliminar(r.id);
                             }}
                           >
-                            <FaTrash />
+                            <i className="bi bi-trash" />
                           </button>
                         </div>
+
+
+
                       )}
                     </div>
 

@@ -527,7 +527,7 @@ export default function TrazabilidadEmbed({
                         </Button>
 
                         <Button
-                          variant="outline-primary"
+                          variant="outline-success"
                           size="sm"
                           className="rounded-circle"
                           style={{ width: 34, height: 34, borderWidth: 2 }}

@@ -442,7 +442,8 @@ const Clima = () => {
                   <p>{idx === 0 ? "Hoy" : formatearFechaCorta(d.fecha)}</p>
                   {getWeatherIcon(d.resumen.weather?.[0]?.main ?? "Clear", 50)}
                   <p className="dia-temp">{Math.round(d.resumen.main.temp)}°C</p>
-                  <p className="dia-minmax">min {min}° · max {max}°</p>
+                  <p className="dia-minmax">min {min}°</p>
+                  <p className="dia-minmax">max {max}°</p>
                 </div>
               );
             })}

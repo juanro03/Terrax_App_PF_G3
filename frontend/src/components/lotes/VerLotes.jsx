@@ -5,6 +5,7 @@ import "./Lotes.css"; // reutilizamos el mismo look
 import { FaEdit, FaTrash } from "react-icons/fa";
 import ModalCrearLote from "./ModalCrearLote";
 import ModalEditarLote from "./ModalEditarLote";
+import { Button} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 const VerLotes = ({ campoId }) => {
@@ -198,20 +199,28 @@ const VerLotes = ({ campoId }) => {
                     style={{ backgroundColor: "#f8f9fa", padding: "10px" }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <button
-                      className="btn btn-outline-primary btn-sm"
+                    <Button
+                      variant="outline-success"
+                      size="sm"
+                      className="rounded-circle"
+                      style={{ width: 34, height: 34, borderWidth: 2 }}
                       onClick={() => handleEditar(lote)}
                       title="Editar / Ver"
                     >
-                      <FaEdit />
-                    </button>
-                    <button
-                      className="btn btn-outline-danger btn-sm"
+                      <i className="bi bi-pencil" />
+                    </Button>
+
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      className="rounded-circle"
+                      style={{ width: 34, height: 34, borderWidth: 2 }}
                       onClick={() => handleDelete(lote.id)}
                       title="Eliminar"
                     >
-                      <FaTrash />
-                    </button>
+                      <i className="bi bi-trash" />
+                    </Button>
+
                   </div>
                 </div>
               ))}

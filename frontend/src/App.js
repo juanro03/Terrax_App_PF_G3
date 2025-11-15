@@ -18,10 +18,10 @@ import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-draw";
 import VerLotesWrapper from "./components/lotes/VerLotesWrapper";
 import ResetPassword from "./components/Auth/ResetPassword";
-import DetalleLote from "./components/lotes/DetalleLote";
+import DetalleLote from "./components/DetalleLote/DetalleLote";
 import ProductosForm from "./components/Productos/ProductosForm";
 import Reportes from "./components/Reportes/reportes.jsx";
-import HistorialCampania from "./components/lotes/HistorialCampania";
+import HistorialCampanias from "./components/DetalleLote/HistorialCampanias";
 import TareasAgricolas from "./components/TareasAgricolas/TareasAgricolas";
 import TrazabilidadEmbed from "./components/TareasAgricolas/TrazabilidadEmbed";
 
@@ -60,7 +60,6 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Login />} />
           <Route path="/inicio" element={<Inicio />} />
-          {/* 👇 CORREGIDO: era <Router ...> */}
           <Route path="/calendario" element={<Calendario />} />
           <Route path="/tareas" element={<TareasAgricolas />} />
           <Route path="/vercampos" element={<VerCampos />} />
@@ -74,6 +73,8 @@ function AppContent() {
           <Route path="/productos/ver" element={<ProductosLista />} />
           <Route path="/reportes" element={<Reportes />} />
           <Route path="/tareas/trazabilidad" element={<TrazabilidadEmbed />} />
+          <Route path="/lotes/:loteId/historial" element={<HistorialCampanias />} />
+
 
           <Route
             path="/usuarios"

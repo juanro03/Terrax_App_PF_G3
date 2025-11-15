@@ -117,7 +117,7 @@ const ModalEditarUsuario = ({ show, onHide, usuario, onSuccess }) => {
             <Button variant="secondary" onClick={onHide} className="me-2">
               Cancelar
             </Button>
-            <Button type="submit" variant="primary">
+            <Button type="submit" variant="success">
               Guardar
             </Button>
           </div>

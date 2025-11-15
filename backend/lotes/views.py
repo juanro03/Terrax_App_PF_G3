@@ -1,33 +1,17 @@
 from django.apps import apps
 from django.utils.dateparse import parse_date
-
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, serializers
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
-
 from tareas.models import Tarea
+from django.db import transaction
+from .models import (Lote, Siembra, Cosecha, Campania, Cobertura)
+from .serializers import (LoteSerializer, SiembraSerializer, CosechaSerializer, CampaniaSerializer, CoberturaSerializer)
 
-from .models import (
-    Lote,
-    Siembra,
-    Cosecha,
-    Campania,
-    Cobertura,
-)
-from .serializers import (
-    LoteSerializer,
-    SiembraSerializer,
-    CosechaSerializer,
-    CampaniaSerializer,
-    CoberturaSerializer,
-)
-
-# =========================
 #   LOTES
-# =========================
 class LoteViewSet(viewsets.ModelViewSet):
     queryset = Lote.objects.all()
     serializer_class = LoteSerializer
@@ -42,10 +26,7 @@ class LoteViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(lotes, many=True)
         return Response(serializer.data)
 
-
-# =========================
 #   SIEMBRAS
-# =========================
 class SiembraViewSet(viewsets.ModelViewSet):
     queryset = Siembra.objects.all()
     serializer_class = SiembraSerializer
@@ -88,87 +69,19 @@ class SiembraViewSet(viewsets.ModelViewSet):
             )
         serializer = self.get_serializer(siembra)
         return Response(serializer.data)
+    
+    def perform_create(self, serializer):
+        siembra = serializer.save()
+        lote = siembra.lote
 
+        # Guardas de estado
+        if lote.estado == "sembrado":
+            raise serializers.ValidationError({"error": "El lote ya tiene una siembra activa."})
 
-# =========================
-#   COSECHAS  (GET + POST multipart)
-# =========================
-class CosechaViewSet(viewsets.ModelViewSet):
-    """
-    - GET  /api/cosechas/            (lista con filtros)
-    - GET  /api/cosechas/<id>/       (detalle)
-    - POST /api/cosechas/            (crear, admite archivo_rendimiento)
-    """
-    queryset = Cosecha.objects.all()
-    serializer_class = CosechaSerializer
-    parser_classes = [MultiPartParser, FormParser]
+        lote.estado = "sembrado"
+        lote.save(update_fields=["estado"])
 
-    def get_queryset(self):
-        qs = super().get_queryset()
-
-        start = self.request.query_params.get("start")
-        end = self.request.query_params.get("end")
-        campo = self.request.query_params.get("campo")
-        lote = self.request.query_params.get("lote")
-
-        if campo:
-            qs = qs.filter(lote__campo_id=campo)
-        if lote:
-            qs = qs.filter(lote_id=lote)
-        if start:
-            qs = qs.filter(fecha__gte=start)
-        if end:
-            qs = qs.filter(fecha__lt=end)
-
-        return qs.select_related("lote").order_by("fecha", "id")
-
-
-# =========================
-#   FINALIZAR CAMPAÑA / HISTORIAL
-# =========================
-class FinalizarCampaniaView(APIView):
-    def post(self, request, lote_id):
-        try:
-            siembra = Siembra.objects.get(lote_id=lote_id)
-        except Siembra.DoesNotExist:
-            return Response(
-                {"error": "No se encontró una siembra asociada al lote."}, status=404
-            )
-
-        cosecha = Cosecha.objects.filter(lote_id=lote_id).order_by("-fecha", "-id").first()
-        if not cosecha:
-            return Response(
-                {"error": "No se encontró una cosecha asociada al lote."}, status=404
-            )
-
-        Campania.objects.create(
-            lote=siembra.lote,
-            fecha_siembra=siembra.fecha,
-            cultivo=siembra.cultivo,
-            variedad=siembra.variedad,
-            densidad=siembra.densidad,
-            unidad_densidad=siembra.unidad_densidad,
-            ventana_cosecha=siembra.ventana_cosecha,
-            analisis_suelo=siembra.analisis_suelo,
-            fecha_cosecha=cosecha.fecha,
-            rinde=cosecha.rinde,
-            archivo_rendimiento=cosecha.archivo_rendimiento,
-        )
-
-        siembra.delete()
-        return Response({"mensaje": "Campaña finalizada y registrada en historial."}, status=200)
-
-
-class HistorialPorLoteView(APIView):
-    def get(self, request, lote_id):
-        historial = Campania.objects.filter(lote_id=lote_id).order_by("-fecha_siembra", "-id")
-        serializer = CampaniaSerializer(historial, many=True)
-        return Response(serializer.data)
-
-
-# =========================
 #   COBERTURAS
-# =========================
 class CoberturaViewSet(viewsets.ModelViewSet):
     queryset = Cobertura.objects.all()
     serializer_class = CoberturaSerializer
@@ -210,11 +123,204 @@ class CoberturaViewSet(viewsets.ModelViewSet):
             )
         serializer = self.get_serializer(cobertura)
         return Response(serializer.data)
+    
+    def perform_create(self, serializer):
+        cobertura = serializer.save()
+        lote = cobertura.lote
+
+        if lote.estado == "sembrado":
+            raise serializers.ValidationError({"error": "No se puede registrar cobertura: el lote está sembrado."})
+        
+
+        lote.estado = "cobertura"
+        lote.save(update_fields=["estado"])
+
+#   COSECHAS 
+class CosechaViewSet(viewsets.ModelViewSet):
+    """
+    - GET  /api/cosechas/            (lista con filtros)
+    - GET  /api/cosechas/<id>/       (detalle)
+    - POST /api/cosechas/            (crear, admite archivo_rendimiento)
+    """
+    queryset = Cosecha.objects.all()
+    serializer_class = CosechaSerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        start = self.request.query_params.get("start")
+        end = self.request.query_params.get("end")
+        campo = self.request.query_params.get("campo")
+        lote = self.request.query_params.get("lote")
+
+        if campo:
+            qs = qs.filter(lote__campo_id=campo)
+        if lote:
+            qs = qs.filter(lote_id=lote)
+        if start:
+            qs = qs.filter(fecha__gte=start)
+        if end:
+            qs = qs.filter(fecha__lt=end)
+
+        return qs.select_related("lote").order_by("fecha", "id")
+    
+    def perform_create(self, serializer):
+        cosecha = serializer.save()
+        lote = cosecha.lote
+
+        if not hasattr(lote, "siembra"):
+            raise serializers.ValidationError({"error": "No se puede cosechar sin una siembra activa."})
+
+        # (Opcional) coherencia temporal
+        if cosecha.fecha < lote.siembra.fecha:
+            raise serializers.ValidationError({"error": "La fecha de cosecha no puede ser anterior a la siembra."})
+
+        lote.estado = "cosechado"
+        lote.save(update_fields=["estado"])
+
+#   CAMPAÑAS
+class CampaniaViewSet(viewsets.ModelViewSet):
+    """
+    - GET  /api/campanias/               (lista con filtros)
+    - GET  /api/campanias/<id>/          (detalle)
+    - GET  /api/campanias/por-lote/<id>/ (todas las campañas del lote, ordenadas)
+    - GET  /api/campanias/ultima/<id>/   (última campaña del lote)
+    """
+    queryset = Campania.objects.all()
+    serializer_class = CampaniaSerializer
+    parser_classes = [MultiPartParser, FormParser]
 
 
-# =========================
-#   TRAZABILIDAD (Timeline)
-# =========================
+    def get_queryset(self):
+        qs = super().get_queryset().select_related("lote")
+
+        # Filtros: /api/campanias/?campo=&lote=&start=&end=&start_cosecha=&end_cosecha=
+        campo = self.request.query_params.get("campo")
+        lote  = self.request.query_params.get("lote")
+        start = self.request.query_params.get("start")           # fecha_siembra >= start
+        end   = self.request.query_params.get("end")             # fecha_siembra <  end
+        start_cosecha = self.request.query_params.get("start_cosecha")
+        end_cosecha   = self.request.query_params.get("end_cosecha")
+
+        if campo:
+            qs = qs.filter(lote__campo_id=campo)
+        if lote:
+            qs = qs.filter(lote_id=lote)
+        if start:
+            qs = qs.filter(fecha_siembra__gte=start)
+        if end:
+            qs = qs.filter(fecha_siembra__lt=end)
+        if start_cosecha:
+            qs = qs.filter(fecha_cosecha__gte=start_cosecha)
+        if end_cosecha:
+            qs = qs.filter(fecha_cosecha__lt=end_cosecha)
+
+        return qs.order_by("-fecha_siembra", "-id")
+
+    @action(detail=False, methods=["get"], url_path=r"por-lote/(?P<lote_id>[^/.]+)")
+    def por_lote(self, request, lote_id=None):
+        """
+        GET /api/campanias/por-lote/<lote_id>/
+        Todas las campañas del lote (más reciente primero)
+        """
+        qs = self.get_queryset().filter(lote_id=lote_id)
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path=r"ultima/(?P<lote_id>[^/.]+)")
+    def ultima(self, request, lote_id=None):
+
+    
+        """
+        GET /api/campanias/ultima/<lote_id>/
+        Devuelve la última campaña del lote (o 404 si no hay)
+        """
+        obj = self.get_queryset().filter(lote_id=lote_id).first()
+        if not obj:
+            return Response({"error": "No hay campañas registradas."}, status=404)
+        serializer = self.get_serializer(obj)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance: Campania = self.get_object()
+
+        # Borrar archivos asociados si existen (opcional pero recomendado)
+        if instance.analisis_suelo and default_storage.exists(instance.analisis_suelo.name):
+            default_storage.delete(instance.analisis_suelo.name)
+        if instance.archivo_rendimiento and default_storage.exists(instance.archivo_rendimiento.name):
+            default_storage.delete(instance.archivo_rendimiento.name)
+
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+#   FINALIZAR CAMPAÑA / HISTORIAL
+class FinalizarCampaniaView(APIView):
+    @transaction.atomic
+    def post(self, request, lote_id):
+        
+        
+        try:
+            siembra = Siembra.objects.get(lote_id=lote_id)
+        except Siembra.DoesNotExist:
+            return Response({"error": "No se encontró una siembra asociada al lote."}, status=404)
+
+        cosecha = (Cosecha.objects
+                   .filter(lote_id=lote_id)
+                   .order_by("-fecha", "-id")
+                   .first())
+        if not cosecha:
+            return Response({"error": "No se encontró una cosecha asociada al lote."}, status=404)
+        
+        lote = siembra.lote
+
+        # --- tomar cobertura si existe ---
+        cobertura = None
+        try:
+            cobertura = lote.cobertura 
+        except Cobertura.DoesNotExist:
+            cobertura = None
+
+        # 1) Snapshot histórico
+        Campania.objects.create(
+            lote=lote,
+            # Siembra
+            fecha_siembra=siembra.fecha,
+            cultivo=siembra.cultivo,
+            variedad=siembra.variedad,
+            densidad=siembra.densidad,
+            unidad_densidad=siembra.unidad_densidad,
+            ventana_cosecha=siembra.ventana_cosecha,
+            analisis_suelo=siembra.analisis_suelo,
+            # Cosecha
+            fecha_cosecha=cosecha.fecha,
+            rinde=cosecha.rinde,
+            archivo_rendimiento=cosecha.archivo_rendimiento,
+            # Cobertura (solo si existía)
+            fecha_cobertura=(cobertura.fecha if cobertura else None),
+            cultivo_cobertura=(cobertura.cultivo if cobertura else None),
+            variedad_cobertura=(cobertura.variedad if cobertura else None),
+            densidad_cobertura=(cobertura.densidad if cobertura else None),
+        )
+
+        # 2) Limpiar ciclo y volver a barbecho
+        siembra.delete()
+        Cosecha.objects.filter(lote_id=lote_id).delete()
+        Cobertura.objects.filter(lote_id=lote_id).delete()
+        lote.estado = "barbecho"
+        lote.save(update_fields=["estado"])
+
+        return Response(
+            {"mensaje": "Campaña finalizada y registrada en historial.", "lote_estado": lote.estado},
+            status=200
+        )
+
+class HistorialPorLoteView(APIView):
+    def get(self, request, lote_id):
+        historial = Campania.objects.filter(lote_id=lote_id).order_by("-fecha_siembra", "-id")
+        serializer = CampaniaSerializer(historial, many=True)
+        return Response(serializer.data)
+
 
 def _get_model(app_label, model_name):
     try:
@@ -294,7 +400,7 @@ class TrazabilidadView(APIView):
 
         # Siembra / Cobertura / Cosecha
         collect("lotes", "Siembra", "SIEMBRA", desc_fields=["cultivo", "variedad", "densidad"])
-        collect("lotes", "Cobertura", "COBERTURA", desc_fields=["descripcion", "cultivo_cobertura", "variedad", "densidad"])
+        collect("lotes", "Cobertura", "COBERTURA", desc_fields=["cultivo", "variedad", "densidad"])
         collect("lotes", "Cosecha", "COSECHA", desc_fields=["rinde", "unidad_rinde", "observaciones"])
 
         # Tareas

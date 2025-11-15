@@ -18,7 +18,7 @@
 /* Contenido principal */
 .inicio-wrapper{
   padding-left: var(--sidebar-closed);
-  padding-right: 24px;
+  padding: 40px ;
   transition: padding-left .25s ease;
 }
 
@@ -31,7 +31,7 @@
 .widget .clima-card {
   max-width: none;
   width: 100%;
-  margin: 0s;
+  margin: 0;
 }
 
 /* Widgets hijos ocupan todo el ancho de su contenedor */
@@ -60,19 +60,6 @@
 }
 
 /* ======== BLOQUE DE PRECIOS DE GRANOS – FULL WIDTH SIN ESPACIOS ======== */
-
-/* Contenedor sin márgenes ni paddings (pegado arriba/abajo) */
-.precios-granos-container {
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* Quitar gutters/paddings internos del grid */
-.precios-granos-container .row,
-.precios-granos-container [class*="col-"] {
-  margin: 0 !important;
-  padding: 0 !important;
-}
 
 /* El wrapper del widget de granos no debe estirarse en altura */
 .widget-auto,
