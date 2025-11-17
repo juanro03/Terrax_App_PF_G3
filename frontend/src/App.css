@@ -253,3 +253,19 @@ body,
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
   width: 100%;
 }
+
+.leaflet-container {
+  z-index: 1 !important;
+}
+
+.modal .leaflet-draw {
+  z-index: 9999 !important;
+}
+
+.modal {
+  overflow: visible !important;
+}
+
+.leaflet-draw-tooltip {
+  z-index: 999999 !important;
+}
