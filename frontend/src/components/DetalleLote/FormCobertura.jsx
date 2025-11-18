@@ -7,70 +7,75 @@ const FormCobertura = ({
   setCobertura,
   cultivosDisponibles,
   openDatePicker,
-  errorsCobertura = {},
   guardarCobertura,
 }) => {
   return (
-    <>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        guardarCobertura();
+      }}
+    >
+      {/* FECHA */}
       <div className="mb-2">
         <label className="form-label">Fecha</label>
         <input
           type="date"
           className="form-control"
-          value={cobertura?.fecha || ""}
-          onChange={(e) => setCobertura((prev) => ({ ...prev, fecha: e.target.value }))}
-          /* usar solo gesto real de usuario, no onFocus */
+          value={cobertura.fecha || ""}
+          onChange={(e) => setCobertura((p) => ({ ...p, fecha: e.target.value }))}
           onClick={openDatePicker}
-          autoComplete="off"
+          required
         />
-        {errorsCobertura.fecha && <div className="invalid-feedback d-block">{errorsCobertura.fecha}</div>}
       </div>
 
+      {/* CULTIVO */}
       <div className="mb-2">
         <label className="form-label">Cultivo</label>
         <input
           type="text"
           className="form-control"
-          value={cobertura?.cultivo || ""}
-          onChange={(e) => setCobertura((prev) => ({ ...prev, cultivo: e.target.value }))}
+          value={cobertura.cultivo || ""}
+          onChange={(e) => setCobertura((p) => ({ ...p, cultivo: e.target.value }))}
           autoComplete="off"
+          required
         />
-        {errorsCobertura.cultivo && <div className="invalid-feedback d-block">{errorsCobertura.cultivo}</div>}
       </div>
 
+      {/* VARIEDAD */}
       <div className="mb-2">
         <label className="form-label">Variedad de cultivo</label>
         <input
           type="text"
           className="form-control"
-          value={cobertura?.variedad || ""}
-          onChange={(e) => setCobertura((prev) => ({ ...prev, variedad: e.target.value }))}
+          value={cobertura.variedad || ""}
+          onChange={(e) => setCobertura((p) => ({ ...p, variedad: e.target.value }))}
           autoComplete="off"
+          required
         />
-        {errorsCobertura.variedad && <div className="invalid-feedback d-block">{errorsCobertura.variedad}</div>}
       </div>
 
+      {/* DENSIDAD */}
       <div className="mb-2">
         <label className="form-label">Densidad de siembra</label>
         <input
           type="text"
           className="form-control"
-          value={cobertura?.densidad || ""}
-          onChange={(e) => setCobertura((prev) => ({ ...prev, densidad: e.target.value }))}
+          value={cobertura.densidad || ""}
+          onChange={(e) => setCobertura((p) => ({ ...p, densidad: e.target.value }))}
           autoComplete="off"
+          required
         />
-        {errorsCobertura.densidad && <div className="invalid-feedback d-block">{errorsCobertura.densidad}</div>}
       </div>
 
       <button
         className="btn btn-success w-100"
-        onClick={guardarCobertura}
-        title={cultivosDisponibles.length === 0 ? "Cargá semillas en Productos para habilitar" : ""}
+        type="submit"
         disabled={cultivosDisponibles.length === 0}
       >
         Registrar Cobertura
       </button>
-    </>
+    </form>
   );
 };
 

@@ -4,7 +4,7 @@ import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import dayjs from 'dayjs';
 import "./DetalleLote.css";
 import { FaArrowLeft } from "react-icons/fa";
-
+import SuccessAlert from "../common/SuccessAlert.jsx";
 import FormSiembra from "./FormSiembra";
 import FormCobertura from "./FormCobertura";
 import FormCosecha from "./FormCosecha";
@@ -54,6 +54,7 @@ const DetalleLote = () => {
   const [semillas, setSemillas] = useState([]);
   const token = localStorage.getItem("accessToken");
   const loteNombre = location.state?.loteNombre ?? `Lote ${loteId}`;
+  const [showSuccess, setShowSuccess] = useState(null);
 
   // Errores de validación
   const [errorsSiembra, setErrorsSiembra] = useState({});
@@ -280,7 +281,7 @@ const DetalleLote = () => {
       const payload = { ...cobertura, lote: loteId };
       if (cobertura.id) await axios.put(url(`/coberturas/${cobertura.id}/`), payload);
       else await axios.post(url(`/coberturas/`), payload);
-      alert("Cobertura guardada correctamente");
+      setShowSuccess("Cobertura guardada con éxito");
       await fetchEstadoLote(); // debería quedar "cobertura"
     } catch (error) {
       console.error("Error al guardar cobertura:", error?.response?.data || error.message);
@@ -308,7 +309,7 @@ const DetalleLote = () => {
 
     try {
       await axios({ method, url: url(endpoint), data: formData, headers: { "Content-Type": "multipart/form-data" } });
-      alert("Siembra guardada correctamente");
+      setShowSuccess("Siembra guardada con éxito");
       await fetchEstadoLote(); // debería pasar a "sembrado"
     } catch (error) {
       console.log("Backend error:", error?.response?.data || error.message);
@@ -331,7 +332,7 @@ const DetalleLote = () => {
 
       await axios.post(url(`/cosechas/`), formData, { headers: { "Content-Type": "multipart/form-data" } });
       await fetchEstadoLote(); // debería pasar a "cosechado"
-      alert("Cosecha registrada. El lote pasó a 'Cosechado'.");
+      setShowSuccess("Cosecha registrada con éxito");
     } catch (error) {
       console.error("Error al registrar cosecha:", error?.response?.data || error.message);
       alert(error?.response?.data?.error || "Ocurrió un error al registrar la cosecha.");
@@ -352,7 +353,7 @@ const DetalleLote = () => {
 
       if (finResp?.lote_estado) setEstado(finResp.lote_estado);
       await fetchEstadoLote(); // “barbecho”
-      alert("Campaña finalizada. Lote en 'Barbecho'.");
+      setShowSuccess("Campaña finalizada con éxito. Lote en 'Barbecho'");
     } catch (error) {
       console.error("Error al finalizar campaña:", error?.response?.data || error.message);
       alert(error?.response?.data?.error || "Ocurrió un error al finalizar la campaña.");
@@ -368,7 +369,7 @@ const DetalleLote = () => {
   };
 
   return (
-    <div className="container-fluid p-4" style={{ backgroundColor: "#f0fdf4" }}>
+    <div className="detalle-lote container-fluid p-4" style={{ backgroundColor: "#f0fdf4" }}>
       {/* Bread + acciones */}
       <div className="d-flex align-items-center flex-wrap gap-3 mb-3">
         <button
@@ -566,9 +567,6 @@ const DetalleLote = () => {
         >
           <div className="confirm-card p-4">
             <h5 className="fw-bold mb-2">¿Seguro quiere Finalizar campaña?</h5>
-            <p className="mb-2">
-              Esta acción es irreversible: no podrás editar la siembra ni cargar nuevos datos.
-            </p>
             <p className="mb-4">Los registros de la campaña pasarán al historial.</p>
 
             <div className="d-flex justify-content-end gap-2">
@@ -588,6 +586,12 @@ const DetalleLote = () => {
           </div>
         </div>
       )}
+
+      <SuccessAlert
+        show={!!showSuccess}
+        title={showSuccess}
+        onClose={() => setShowSuccess(null)}
+      />
 
     </div>
   );

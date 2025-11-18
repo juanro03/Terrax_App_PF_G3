@@ -1,11 +1,11 @@
 // src/components/lotes/VerLotes.jsx
 import React, { useEffect, useState } from "react";
 import axios from "../../axiosconfig";
-import "./Lotes.css"; // reutilizamos el mismo look
+import "./Lotes.css";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import ModalCrearLote from "./ModalCrearLote";
 import ModalEditarLote from "./ModalEditarLote";
-import { Button} from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 const VerLotes = ({ campoId }) => {
@@ -16,13 +16,16 @@ const VerLotes = ({ campoId }) => {
   const [loteSeleccionado, setLoteSeleccionado] = useState(null);
   const [filtroTexto, setFiltroTexto] = useState("");
 
+  // 🔴 NUEVO: estado para confirmación
+  const [confirmDeleteLote, setConfirmDeleteLote] = useState(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchCampoNombre();
     fetchLotes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campoId]);
+
   useEffect(() => {
     const handlePopState = (e) => {
       e?.preventDefault?.();
@@ -36,31 +39,32 @@ const VerLotes = ({ campoId }) => {
     try {
       const res = await axios.get(`http://127.0.0.1:8000/api/campos/${campoId}/`);
       setCampoNombre(res.data?.nombre || `ID ${campoId}`);
-    } catch (error) {
-      console.error("Error al obtener el nombre del campo:", error);
+    } catch {
       setCampoNombre(`ID ${campoId}`);
     }
   };
 
   const fetchLotes = async () => {
     try {
-      // ajustá si tu endpoint es otro (por-campo o query param)
       const url = `http://127.0.0.1:8000/api/lotes/por-campo/${campoId}/`;
       const { data } = await axios.get(url);
       setLotes(data || []);
     } catch (error) {
-      console.error("Error al obtener los lotes:", error);
+      console.error("Error:", error);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar este lote?")) {
-      try {
-        await axios.delete(`http://127.0.0.1:8000/api/lotes/${id}/`);
-        fetchLotes();
-      } catch (error) {
-        console.error("Error al eliminar el lote:", error);
-      }
+  // 🔴 NUEVO: función real de eliminación
+  const eliminarLote = async () => {
+    if (!confirmDeleteLote) return;
+
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/lotes/${confirmDeleteLote}/`);
+      setConfirmDeleteLote(null);
+      fetchLotes();
+    } catch (error) {
+      console.error("Error al eliminar lote:", error);
+      alert("No se pudo eliminar el lote.");
     }
   };
 
@@ -81,15 +85,13 @@ const VerLotes = ({ campoId }) => {
         padding: "20px",
       }}
     >
-      {/* barra superior (idéntica a VerCampos) */}
+      {/* barra superior */}
       <div
         className="d-flex justify-content-between align-items-center mb-4"
         style={{ gap: "10px", flexWrap: "wrap" }}
       >
         <div className="d-flex align-items-center flex-grow-1 flex-wrap gap-2">
-          <h2 className="fw-bold mb-0 me-2" style={{ whiteSpace: "nowrap" }}>
-            {`Campo: ${campoNombre}`}
-          </h2>
+          <h2 className="fw-bold mb-0 me-2">{`Campo: ${campoNombre}`}</h2>
 
           <input
             type="text"
@@ -99,8 +101,6 @@ const VerLotes = ({ campoId }) => {
               backgroundColor: "#d1fae5",
               width: "450px",
               marginLeft: 100,
-              marginTop: 0,
-              marginBottom: 0,
               borderRadius: "8px",
               border: "1px solid #ced4da",
               padding: "6px 12px",
@@ -130,15 +130,13 @@ const VerLotes = ({ campoId }) => {
         </button>
       </div>
 
-      {/* grid de tarjetas (misma card que VerCampos) */}
+      {/* grid */}
       <div className="row justify-content-center">
         <div className="container mt-4">
           <div className="row">
             {lotes
               .filter((l) =>
-                (l.nombre || "")
-                  .toLowerCase()
-                  .includes(filtroTexto.toLowerCase())
+                (l.nombre || "").toLowerCase().includes(filtroTexto.toLowerCase())
               )
               .map((lote) => (
                 <div
@@ -152,11 +150,7 @@ const VerLotes = ({ campoId }) => {
                   }}
                   onClick={() =>
                     navigate(`/lote/${lote.id}`, {
-                      state: {
-                        campoId,           // el id del campo actual
-                        campoNombre,       // el nombre del campo (si lo tenés)
-                        loteNombre: lote.nombre,
-                      },
+                      state: { campoId, campoNombre, loteNombre: lote.nombre },
                     })
                   }
                 >
@@ -165,62 +159,48 @@ const VerLotes = ({ campoId }) => {
                     {lote.nombre}
                   </div>
 
-                  {/* imagen */}
                   <img
-                    src={
-                      lote.imagen_satelital ||
-                      "/img/campo.jpg" /* placeholder si no hay imagen */
-                    }
+                    src={lote.imagen_satelital || "/img/campo.jpg"}
                     alt={`Imagen del lote ${lote.nombre}`}
                     className="card-img-top"
                     style={{
                       height: "180px",
                       objectFit: "cover",
-                      borderRadius: "0",
                     }}
                   />
 
-                  {/* body (info) */}
-                  <div
-                    className="card-body text-center"
-                    style={{ padding: "12px", backgroundColor: "#fff" }}
-                  >
-                    <p
-                      className="card-text text-dark m-0"
-                      style={{ fontSize: "14px" }}
-                    >
+                  <div className="card-body text-center">
+                    <p className="card-text text-dark m-0" style={{ fontSize: "14px" }}>
                       Área: {fmtArea(lote.area)} ha
                     </p>
                   </div>
 
-                  {/* footer con acciones, detiene propagación para no navegar */}
                   <div
                     className="card-footer d-flex justify-content-center gap-4"
                     style={{ backgroundColor: "#f8f9fa", padding: "10px" }}
                     onClick={(e) => e.stopPropagation()}
                   >
+                    {/* Editar */}
                     <Button
                       variant="outline-success"
                       size="sm"
                       className="rounded-circle"
                       style={{ width: 34, height: 34, borderWidth: 2 }}
                       onClick={() => handleEditar(lote)}
-                      title="Editar / Ver"
                     >
-                      <i className="bi bi-pencil" />
+                      <FaEdit />
                     </Button>
 
+                    {/* Eliminar → abre confirmación */}
                     <Button
                       variant="outline-danger"
                       size="sm"
                       className="rounded-circle"
                       style={{ width: 34, height: 34, borderWidth: 2 }}
-                      onClick={() => handleDelete(lote.id)}
-                      title="Eliminar"
+                      onClick={() => setConfirmDeleteLote(lote.id)}
                     >
-                      <i className="bi bi-trash" />
+                      <FaTrash />
                     </Button>
-
                   </div>
                 </div>
               ))}
@@ -236,7 +216,7 @@ const VerLotes = ({ campoId }) => {
         campoId={campoId}
       />
 
-      {/* modal editar (si lo usás) */}
+      {/* modal editar */}
       {loteSeleccionado && (
         <ModalEditarLote
           show={showEditar}
@@ -244,6 +224,34 @@ const VerLotes = ({ campoId }) => {
           lote={loteSeleccionado}
           onSuccess={fetchLotes}
         />
+      )}
+
+      {/* 🔴 NUEVO: MODAL DE CONFIRMACIÓN DE ELIMINAR LOTE */}
+      {confirmDeleteLote && (
+        <div
+          className="confirm-overlay"
+          onClick={(e) => e.target === e.currentTarget && setConfirmDeleteLote(null)}
+        >
+          <div className="confirm-card p-4">
+            <h5 className="fw-bold mb-2">¿Seguro que desea eliminar el lote?</h5>
+            <p className="mb-2">
+              Esta acción es irreversible y eliminará el lote permanentemente.
+            </p>
+
+            <div className="d-flex justify-content-end gap-2">
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => setConfirmDeleteLote(null)}
+              >
+                Cancelar
+              </button>
+
+              <button className="btn btn-danger" onClick={eliminarLote}>
+                Sí, eliminar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

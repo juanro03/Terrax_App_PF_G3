@@ -28,7 +28,6 @@ export default function Perfil() {
 
   useEffect(() => {
     if (usuario) {
-      // Simulamos datos, pero podrías hacer peticiones reales
       setEstadisticas({
         lotes: 12,
         tareas: 42,
@@ -83,7 +82,7 @@ export default function Perfil() {
           <span className="text-capitalize">{usuario.rol}</span>
         </div>
 
-        {/* Estadisticas */}
+        {/* Estadisticas 
         <div className="bg-light rounded p-3 mt-3">
           <h6 className="fw-bold text-success mb-3 text-center">
             Resumen de actividad
@@ -106,9 +105,10 @@ export default function Perfil() {
             </div>
           </div>
         </div>
+        */}
 
         {/* Acciones */}
-        <div className="mt-4 text-center">
+        <div className="text-center">
           <button
             className="btn btn-outline-success me-2"
             onClick={() => navigate("/VerCampos")}
@@ -116,23 +116,27 @@ export default function Perfil() {
             🌱 Ver mis campos
           </button>
           <button
-            className="btn btn-outline-success"
+            className="btn btn-outline-success me-2"
             onClick={() => navigate("/calendario")}
           >
             📅 Ir al calendario
           </button>
-        </div>
-
-        {/* Editar perfil */}
-        <div className="mt-4 text-center">
           <button
-            className="btn btn-success px-4"
+            className="btn btn-outline-success me-2"
+            onClick={() => navigate("/reportes")}
+          >
+            📑 Mis Reportes
+          </button>
+          <button
+            className="btn btn-outline-success me-2"
             onClick={() => setShowModalEdit(true)}
           >
             <FaUserEdit className="me-2" />
             Editar perfil
           </button>
         </div>
+
+
       </div>
 
       {/* Modales */}

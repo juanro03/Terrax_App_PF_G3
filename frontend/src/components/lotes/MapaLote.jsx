@@ -8,81 +8,92 @@ import html2canvas from "html2canvas";
 import leafletImage from "leaflet-image";
 
 
-const MapWithDraw = ({ onPoligonoCreado, coordenadasIniciales }) => {
+const MapWithDraw = ({ onPoligonoCreado, coordenadasIniciales, mapContainerRef  }) => {
   const map = useMap();
-  const drawnItems = useRef(null);
-  const drawControl = useRef(null);
+  const drawnItems = useRef(new L.FeatureGroup());
+  const drawControlRef = useRef(null);
+
+
+
 
   useEffect(() => {
-    if (!map) return;
+    if (!map || drawControlRef.current) return;
 
-    // --- Crear FeatureGroup una sola vez ---
-    if (!drawnItems.current) {
-      drawnItems.current = new L.FeatureGroup();
-      map.addLayer(drawnItems.current);
-    }
+    map.addLayer(drawnItems.current);
 
-    // --- Crear control Draw una sola vez ---
-    if (!drawControl.current) {
-      drawControl.current = new L.Control.Draw({
-        draw: {
-          polygon: true,
-          rectangle: false,
-          circle: false,
-          marker: false,
-          circlemarker: false,
-          polyline: false,
-        },
-        edit: {
-          featureGroup: drawnItems.current,
-          remove: true,
-        },
-      });
-      map.addControl(drawControl.current);
-    }
+    const drawControl = new L.Control.Draw({
+      draw: {
+        polygon: true,
+        rectangle: false,
+        circle: false,
+        marker: false,
+        circlemarker: false,
+        polyline: false,
+      },
+      edit: {
+        featureGroup: drawnItems.current,
+        remove: true,
+      },
+    });
 
-    // --- Evento: polygon creado ---
+    drawControlRef.current = drawControl;
+    map.addControl(drawControl);
     map.on(L.Draw.Event.CREATED, (e) => {
       drawnItems.current.clearLayers();
 
       const layer = e.layer;
+      const latlngs = layer.getLatLngs()[0].map((p) => ({
+        lat: p.lat,
+        lng: p.lng,
+      }));
+
+      // Mostrar al usuario
       drawnItems.current.addLayer(layer);
 
-      const latlngs = layer
-        .getLatLngs()[0]
-        .map((p) => ({ lat: p.lat, lng: p.lng }));
+      // 🔵 Captura visual: crear polígono temporal directamente
+      const poligonoCapturable = L.polygon(latlngs, { color: "blue" }).addTo(map);
 
-      // Captura PNG
-      leafletImage(map, (err, canvas) => {
-        if (err) return;
+      // 📸 Captura
+      setTimeout(() => {
+        leafletImage(map, (err, canvas) => {
+          if (err) return;
 
-        canvas.toBlob((blob) => {
-          if (!blob) return;
-          const file = new File([blob], "lote.png", { type: "image/png" });
-          onPoligonoCreado(latlngs, file);
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const file = new File([blob], "lote.png", { type: "image/png" });
+              onPoligonoCreado(latlngs, file);
+
+              // 🔁 Eliminar polígono auxiliar si no querés que quede
+              map.removeLayer(poligonoCapturable);
+            }
+          });
         });
-      });
+      }, 500);
     });
 
-    // --- Precargar polígono inicial ---
-    if (coordenadasIniciales?.length > 0) {
-      const points = coordenadasIniciales.map((p) => L.latLng(p.lat, p.lng));
-      const polygon = L.polygon(points);
+    
+
+
+    // ⬇️ Este bloque es el importante para precargar el polígono
+    if (coordenadasIniciales && Array.isArray(coordenadasIniciales)) {
+      const latlngs = coordenadasIniciales.map(coord => L.latLng(coord.lat, coord.lng));
+      const polygon = L.polygon(latlngs);
       drawnItems.current.addLayer(polygon);
-      map.fitBounds(polygon.getBounds());
+      map.fitBounds(polygon.getBounds()); // opcional: centra el mapa
     }
-  }, [map, coordenadasIniciales, onPoligonoCreado]);
+
+  }, [map, onPoligonoCreado, coordenadasIniciales]);
 
   return null;
 };
 
-const MapaLote = ({ onPoligonoCreado, coordenadasIniciales }) => {
+const MapaLote = ({ onPoligonoCreado, coordenadasIniciales, centroInicial }) => {
   const mapContainerRef = useRef(null);
 
   return (
     <div ref={mapContainerRef}>
       <MapContainer
-        center={[-31.41, -64.19]}
+        center={centroInicial}
         zoom={13}
         style={{ height: "400px", width: "100%" }}
         preferCanvas={true}

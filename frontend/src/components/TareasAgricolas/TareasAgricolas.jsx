@@ -444,7 +444,6 @@ export default function ActividadesAgricolas() {
 
           <div className="d-flex align-items-center mt-4 gap-2">
             <Button variant="success" type="submit" disabled={!canSubmit}>Registrar Actividad</Button>
-            <Button type="button" variant="outline-danger" onClick={limpiarFormularioActividad} disabled={!actividad}>Limpiar</Button>
 
           </div>
         </Form>

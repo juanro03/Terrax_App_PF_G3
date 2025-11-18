@@ -107,7 +107,7 @@ const Login = () => {
                 type="submit"
                 className="w-100 rounded-pill"
               >
-                Iniciar
+                Iniciar Sesión 
               </Button>
             </Form>
 

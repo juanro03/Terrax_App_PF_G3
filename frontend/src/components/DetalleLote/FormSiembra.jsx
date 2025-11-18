@@ -8,12 +8,17 @@ const FormSiembra = ({
   cultivosDisponibles,
   variedadesDisponibles,
   openDatePicker,
-  errorsSiembra,
   handleSiembraChange,
   guardarSiembra,
 }) => {
   return (
-    <>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        guardarSiembra();
+      }}
+    >
+      {/* FECHA */}
       <div className="mb-2">
         <label className="form-label">Fecha</label>
         <input
@@ -23,11 +28,11 @@ const FormSiembra = ({
           value={siembra.fecha || ""}
           onChange={handleSiembraChange}
           onClick={openDatePicker}
-          autoComplete="off"
+          required
         />
-        {errorsSiembra?.fecha && <div className="invalid-feedback d-block">{errorsSiembra.fecha}</div>}
       </div>
 
+      {/* CULTIVO */}
       <div className="mb-2">
         <label className="form-label">Cultivo</label>
         <select
@@ -35,15 +40,16 @@ const FormSiembra = ({
           className="form-control"
           value={siembra.cultivo || ""}
           onChange={handleSiembraChange}
+          required
         >
           <option value="">Seleccionar cultivo</option>
           {cultivosDisponibles.map((cultivo, i) => (
             <option key={i} value={cultivo}>{cultivo}</option>
           ))}
         </select>
-        {errorsSiembra?.cultivo && <div className="invalid-feedback d-block">{errorsSiembra.cultivo}</div>}
       </div>
 
+      {/* VARIEDAD */}
       <div className="mb-2">
         <label className="form-label">Variedad de cultivo</label>
         <select
@@ -52,20 +58,16 @@ const FormSiembra = ({
           value={siembra.variedad || ""}
           onChange={handleSiembraChange}
           disabled={!siembra.cultivo}
+          required
         >
           <option value="">Seleccionar variedad</option>
           {variedadesDisponibles.map((variedad, i) => (
             <option key={i} value={variedad}>{variedad}</option>
           ))}
         </select>
-        {siembra.cultivo && variedadesDisponibles.length === 0 && (
-          <small className="text-muted d-block mt-1">
-            No hay variedades registradas para <strong>{siembra.cultivo}</strong>. Cargá variedades en <strong>Productos</strong>.
-          </small>
-        )}
-        {errorsSiembra?.variedad && <div className="invalid-feedback d-block">{errorsSiembra.variedad}</div>}
       </div>
 
+      {/* DENSIDAD */}
       <div className="mb-2">
         <label className="form-label">Densidad de siembra</label>
         <div className="input-group">
@@ -77,63 +79,61 @@ const FormSiembra = ({
             onChange={handleSiembraChange}
             style={{ height: "48px" }}
             autoComplete="off"
+            required
           />
+
           <button
             type="button"
             className={`btn ${unidadDensidad === "Kg/Ha" ? "btn-success" : "btn-outline-success"}`}
-            onClick={() => { setUnidadDensidad("Kg/Ha"); setSiembra((p) => ({ ...p, unidad: "Kg/Ha" })); }}
             style={{ height: "48px" }}
+            onClick={() => {
+              setUnidadDensidad("Kg/Ha");
+              setSiembra((p) => ({ ...p, unidad: "Kg/Ha" }));
+            }}
           >
             Kg/Ha
           </button>
+
           <button
             type="button"
             className={`btn ${unidadDensidad === "Pl/Ha" ? "btn-success" : "btn-outline-success"}`}
-            onClick={() => { setUnidadDensidad("Pl/Ha"); setSiembra((p) => ({ ...p, unidad: "Pl/Ha" })); }}
             style={{ height: "48px" }}
+            onClick={() => {
+              setUnidadDensidad("Pl/Ha");
+              setSiembra((p) => ({ ...p, unidad: "Pl/Ha" }));
+            }}
           >
             Pl/Ha
           </button>
         </div>
-        {errorsSiembra?.densidad && <div className="invalid-feedback d-block">{errorsSiembra.densidad}</div>}
       </div>
 
+      {/* FECHA ESTIMADA */}
       <div className="mb-2">
-        <label className="form-label">Fecha estimada de cosecha (se calcula automáticamente)</label>
+        <label className="form-label">Fecha estimada de cosecha</label>
         <input
           type="text"
-          name="fechaEstimadaCosecha"
-          className="form-control auto-field"
+          className="form-control"
           value={siembra.fechaEstimadaCosecha || ""}
           readOnly
         />
       </div>
 
+      {/* ANALISIS OPCIONAL */}
       <div className="mb-2">
         <label className="form-label">Último análisis de suelo (opcional)</label>
-        <input type="file" name="analisisSuelo" className="form-control mb-2" onChange={handleSiembraChange} />
-        {siembra.analisis_suelo && (
-          <div className="d-flex align-items-start gap-3 mt-2 p-2 rounded file-chip">
-            <img src={siembra.analisis_suelo} alt="Análisis de suelo" className="chip-thumb" />
-            <div className="flex-grow-1">
-              <small className="text-muted">Archivo cargado</small>
-              <p className="mb-0 text-truncate" title={siembra.analisis_suelo}>
-                {String(siembra.analisis_suelo).split("/").pop()}
-              </p>
-            </div>
-          </div>
-        )}
+        <input
+          type="file"
+          name="analisisSuelo"
+          className="form-control"
+          onChange={handleSiembraChange}
+        />
       </div>
 
-      <button
-        className="btn btn-success w-100 mt-2"
-        onClick={guardarSiembra}
-        title={cultivosDisponibles.length === 0 ? "Cargá semillas en Productos para habilitar" : ""}
-        disabled={cultivosDisponibles.length === 0}
-      >
+      <button className="btn btn-success w-100 mt-2" type="submit">
         Registrar Siembra
       </button>
-    </>
+    </form>
   );
 };
 

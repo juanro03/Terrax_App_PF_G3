@@ -9,44 +9,72 @@ const ModalEditarPassword = ({ show, onHide, usuarioId, onSuccess }) => {
   const [confirmar, setConfirmar] = useState("");
   const [mostrarNueva, setMostrarNueva] = useState(false);
   const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleClose = () => {
+    // al cerrar, limpio campos
+    setNueva("");
+    setConfirmar("");
+    setMostrarNueva(false);
+    setMostrarConfirmar(false);
+    onHide();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (nueva !== confirmar) return alert("Las contraseñas no coinciden.");
+
+    if (!nueva || !confirmar) {
+      alert("Completá ambos campos.");
+      return;
+    }
+
+    if (nueva !== confirmar) {
+      alert("Las contraseñas no coinciden.");
+      return;
+    }
+
     try {
+      setLoading(true);
       await axios.post(
         `http://localhost:8000/api/usuarios/${usuarioId}/cambiar-password/`,
-        { nueva },
+        { nueva, confirmar },
         { headers: { "Content-Type": "application/json" } }
       );
-      onSuccess();
-      onHide();
+
+      // callback externo (para refrescar lista, etc.)
+      onSuccess && onSuccess();
+
+      alert("Contraseña actualizada correctamente.");
+      handleClose();
     } catch (error) {
-      console.error("Error al cambiar contraseña:", error);
-      alert("No se pudo cambiar la contraseña.");
+      console.error("Error al cambiar contraseña:", error.response?.data || error);
+      alert(
+        error.response?.data?.detail ||
+          "No se pudo cambiar la contraseña. Revisá la consola."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Altura de input-sm: calc(1.5em + .5rem + 2px)
   const eyeStyle = {
-    width: '2.5rem',
-    height: 'calc(1.5em + 1.4rem + 2px)',
-    cursor: 'pointer',
-    borderTopRightRadius: '.25rem',
-    borderBottomRightRadius: '.25rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
+    width: "2.5rem",
+    height: "calc(1.5em + 1.4rem + 2px)",
+    cursor: "pointer",
+    borderTopRightRadius: ".25rem",
+    borderBottomRightRadius: ".25rem",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered>
+    <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
         <Modal.Title>Cambiar Contraseña</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
-
           {/* Nueva Contraseña */}
           <Form.Group className="mb-3">
             <Form.Label>Nueva Contraseña</Form.Label>
@@ -94,11 +122,16 @@ const ModalEditarPassword = ({ show, onHide, usuarioId, onSuccess }) => {
           </Form.Group>
 
           <div className="text-end">
-            <Button variant="secondary" onClick={onHide} className="me-2">
+            <Button
+              variant="secondary"
+              onClick={handleClose}
+              className="me-2"
+              disabled={loading}
+            >
               Cancelar
             </Button>
-            <Button type="submit" variant="success">
-              Cambiar
+            <Button type="submit" variant="success" disabled={loading}>
+              {loading ? "Guardando..." : "Cambiar"}
             </Button>
           </div>
         </Form>

@@ -156,7 +156,7 @@ const ModalEditarCampo = ({ show, onHide, campo, onSuccess }) => {
             <Button variant="secondary" onClick={onHide} className="me-2">
               Cancelar
             </Button>
-            <Button type="submit" variant="primary">
+            <Button type="submit" variant="success">
               Guardar Cambios
             </Button>
           </div>
