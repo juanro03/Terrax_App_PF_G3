@@ -45,6 +45,8 @@ const ProductosInicio = () => {
         background: blanco,
         borderRadius: "1.4rem",
         border: "none",
+        transform: "none",
+        transition: "none",
       }}
     >
       <Card.Body className="p-4 p-sm-5">
@@ -57,7 +59,8 @@ const ProductosInicio = () => {
             className="text-muted"
             style={{
               fontSize: "0.975rem",
-              marginTop: "0.8rem", // 👈 separa más el subtítulo del título
+              marginTop: "0.8rem", 
+              textAlign: "center",
             }}
           >
             Gestioná tu catálogo: consultá, filtrá o sumá nuevos ítems.

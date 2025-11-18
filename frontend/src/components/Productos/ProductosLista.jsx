@@ -74,11 +74,15 @@ const ProductosLista = () => {
         background: blanco,
         borderRadius: "1.4rem",
         border: "none",
+        transform: "none",
+        transition: "none",
       }}
     >
       <Card.Body>
         {/* Título */}
-        <Card.Title className="fw-bold mb-4" style={{ color: verdeOscuro }}>
+        <Card.Title className="fw-bold mb-4" style={{ 
+          color: verdeOscuro,
+          }}>
           Mis Productos — {categoriaSeleccionada}
         </Card.Title>
 

@@ -83,7 +83,7 @@ const VerUsuarios = () => {
     <div
       className="container-fluid"
       style={{
-        backgroundColor: "#f0f8ff",
+        backgroundColor: "#dff3e6",
         minHeight: "100vh",
         padding: "20px",
       }}

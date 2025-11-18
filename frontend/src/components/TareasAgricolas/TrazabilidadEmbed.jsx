@@ -48,7 +48,7 @@ const TYPE_META = {
   RIEGO: { label: "Riego", bg: "#e6f3fb", dot: "#5aa6d6" },
   FITOSANITARIA: { label: "Aplicación Fitosanitaria", bg: "#e8f2ea", dot: "#4f8f67" },
   COSECHA: { label: "Cosecha", bg: "#fff5d7", dot: "#cc9a00" },
-  OTRA: { label: "Tarea", bg: "#f3f5f7", dot: "#8792a1" },
+  OTRA: { label: "Otros", bg: "#f3f5f7", dot: "#8792a1" },
 };
 
 const mapTipo = (raw) => {
@@ -66,7 +66,6 @@ const mapTipo = (raw) => {
 
 const FIELD_LABELS = {
   fecha: "Fecha",
-  descripcion: "Descripción",
   observaciones: "Observaciones",
   cultivo: "Cultivo",
   variedad: "Variedad",
@@ -105,21 +104,21 @@ const TIPO_OPTIONS = [
 
 // campos editables según tipo
 const EDITABLE_BY_TYPE = {
-  SIEMBRA: ["cultivo", "variedad", "densidad", "unidad_densidad", "observaciones", "descripcion"],
+  SIEMBRA: ["cultivo", "variedad", "densidad", "unidad_densidad", "observaciones"],
   COBERTURA: ["cultivo_cobertura", "variedad", "densidad", "unidad_densidad", "observaciones", "descripcion"],
-  RIEGO: ["tipo_riego", "volumen", "observaciones", "descripcion"],
-  LABOREO: ["tipo_laboreo", "operario", "observaciones", "descripcion"],
+  RIEGO: ["tipo_riego", "volumen", "observaciones"],
+  LABOREO: ["tipo_laboreo", "operario", "observaciones"],
   FERTILIZACION: [
     "tipo_fertilizante", "de", "producto_aplicar", "concentracion", "fabricante",
-    "litros_por_ha", "hectareas_aplicadas", "observaciones", "descripcion",
+    "litros_por_ha", "hectareas_aplicadas", "observaciones",
   ],
   MALEZAS: [
     "tipo_fitosanitario", "plaga_maleza", "producto_aplicar", "fabricante",
-    "lkg_por_ha", "hectareas_aplicadas", "observaciones", "descripcion",
+    "lkg_por_ha", "hectareas_aplicadas", "observaciones",
   ],
-  FITOSANITARIA: ["producto_aplicar", "plaga_maleza", "observaciones", "descripcion"],
-  COSECHA: ["rinde", "unidad_rinde", "observaciones", "descripcion"],
-  OTRA: ["descripcion", "observaciones"],
+  FITOSANITARIA: ["producto_aplicar", "plaga_maleza", "observaciones"],
+  COSECHA: ["rinde", "unidad_rinde", "observaciones"],
+  OTRA: ["observaciones"],
 };
 
 const NUMERIC_KEYS = new Set([

@@ -15,6 +15,7 @@ const actividades = [
   "Laboreos de Lote",
   "Riego",
   "Aplicación Fitosanitaria",
+  "Otros",
 ];
 
 const TIPO_MAP = {
@@ -23,6 +24,7 @@ const TIPO_MAP = {
   "Laboreos de Lote": "laboreo",
   Riego: "riego",
   "Aplicación Fitosanitaria": "fitosanitaria",
+  "Otros": "otra",
 };
 
 const TIPOS_LABOREO = [
@@ -58,7 +60,7 @@ export default function ActividadesAgricolas() {
     concentracion: "", fabricante: "", litrosPorHa: "", hectareasAplicadas: "",
     observaciones: "", mapaAdjunto: null,
   });
-
+  const [otros, setOtros] = useState({  fecha: "",  nombre: "",  observaciones: "",});
   const [riego, setRiego] = useState({ fecha: "", tipoRiego: "", volumen: "", observaciones: "" });
   const [laboreo, setLaboreo] = useState({ fecha: "", tipoLaboreo: "", operario: "", observaciones: "" });
   const [maleza, setMaleza] = useState({
@@ -115,6 +117,21 @@ export default function ActividadesAgricolas() {
     formData.append("tipo", tipoKey);
 
     try {
+      if (actividad === "Otros") {
+        if (!otros.fecha) throw new Error("La fecha es obligatoria.");
+
+        formData.append("fecha", otros.fecha);
+        formData.append("observaciones", otros.observaciones || "");
+
+        await axios.post("/api/tareas/", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        setMensajeOk(true);
+        setMensaje("Actividad 'Otros' registrada correctamente");
+        setRefreshKey((k) => k + 1);
+        return;
+      }
       if (actividad === "Fertilización") {
         if (!fert.fecha) throw new Error("La fecha es obligatoria.");
         formData.append("fecha", fert.fecha);
@@ -183,14 +200,15 @@ export default function ActividadesAgricolas() {
   };
 
   const canSubmit = Boolean(
-    lote && actividad && (
-      (actividad === "Fertilización" && fert.fecha) ||
-      (actividad === "Riego" && riego.fecha) ||
-      (actividad === "Laboreos de Lote" && laboreo.fecha) ||
-      (actividad === "Manejo de Malezas" && maleza.fecha) ||
-      (actividad === "Aplicación Fitosanitaria" && fito.fecha)
-    )
-  );
+  lote && actividad && (
+    (actividad === "Fertilización" && fert.fecha) ||
+    (actividad === "Riego" && riego.fecha) ||
+    (actividad === "Laboreos de Lote" && laboreo.fecha) ||
+    (actividad === "Manejo de Malezas" && maleza.fecha) ||
+    (actividad === "Aplicación Fitosanitaria" && fito.fecha) ||
+    (actividad === "Otros" && otros.fecha)  
+  )
+);
 
   return (
     <Card className="mx-auto my-5 shadow"
@@ -441,6 +459,32 @@ export default function ActividadesAgricolas() {
               </Col>
             </Row>
           )}
+
+          {actividad === "Otros" && (
+            <Row className="g-3">
+              <Col md={4}>
+                <Form.Label>Fecha</Form.Label>
+                <Form.Control
+                  type="date"
+                  value={otros.fecha}
+                  onChange={(e) => setOtros({ ...otros, fecha: e.target.value })}
+                  required
+                />
+              </Col>
+
+
+              <Col md={12}>
+                <Form.Label>Observaciones</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={2}
+                  value={otros.observaciones}
+                  onChange={(e) => setOtros({ ...otros, observaciones: e.target.value })}
+                />
+              </Col>
+            </Row>
+          )}
+
 
           <div className="d-flex align-items-center mt-4 gap-2">
             <Button variant="success" type="submit" disabled={!canSubmit}>Registrar Actividad</Button>
