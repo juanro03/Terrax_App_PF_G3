@@ -1,67 +1,52 @@
+.detalle-lote {
+  /* evita fugas de estilos */
+}
+
 /* Stack centrado */
-.lote-stack{
+.detalle-lote .lote-stack {
   max-width: 750px;
   margin: 0 auto;
 }
 
 /* Errores de campo */
-.is-invalid {
+.detalle-lote .is-invalid {
   border-color: #dc3545 !important;
 }
 
-.invalid-feedback.d-block {
+.detalle-lote .invalid-feedback.d-block {
   color: #dc3545;
   font-size: .875rem;
   margin-top: .25rem;
 }
 
+/* ============================
+   ESTADOS
+   ============================ */
 
-/* Indicador de estado */
-.estado-chip{
-  display:inline-block;
-  padding:.5rem 1rem;
-  border-radius:999px;
-  font-weight:700;
-  text-transform:capitalize;
+.detalle-lote .estado-chip {
+  display: inline-block;
+  padding: .5rem 1rem;
+  border-radius: 999px;
+  font-weight: 700;
+  text-transform: capitalize;
   background: var(--gris-suave);
   color: var(--fuente-oscura);
   border: 1px solid rgba(0,0,0,.05);
+  line-height: 1;
 }
-.estado-barbecho  { background:#E6F4EA; color:#0F5132; }
-.estado-sembrado  { background:#E1F0FF; color:#084298; }
-.estado-cosechado { background:#FFF3CD; color:#664D03; }
 
-/* Tarjetas plegables */
-.section-header{
-  width:100%;
+.detalle-lote .estado-barbecho { background: #E6F4EA; color: #0F5132; }
+.detalle-lote .estado-cobertura { background: #E7F1FF; color: #0B5ED7; }
+.detalle-lote .estado-sembrado { background: #E1F0FF; color: #084298; }
+.detalle-lote .estado-cosechado { background: #FFF3CD; color: #664D03; }
+
+.detalle-lote .estado-ghost {
   background: transparent;
-  border: 0;
-  padding: .9rem 1rem;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  border-radius: 15px;
-  cursor: pointer;
+  color: var(--fuente-oscura);
+  border: 1.5px solid var(--gris-suave);
 }
-.section-header:hover{ background: rgba(255,255,255,.25); }
-.section-header.no-toggle{ cursor:not-allowed; }
-.section-title{ font-weight: 700; color: var(--fuente-oscura); }
-.arrow{ transition: transform .2s ease; }
-.arrow.open{ transform: rotate(180deg); }
 
-/* Deshabilitadas (compactas) */
-.section-disabled{
-  opacity:.7;
-}
-.section-disabled .section-header{ cursor: default; }
-.section-disabled .arrow{ opacity:.5; }
-
-/* Chips de archivo */
-.file-chip { background:#f8f9fa; border:1px solid #dee2e6; border-radius: 10px; }
-.chip-thumb { width:100px; height:100px; object-fit:cover; border-radius:10px; border:1px solid #ccc; }
-
-/* Contenedor de las “pills” de estado */
-.estado-list{
+.detalle-lote .estado-list {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -69,82 +54,132 @@
   flex-wrap: wrap;
 }
 
-/* Tu chip base se mantiene tal cual */
-.estado-chip{
-  display:inline-block;
-  padding:.5rem 1rem;
-  border-radius:999px;
-  font-weight:700;
-  text-transform:capitalize;
-  background: var(--gris-suave);
-  color: var(--fuente-oscura);
-  line-height: 1;
-}
+/* ============================
+   TARJETAS PLEGABLES
+   ============================ */
 
-/* “Pintados” (activos), ya los tenías */
-.estado-barbecho  { background:#E6F4EA; color:#0F5132; }
-.estado-cobertura { background:#E7F1FF; color:#0B5ED7; }
-.estado-sembrado  { background:#E1F0FF; color:#084298; }
-.estado-cosechado { background:#FFF3CD; color:#664D03; }
-
-/* Inactivos (se ven como antes, pero sin “pintar”) */
-.estado-ghost{
+.detalle-lote .section-header {
+  width: 100%;
   background: transparent;
+  border: 0;
+  padding: .9rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 15px;
+  cursor: pointer;
+}
+
+.detalle-lote .section-header:hover {
+  background: rgba(255,255,255,.25);
+}
+
+.detalle-lote .section-header.no-toggle {
+  cursor: not-allowed;
+}
+
+.detalle-lote .section-title {
+  font-weight: 700;
   color: var(--fuente-oscura);
-  border: 1.5px solid var(--gris-suave);
 }
 
+.detalle-lote .arrow {
+  transition: transform .2s ease;
+}
 
-/* --- Quitar zoom/animaciones en tarjetas y secciones --- */
-.card,
-.card * {
+.detalle-lote .arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Deshabilitadas */
+.detalle-lote .section-disabled {
+  opacity: .7;
+}
+
+.detalle-lote .section-disabled .section-header {
+  cursor: default;
+}
+
+.detalle-lote .section-disabled .arrow {
+  opacity: .5;
+}
+
+/* ============================
+   FILE CHIPS
+   ============================ */
+
+.detalle-lote .file-chip {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+}
+
+.detalle-lote .chip-thumb {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+/* ============================
+   REMUEVO ESTILOS PELIGROSOS
+   ============================ */
+
+/* Antes: .card, .card * { transition: none } → Esto rompe Leaflet */
+/* Ahora lo limitamos SOLO a las tarjetas dentro del detalle */
+
+.detalle-lote .card,
+.detalle-lote .card * {
   transition: none !important;
 }
 
-.card {
+.detalle-lote .card,
+.detalle-lote .card *,
+.detalle-lote .section-header,
+.detalle-lote .section-body {
   transform: none !important;
 }
 
-.card:hover,
-.card:focus,
-.card:focus-within {
+.detalle-lote .section-header:hover,
+.detalle-lote .section-body:hover {
   transform: none !important;
 }
 
-/* Si tenías alguna regla que escalaba el header/cuerpo de secciones */
-.section-header,
-.section-body {
-  transition: none !important;
-  transform: none !important;
-}
-
-.section-header:hover,
-.section-body:hover {
-  transform: none !important;
-}
-
-/* Por si algún theme aplica animaciones por keyframes */
 @media (prefers-reduced-motion: no-preference) {
-  .card, .section-header, .section-body {
+  .detalle-lote .card,
+  .detalle-lote .section-header,
+  .detalle-lote .section-body {
     animation: none !important;
   }
 }
 
-/* (Opcional) neutralizar escalas por utilidades o clases accidentales */
-[class*="scale"],
-[class*="zoom"] {
+/* Antes: [class*="scale"], [class*="zoom"] → mataba Leaflet */
+/* Ahora SOLO afecta clases dentro de detalle-lote */
+
+.detalle-lote [class*="scale"],
+.detalle-lote [class*="zoom"] {
   transform: none !important;
   transition: none !important;
 }
 
-.confirm-overlay{
-  position: fixed; inset: 0; background: rgba(0,0,0,.45);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 1050; /* arriba de todo */
+/* ============================
+   CONFIRM OVERLAY
+   ============================ */
+
+.detalle-lote .confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
 }
-.confirm-card{
+
+.detalle-lote .confirm-card {
   width: min(520px, 92vw);
-  background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.2);
 }
-
-

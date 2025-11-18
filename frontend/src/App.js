@@ -37,8 +37,8 @@ function AppContent() {
   const contentMarginLeft = !isSidebarVisible
     ? "0px"
     : sidebarOpen
-    ? "250px"
-    : "70px";
+      ? "250px"
+      : "70px";
 
   return (
     <div className="d-flex" style={{ minHeight: "100vh" }}>
@@ -67,13 +67,16 @@ function AppContent() {
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/calculadora" element={<Calculadora />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/lote/:loteId" element={<DetalleLote />} />
           <Route path="/productos" element={<ProductosInicio />} />
           <Route path="/productos/agregar" element={<ProductosForm />} />
           <Route path="/productos/ver" element={<ProductosLista />} />
           <Route path="/reportes" element={<Reportes />} />
           <Route path="/tareas/trazabilidad" element={<TrazabilidadEmbed />} />
-          <Route path="/lotes/:loteId/historial" element={<HistorialCampanias />} />
+
+          <Route path="/lote/:loteId" element={<DetalleLote />} />
+          {/*<Route path="/lotes/:loteId/historial" element={<HistorialCampanias />} />*/}
+
+
 
 
           <Route
