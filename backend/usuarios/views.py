@@ -40,18 +40,40 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="cambiar-password")
     def cambiar_password(self, request, pk=None):
-        usuario = self.get_object()
-        actual = request.data.get("actual")
-        nueva = request.data.get("nueva")
+        """
+        Endpoint para cambiar la contraseña de un usuario desde el panel.
 
-        if not usuario.check_password(actual):
-            return Response({"detail": "Contraseña actual incorrecta"}, status=status.HTTP_400_BAD_REQUEST)
+        Espera:
+        {
+          "nueva": "xxxx",
+          "confirmar": "xxxx"
+        }
+        """
+        usuario = self.get_object()
+        nueva = request.data.get("nueva")
+        confirmar = request.data.get("confirmar")
+
+        if not nueva or not confirmar:
+            return Response(
+                {"detail": "Debés completar ambos campos."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if nueva != confirmar:
+            return Response(
+                {"detail": "Las contraseñas no coinciden."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         usuario.set_password(nueva)
         usuario.save()
-        return Response({"detail": "Contraseña actualizada correctamente"}, status=status.HTTP_200_OK)
 
-
+        return Response(
+            {"detail": "Contraseña actualizada correctamente."},
+            status=status.HTTP_200_OK,
+        )
+    
+    
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
@@ -114,6 +136,7 @@ def activar_usuario(request, pk):
         return Response({"detail": "Usuario reactivado"})
     except Usuario.DoesNotExist:
         return Response({"detail": "No encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
 class PasswordResetRequestAPIView(APIView):
     """
     Recibe { email }, valida usuario y envía mail con link de reset.
@@ -153,7 +176,6 @@ class PasswordResetRequestAPIView(APIView):
             {"detail": "Si existe esa cuenta, recibirás un e-mail con instrucciones."},
             status=status.HTTP_200_OK
         )
-
 
 class PasswordResetConfirmAPIView(APIView):
     """
