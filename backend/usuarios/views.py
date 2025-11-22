@@ -25,19 +25,6 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
 
-    @action(
-        detail=False,
-        methods=['delete'],
-        url_path=r'delete-by-username/(?P<username>[^/.]+)'
-    )
-    def delete_by_username(self, request, username=None):
-        try:
-            usuario = Usuario.objects.get(username=username)
-            usuario.delete()
-            return Response({"detail": "Usuario eliminado"}, status=status.HTTP_204_NO_CONTENT)
-        except Usuario.DoesNotExist:
-            return Response({"detail": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-
     @action(detail=True, methods=["post"], url_path="cambiar-password")
     def cambiar_password(self, request, pk=None):
         """
@@ -73,6 +60,44 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK,
         )
     
+    """
+    Endpoint para cerrar sesión.
+
+    Espera en el body:
+      { "refresh": "<refresh_token_actual>" }
+
+    - Blacklistea el refresh token (si usás blacklist).
+    - Opcional: limpia la sesión de Django si hubiera.
+    """
+    "permission_classes = [IsAuthenticated]"
+
+    def post(self, request):
+        refresh_token = request.data.get("refresh")
+
+        if not refresh_token:
+            return Response(
+                {"detail": "Falta el token de actualización (refresh)."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            token = RefreshToken(refresh_token)
+            # 👇 Esto lo marca como inválido en el servidor
+            token.blacklist()
+        except TokenError:
+            return Response(
+                {"detail": "Token inválido o ya caducado."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Si además usás sesiones de Django, podés limpiarla:
+        if hasattr(request, "session"):
+            request.session.flush()
+
+        return Response(
+            {"detail": "Sesión cerrada correctamente."},
+            status=status.HTTP_205_RESET_CONTENT,
+        )
     
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -125,7 +150,6 @@ def desactivar_usuario(request, pk):
     usuario.is_active = False
     usuario.save()
     return Response({"mensaje": "Usuario desactivado correctamente"}, status=status.HTTP_200_OK)
-
 
 @api_view(["PATCH"])
 def activar_usuario(request, pk):
@@ -206,7 +230,6 @@ class PasswordResetConfirmAPIView(APIView):
         return Response({"detail": "Contraseña actualizada con éxito."}, status=status.HTTP_200_OK)
     
 class UsuarioActualAPIView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         serializer = UsuarioSerializer(request.user)

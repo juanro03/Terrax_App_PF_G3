@@ -39,7 +39,7 @@ const Login = () => {
         localStorage.removeItem("geoCoords");
         window.location.href = "/inicio";
       } else {
-        setLoginError("El correo electrónico o la contraseña son inválidos");
+        setLoginError("Los datos ingresado son inválidos o su cuenta está inactiva.");
       }
     } catch (error) {
       console.error(error);

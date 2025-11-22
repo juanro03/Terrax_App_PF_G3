@@ -6,6 +6,8 @@ const FormCosecha = ({
   minFechaCosechaISO,
   openDatePicker,
   registrarCosecha,
+  errorRinde,
+  setErrorRinde
 }) => {
   return (
     <form
@@ -16,13 +18,13 @@ const FormCosecha = ({
     >
       {/* FECHA */}
       <div className="mb-2">
-        <label className="form-label">Fecha</label>
+        <label className="form-label mb-0">Fecha de cosecha</label>
+        <small className="text-muted d-block mb-2">(por defecto se establece la fecha estimada de cosecha)</small>
         <input
           type="date"
           name="fecha"
           className="form-control"
           value={cosecha.fecha || ""}
-          min={minFechaCosechaISO}
           onChange={(e) =>
             setCosecha((prev) => ({ ...prev, fecha: e.target.value }))
           }
@@ -33,20 +35,44 @@ const FormCosecha = ({
 
       {/* RINDE */}
       <div className="mb-2">
-        <label className="form-label">Rinde</label>
+        <label className="form-label mb-0">Rinde</label>
+        {errorRinde && (
+          <div className="form-text text-danger mt-0 mb-2">{errorRinde}</div>
+        )}
         <div className="input-group">
           <input
             type="text"
             name="rinde"
             className="form-control"
             value={cosecha.rinde || ""}
-            onChange={(e) =>
-              setCosecha((prev) => ({ ...prev, rinde: e.target.value }))
-            }
+            placeholder="Ejemplo: 7,5"
+            onChange={(e) => {
+              let valor = e.target.value;
+
+              // CONVERSIÓN AUTOMÁTICA: punto → coma
+              valor = valor.replace(".", ",");
+
+              // permitir escritura libre
+              setCosecha(prev => ({ ...prev, rinde: valor }));
+
+              // limpiar error mientras escribe
+              setErrorRinde("");
+            }}
+            onBlur={() => {
+              // VALIDACIÓN FINAL (solo al salir)
+              const r = (cosecha.rinde || "").trim();
+              const rindeRegex = /^\d+(,\d{1,2})?$/; // acepta 7,5 / 12,25 / 8
+
+              if (!rindeRegex.test(r)) {
+                setErrorRinde("Formato inválido. Use coma decimal. Ej: 7,5");
+              }
+            }}
             style={{ height: "48px" }}
             autoComplete="off"
             required
           />
+
+
           <span
             className="input-group-text text-white"
             style={{

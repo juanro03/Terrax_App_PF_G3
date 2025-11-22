@@ -48,6 +48,9 @@ const DetalleLote = () => {
   const [unidadDensidad, setUnidadDensidad] = useState("Kg/Ha");
   const { loteId } = useParams();
   const [cosecha, setCosecha] = useState({ fecha: '', rinde: '', archivo: null });
+  const [errorRinde, setErrorRinde] = useState("");
+  const [errorDensidad, setErrorDensidad] = useState("");
+  const [errorDensidadCobertura, setErrorDensidadCobertura] = useState("");
   const [openSection, setOpenSection] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -131,6 +134,7 @@ const DetalleLote = () => {
       console.error("No pude obtener el estado del lote", e);
     }
   };
+
   useEffect(() => {
     fetchEstadoLote();
   }, [loteId]);
@@ -181,8 +185,30 @@ const DetalleLote = () => {
 
   // Calcular fecha estimada de cosecha según semilla
   useEffect(() => {
+    // Caso cultivo libre
+    if (siembra.modoCultivoLibre) {
+      if (siembra.fecha && siembra.dias_madurez_manual) {
+        const dias = parseInt(siembra.dias_madurez_manual);
+        if (!isNaN(dias)) {
+          const fechaSiembra = new Date(siembra.fecha);
+          fechaSiembra.setDate(fechaSiembra.getDate() + dias);
+          setSiembra(prev => ({
+            ...prev,
+            fechaEstimadaCosecha: dayjs(fechaSiembra).format("DD/MM/YYYY"),
+            fechaEstimadaCosechaISO: dayjs(fechaSiembra).format("YYYY-MM-DD")
+          }));
+        }
+      }
+      return;
+    }
+
+    // Caso cultivo desde productos
     if (siembra.fecha && siembra.cultivo && siembra.variedad && semillas.length > 0) {
-      const semilla = semillas.find(s => s.cultivo === siembra.cultivo && s.variedad === siembra.variedad);
+      const semilla = semillas.find(s =>
+        s.cultivo === siembra.cultivo &&
+        s.variedad === siembra.variedad
+      );
+
       if (semilla) {
         const dias = parseInt(semilla.dias_madurez);
         if (!isNaN(dias)) {
@@ -196,7 +222,14 @@ const DetalleLote = () => {
         }
       }
     }
-  }, [siembra.fecha, siembra.cultivo, siembra.variedad, semillas]);
+  }, [
+    siembra.fecha,
+    siembra.cultivo,
+    siembra.variedad,
+    siembra.dias_madurez_manual,
+    siembra.modoCultivoLibre,
+    semillas
+  ]);
 
   // Fecha mínima para cosecha (día después de la estimada)
   const minFechaCosechaISO = siembra.fechaEstimadaCosechaISO
@@ -241,12 +274,16 @@ const DetalleLote = () => {
   // Validaciones
   const validateSiembra = () => {
     const e = {};
-    if (!siembra.fecha) e.fecha = "La fecha es obligatoria.";
-    if (!siembra.cultivo) e.cultivo = "El cultivo es obligatorio.";
-    if (!siembra.variedad) e.variedad = "La variedad es obligatoria.";
-    if (!siembra.densidad) e.densidad = "La densidad es obligatoria.";
-    return e;
+
+    if (siembra.modoCultivoLibre) {
+      if (!siembra.cultivo) e.cultivo = "El cultivo es obligatorio.";
+      if (!siembra.variedad) e.variedad = "La variedad es obligatoria.";
+      if (!siembra.dias_madurez_manual) e.dias = "Debes ingresar los días de maduración.";
+    }
+
+    return e;  
   };
+
   const validateCobertura = () => {
     const e = {};
     if (!cobertura.fecha) e.fecha = "La fecha es obligatoria.";
@@ -273,71 +310,154 @@ const DetalleLote = () => {
   // Guardar cobertura, siembra y cosecha
   const guardarCobertura = async () => {
     if (estado !== "barbecho") return;
+
     const errs = validateCobertura();
     setErrorsCobertura(errs);
     if (Object.keys(errs).length) return;
 
+    // 🔵 Normalizar densidad: coma → punto
+    const densidadNormalizada = cobertura.densidad
+      ? cobertura.densidad.replace(",", ".")
+      : "";
+
+    // 🔵 Variedad final (si eligió "Registrar otra")
+    const variedadFinal =
+      cobertura.variedad === "__otra_var__"
+        ? cobertura.variedadTextoLibre
+        : cobertura.variedad;
+
+    // 🔵 Construcción del payload limpio
+    const payload = {
+      fecha: cobertura.fecha,
+      cultivo: cobertura.cultivo,
+      variedad: variedadFinal,
+      densidad: densidadNormalizada,
+      lote: loteId,
+    };
+
     try {
-      const payload = { ...cobertura, lote: loteId };
-      if (cobertura.id) await axios.put(url(`/coberturas/${cobertura.id}/`), payload);
-      else await axios.post(url(`/coberturas/`), payload);
+      if (cobertura.id) {
+        await axios.put(url(`/coberturas/${cobertura.id}/`), payload);
+      } else {
+        await axios.post(url(`/coberturas/`), payload);
+      }
+
       setShowSuccess("Cobertura guardada con éxito");
-      await fetchEstadoLote(); // debería quedar "cobertura"
+      await fetchEstadoLote(); // quedaría en "cobertura"
+
     } catch (error) {
       console.error("Error al guardar cobertura:", error?.response?.data || error.message);
+      alert(error?.response?.data?.error || "Error al registrar la cobertura.");
     }
   };
 
+
   const guardarSiembra = async () => {
     if (!(estado === "barbecho" || estado === "cobertura")) return;
+
     const errs = validateSiembra();
     setErrorsSiembra(errs);
     if (Object.keys(errs).length) return;
+
+    // 🔵 NORMALIZAR DENSIDAD: convertir coma → punto
+    const densidadNormalizada = siembra.densidad
+      ? siembra.densidad.replace(",", ".")
+      : "";
 
     const formData = new FormData();
     formData.append("fecha", siembra.fecha);
     formData.append("cultivo", siembra.cultivo);
     formData.append("variedad", siembra.variedad);
-    formData.append("densidad", siembra.densidad);
+    formData.append("densidad", densidadNormalizada);
     formData.append("unidad_densidad", siembra.unidad);
-    formData.append("ventana_cosecha", siembra.fechaEstimadaCosechaISO || siembra.fechaEstimadaCosecha);
+    formData.append(
+      "ventana_cosecha",
+      siembra.fechaEstimadaCosechaISO || siembra.fechaEstimadaCosecha
+    );
     formData.append("lote", loteId);
-    if (siembra.analisisSuelo) formData.append("analisis_suelo", siembra.analisisSuelo);
+
+    if (siembra.modoCultivoLibre) {
+      formData.append("dias_madurez_manual", siembra.dias_madurez_manual);
+    }
+
+    if (siembra.analisisSuelo) {
+      formData.append("analisis_suelo", siembra.analisisSuelo);
+    }
 
     const endpoint = siembra.id ? `/siembras/${siembra.id}/` : `/siembras/`;
     const method = siembra.id ? "put" : "post";
 
     try {
-      await axios({ method, url: url(endpoint), data: formData, headers: { "Content-Type": "multipart/form-data" } });
+      await axios({
+        method,
+        url: url(endpoint),
+        data: formData,
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
       setShowSuccess("Siembra guardada con éxito");
       await fetchEstadoLote(); // debería pasar a "sembrado"
+
     } catch (error) {
       console.log("Backend error:", error?.response?.data || error.message);
     }
   };
 
+
   const registrarCosecha = async () => {
     if (estado !== "sembrado") return;
+
+    // --- VALIDACIÓN DEL RINDE EN FORMATO CON COMA ---
+    const r = (cosecha.rinde || "").trim();
+
+    // regex que acepta: 1, 1,1  12,25  150,3
+    const rindeRegex = /^\d+(,\d{1,2})?$/;
+
+    if (!r) {
+      setErrorRinde("Debe ingresar un rinde.");
+      return;
+    }
+
+    if (!rindeRegex.test(r)) {
+      setErrorRinde("Formato inválido. Ingrese un rinde con coma decimal. Ej: 7,5");
+      return;
+    }
+
+    // --- NORMALIZAR PARA EL BACKEND ( 7,5 → 7.5 ) ---
+    const rindeParaBackend = r.replace(",", ".");
+
+    // continuar con validaciones generales
     const errs = validateCosecha();
     setErrorsCosecha(errs);
     if (Object.keys(errs).length) return;
 
     try {
-      const rindeFinal = `${(cosecha.rinde || "").trim()} tn/ha`;
+      const rindeFinal = `${rindeParaBackend} tn/ha`;
+
       const formData = new FormData();
       formData.append("fecha", cosecha.fecha);
       formData.append("rinde", rindeFinal);
       formData.append("lote", loteId);
-      if (cosecha.archivo) formData.append("archivo_rendimiento", cosecha.archivo);
 
-      await axios.post(url(`/cosechas/`), formData, { headers: { "Content-Type": "multipart/form-data" } });
+      if (cosecha.archivo) {
+        formData.append("archivo_rendimiento", cosecha.archivo);
+      }
+
+      await axios.post(url(`/cosechas/`), formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
       await fetchEstadoLote(); // debería pasar a "cosechado"
       setShowSuccess("Cosecha registrada con éxito");
+      setErrorRinde(""); // limpiar error
+
     } catch (error) {
       console.error("Error al registrar cosecha:", error?.response?.data || error.message);
       alert(error?.response?.data?.error || "Ocurrió un error al registrar la cosecha.");
     }
   };
+
+
 
   // Finalizar campaña
   const finalizarCampania = async () => {
@@ -354,6 +474,7 @@ const DetalleLote = () => {
       if (finResp?.lote_estado) setEstado(finResp.lote_estado);
       await fetchEstadoLote(); // “barbecho”
       setShowSuccess("Campaña finalizada con éxito. Lote en 'Barbecho'");
+
     } catch (error) {
       console.error("Error al finalizar campaña:", error?.response?.data || error.message);
       alert(error?.response?.data?.error || "Ocurrió un error al finalizar la campaña.");
@@ -445,82 +566,35 @@ const DetalleLote = () => {
 
         {/* Siembra */}
         <Section id="siembra" title="Registrar Siembra" enabled={canSiembra} isOpen={openSection === 'siembra'} onToggle={setOpenSection}>
-          {cultivosDisponibles.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-title">Aún no hay semillas cargadas</div>
-              <p className="empty-text">
-                Para registrar una siembra, primero cargá tus <strong>Semillas</strong> en la pestaña <strong>Productos</strong>.
-              </p>
-              <div className="d-flex gap-2">
-                <button
-                  type="button"
-                  className="btn btn-outline-success"
-                  onClick={() => navigate("/productos?categoria=SEMILLAS")}
-                >
-                  Ir a Productos
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary"
-                  onClick={() => window.location.reload()}
-                  title="Actualizar luego de cargar productos"
-                >
-                  Refrescar
-                </button>
-              </div>
-            </div>
-          ) : (
-            <FormSiembra
-              siembra={siembra}
-              setSiembra={setSiembra}
-              unidadDensidad={unidadDensidad}
-              setUnidadDensidad={setUnidadDensidad}
-              cultivosDisponibles={cultivosDisponibles}
-              variedadesDisponibles={variedadesDisponibles}
-              openDatePicker={openDatePicker}
-              errorsSiembra={errorsSiembra}
-              handleSiembraChange={handleSiembraChange}
-              guardarSiembra={guardarSiembra}
-            />
-          )}
+          <FormSiembra
+            siembra={siembra}
+            setSiembra={setSiembra}
+            unidadDensidad={unidadDensidad}
+            setUnidadDensidad={setUnidadDensidad}
+            cultivosDisponibles={cultivosDisponibles}
+            variedadesDisponibles={variedadesDisponibles}
+            openDatePicker={openDatePicker}
+            errorsSiembra={errorsSiembra}
+            handleSiembraChange={handleSiembraChange}
+            guardarSiembra={guardarSiembra}
+            errorDensidad={errorDensidad}
+            setErrorDensidad={setErrorDensidad}
+          />
         </Section>
 
         {/* Cobertura */}
         <Section id="cobertura" title="Registrar Cobertura" enabled={canCobertura} isOpen={openSection === 'cobertura'} onToggle={setOpenSection}>
-          {cultivosDisponibles.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-title">Aún no hay semillas cargadas</div>
-              <p className="empty-text">
-                Para registrar una <strong>cobertura</strong>, primero cargá tus <strong>Semillas</strong> en la pestaña <strong>Productos</strong>.
-              </p>
-              <div className="d-flex gap-2">
-                <button
-                  type="button"
-                  className="btn btn-outline-success"
-                  onClick={() => navigate("/productos?categoria=SEMILLAS")}
-                >
-                  Ir a Productos
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary"
-                  onClick={() => window.location.reload()}
-                  title="Actualizar luego de cargar productos"
-                >
-                  Refrescar
-                </button>
-              </div>
-            </div>
-          ) : (
-            <FormCobertura
-              cobertura={cobertura}
-              setCobertura={setCobertura}
-              cultivosDisponibles={cultivosDisponibles}
-              openDatePicker={openDatePicker}
-              errorsCobertura={errorsCobertura}
-              guardarCobertura={guardarCobertura}
-            />
-          )}
+          <FormCobertura
+            cobertura={cobertura}
+            setCobertura={setCobertura}
+            cultivosDisponibles={cultivosDisponibles}
+            variedadesDisponibles={variedadesDisponibles}
+            openDatePicker={openDatePicker}
+            errorsCobertura={errorsCobertura}
+            guardarCobertura={guardarCobertura}
+            errorDensidadCobertura={errorDensidadCobertura}
+            setErrorDensidadCobertura={setErrorDensidadCobertura}
+          />
         </Section>
 
         {/* Cosecha */}
@@ -533,6 +607,8 @@ const DetalleLote = () => {
             handleCosechaChange={handleCosechaChange}
             registrarCosecha={registrarCosecha}
             openDatePicker={openDatePicker}
+            errorRinde={errorRinde}
+            setErrorRinde={setErrorRinde}
           />
         </Section>
 
@@ -578,6 +654,7 @@ const DetalleLote = () => {
                 onClick={async () => {
                   await finalizarCampania();
                   cerrarConfirmEnd();
+
                 }}
               >
                 Sí, finalizar
@@ -590,7 +667,14 @@ const DetalleLote = () => {
       <SuccessAlert
         show={!!showSuccess}
         title={showSuccess}
-        onClose={() => setShowSuccess(null)}
+        onClose={() => {
+          setShowSuccess(null);
+
+          // 🔵 Si el mensaje es el de finalizar campaña, recargamos
+          if (showSuccess === "Campaña finalizada con éxito. Lote en 'Barbecho'") {
+            window.location.reload();
+          }
+        }}
       />
 
     </div>

@@ -22,16 +22,13 @@ const Reportes = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [campos, setCampos] = useState([]);
   const [lotes, setLotes] = useState([]);
-
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState("");
   const [campoSeleccionado, setCampoSeleccionado] = useState("");
   const [loteSeleccionado, setLoteSeleccionado] = useState("");
   const [rol, setRol] = useState("");
-
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [reporteAEditar, setReporteAEditar] = useState(null);
-
   const [nuevoReporte, setNuevoReporte] = useState({
     productor: "",
     campo: "",
@@ -42,17 +39,13 @@ const Reportes = () => {
     archivo_pdf: null,
     fecha_reporte: "",
   });
-
   const [atributoFiltro, setAtributoFiltro] = useState("nombre");
   const [valorBusqueda, setValorBusqueda] = useState("");
-
   const token = localStorage.getItem("accessToken");
   const headers = { Authorization: `Bearer ${token}` };
-
   const [reporteSel, setReporteSel] = useState(null);
   const [loteSel, setLoteSel] = useState(null);
   const [cargandoLote, setCargandoLote] = useState(false);
-
   const obtenerNombreCampo = (id) =>
     campos.find((c) => c.id === id)?.nombre || id;
   const obtenerNombreLote = (id) =>
@@ -291,6 +284,20 @@ const Reportes = () => {
     dropdownIndicator: (p) => ({ ...p, color: TX_GREEN }),
     menu: (p) => ({ ...p, zIndex: 5 }),
   };
+
+  // Si los filtros cambian y ya no existe el reporte seleccionado,
+  // lo deseleccionamos para que Anotaciones quede vacío
+  useEffect(() => {
+    if (!reporteSel) return;
+
+    // ¿El reporte seleccionado sigue estando en la lista filtrada?
+    const sigueExistiendo = reportesFiltrados.some(r => r.id === reporteSel.id);
+
+    if (!sigueExistiendo) {
+      setReporteSel(null);
+      setLoteSel(null);
+    }
+  }, [reportesFiltrados]);
 
   return (
     <Card
