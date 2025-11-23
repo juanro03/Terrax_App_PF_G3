@@ -151,7 +151,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             />
             {usuario.rol === "productor" && (
               <SidebarItem
-                icon={<Sprout size={18} />}
+                icon={<i class="bi bi-exclamation-triangle"></i>}
                 label="Alertas Climáticas"
                 isOpen={isOpen}
                 to="/alertas"
