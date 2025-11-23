@@ -84,3 +84,31 @@ class Campania(models.Model):
 
     def __str__(self):
         return f"Campaña {self.cultivo} ({self.lote.nombre}) - {self.fecha_siembra.strftime('%Y-%m-%d')}"
+
+class AlertaClimatica(models.Model):
+    TIPO_CHOICES = [
+        ("temp_baja", "Temperatura muy baja"),
+        ("temp_alta", "Temperatura muy alta"),
+        ("granizo", "Probabilidad de granizo"),
+        ("incendio", "Riesgo de incendio"),
+        ("tormenta_severa", "Tormenta severa"),
+    ]
+
+    NIVEL_CHOICES = [
+        ("info", "Informativa"),
+        ("moderada", "Moderada"),
+        ("alta", "Alta"),
+        ("critica", "Crítica"),
+    ]
+
+    lote = models.ForeignKey(Lote, on_delete=models.CASCADE, related_name="alertas")
+    tipo = models.CharField(max_length=50, choices=TIPO_CHOICES)
+    mensaje = models.TextField()
+    valor_detectado = models.FloatField(null=True, blank=True)
+    nivel = models.CharField(max_length=20, choices=NIVEL_CHOICES, default="info")
+    fuente = models.CharField(max_length=50, default="openweather")
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    vista = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.get_tipo_display()} - {self.lote.nombre}"

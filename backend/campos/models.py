@@ -12,6 +12,8 @@ class Campo(models.Model):
     cantidadLotes = models.PositiveIntegerField(default=1)
     fecha_creacion = models.DateTimeField(default=timezone.now)
     observacion = models.TextField(blank=True, null=True)
+    latitud = models.FloatField(null=True, blank=True)
+    longitud = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return self.nombre

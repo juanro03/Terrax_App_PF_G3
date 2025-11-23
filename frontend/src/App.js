@@ -24,7 +24,7 @@ import Reportes from "./components/Reportes/reportes.jsx";
 import HistorialCampanias from "./components/DetalleLote/HistorialCampanias";
 import TareasAgricolas from "./components/TareasAgricolas/TareasAgricolas";
 import TrazabilidadEmbed from "./components/TareasAgricolas/TrazabilidadEmbed";
-
+import AlertasClimaticas from "./components/Alertas/Alertas";
 
 function AppContent() {
   const location = useLocation();
@@ -73,8 +73,11 @@ function AppContent() {
           <Route path="/productos/ver" element={<ProductosLista />} />
           <Route path="/reportes" element={<Reportes />} />
           <Route path="/tareas/trazabilidad" element={<TrazabilidadEmbed />} />
-          <Route path="/lotes/:loteId/historial" element={<HistorialCampanias />} />
-
+          <Route
+            path="/lotes/:loteId/historial"
+            element={<HistorialCampanias />}
+          />
+          <Route path="/alertas" element={<AlertasClimaticas />} />
 
           <Route
             path="/usuarios"
