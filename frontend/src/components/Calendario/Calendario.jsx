@@ -28,9 +28,9 @@ const COLOR_MAP = {
   riego: "#79beecff",
   fitosanitaria: "#54ad6f",
   otra: "#a2a5a3ff",
-  siembra: "#887847ff", // Inicio de Siembra
-  cosecha: "#ff7f50", // Cosecha
+  anotacion: "#f39c12", // Anotación de lote
 };
+
 // Labels legibles por tipo
 const LABEL_MAP = {
   fertilizacion: "Fertilización",
@@ -39,40 +39,55 @@ const LABEL_MAP = {
   riego: "Riego",
   fitosanitaria: "Aplicación Fitosanitaria",
   otra: "Anotación",
-  siembra: "Inicio de Siembra",
-  cosecha: "Cosecha",
+  anotacion: "Anotación en lote",
 };
+
 const ACTIVIDADES = Object.keys(LABEL_MAP);
+
 const TIPO_OPTS = Object.entries(LABEL_MAP).map(([key, label]) => ({
   key,
   label,
 }));
-// Opciones del formulario: excluimos siembra/cosecha (vienen de sus propios endpoints)
+
+// Opciones del formulario: excluimos siembra, cosecha y anotación (las anotaciones vienen de reportes)
 const FORM_TIPO_OPTS = TIPO_OPTS.filter(
-  (op) => !["siembra", "cosecha"].includes(op.key)
+  (op) => !["siembra", "cosecha", "anotacion"].includes(op.key)
 );
+
+// Meses en español para el selector
+const MONTHS = [
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
+];
 
 // ====== Estilos UI/UX adicionales ======
 const styles = `
-  /* redondeo de la franja superior (toolbar) de la tarjeta */
   .calendar-toolbar {
     border-top-left-radius: 1.4rem;
     border-top-right-radius: 1.4rem;
   }
 
-  /* redondeo del grid del calendario (abajo ya estaba; sumo arriba por si querés continuidad) */
   .fc .fc-scrollgrid {
     border-top-left-radius: 1.4rem;
     border-top-right-radius: 1.4rem;
     border-bottom-left-radius: 1.4rem;
     border-bottom-right-radius: 1.4rem;
-    overflow: hidden; /* mantiene los bordes prolijos */
+    overflow: hidden;
   }
-  /* Tipografía más clara del calendario y encabezados */
+
   .fc .fc-toolbar-title { font-weight: 700; color: #0f5132; letter-spacing: .2px; }
   .fc .fc-col-header-cell-cushion, .fc .fc-daygrid-day-number { color: #111; }
 
-  /* Eventos con pastilla redondeada y fondo cremita */
   .fc .fc-h-event, .fc .fc-daygrid-event, .fc-event {
     background: #f9f5e9ff !important;
     border: none !important;
@@ -82,13 +97,9 @@ const styles = `
   }
   .fc .fc-daygrid-day-frame { padding: 4px; }
 
-  /* Hover sutil en días y eventos */
   .fc .fc-daygrid-day:hover { background: #fafcfb; }
-
-  /* Hoy destacado pero no invasivo */
   .fc .fc-day-today { background: #eefaf2 !important; }
 
-  /* Chip del evento con barra lateral de color por tipo */
   .event-chip {
     display: grid;
     grid-template-columns: 6px 1fr;
@@ -112,7 +123,6 @@ const styles = `
     font-size: 11.5px;
   }
 
-  /* Toolbar sticky: siempre visible al hacer scroll */
   .calendar-toolbar {
     position: sticky;
     top: 0;
@@ -122,7 +132,6 @@ const styles = `
     border-bottom: 1px solid #eef3ef;
   }
 
-  /* Botón de acción flotante (FAB) */
   .fab-add {
     position: fixed;
     right: 24px;
@@ -135,7 +144,6 @@ const styles = `
     
   .fc .fc-toolbar-title::first-letter { text-transform: uppercase; }
 
-  /* Multiselect dropdown ancho y scrolleable, encima del calendario */
   .filter-dropdown .dropdown-menu {
     z-index: 1060;
     min-width: 280px;
@@ -144,63 +152,52 @@ const styles = `
     padding: 8px 10px;
   }
 
-  /* Leyenda compacta */
   .legend-dot {
     display: inline-block;
     width: 12px; height: 12px;
     border-radius: 4px; margin-right: 6px;
   }
 
-  /* Overlay loading */
   .loading-overlay {
     position: absolute; inset: 0; display: grid; place-items: center;
     background: rgba(255,255,255,.6); z-index: 5; border-radius: 1.4rem;
   }
   
-  /* --- Fix domingo pegado al borde (LTR) --- */
-  .fc .fc-daygrid-day-events { margin: 0 4px 2px; }                /* margen horizontal general */
-  .fc .fc-daygrid-event { max-width: 100%; box-sizing: border-box; }/* no se desborda */
-  .fc .fc-daygrid-day-frame { padding: 2px 4px 4px; }               /* padding más chico general */
+  .fc .fc-daygrid-day-events { margin: 0 4px 2px; }
+  .fc .fc-daygrid-event { max-width: 100%; box-sizing: border-box; }
+  .fc .fc-daygrid-day-frame { padding: 2px 4px 4px; }
 
-  /* última columna (domingo) con un poco más de aire a la derecha */
   .fc-direction-ltr .fc-daygrid-day:last-child .fc-daygrid-day-frame { padding-right: 8px; }
   .fc-direction-ltr .fc-daygrid-day:last-child .fc-daygrid-day-events { margin-right: 8px; }
 
-  /* header de domingo con aire a la derecha también */
   .fc-direction-ltr .fc-col-header-cell:last-child .fc-col-header-cell-cushion { padding-right: 8px; }
 
-  /* numerito del día: evitar que se superponga cuando hay poco ancho */
   .fc .fc-daygrid-day-top { padding: 2px 6px; gap: 2px; }
 
-  /* por las dudas, aseguramos border-box para las celdas */
   .fc .fc-daygrid-day, .fc .fc-daygrid-day-frame, .fc .fc-daygrid-event { box-sizing: border-box; }
 
   .fc .fc-scrollgrid {
-  border-bottom-left-radius: 1.4rem;
-  border-bottom-right-radius: 1.4rem;
-  overflow: hidden; /* acá sí, dentro del calendario */
-}
+    border-bottom-left-radius: 1.4rem;
+    border-bottom-right-radius: 1.4rem;
+    overflow: hidden;
+  }
 
-/* Domingo: dar aire estable, aunque se re-renderice el mes */
-.fc .fc-daygrid-day.fc-day-sun .fc-daygrid-day-frame { padding-right: 16px; }
-.fc .fc-daygrid-day.fc-day-sun .fc-daygrid-day-events { margin-right: 16px; }
-.fc .fc-col-header-cell.fc-day-sun .fc-col-header-cell-cushion { padding-right: 16px; }
+  .fc .fc-daygrid-day.fc-day-sun .fc-daygrid-day-frame { padding-right: 16px; }
+  .fc .fc-daygrid-day.fc-day-sun .fc-daygrid-day-events { margin-right: 16px; }
+  .fc .fc-col-header-cell.fc-day-sun .fc-col-header-cell-cushion { padding-right: 16px; }
 
-/* Evitar que el contenido del chip “empuje” el ancho y choque el borde */
-.event-chip { min-width: 0; }
-.event-chip .text, .event-chip .sub {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+  .event-chip { min-width: 0; }
+  .event-chip .text, .event-chip .sub {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-/* Redondeo y clipping dentro del propio grid del calendario */
-.fc .fc-scrollgrid {
-  border-bottom-left-radius: 1.4rem;
-  border-bottom-right-radius: 1.4rem;
-  overflow: hidden;
-}
-
+  .fc .fc-scrollgrid {
+    border-bottom-left-radius: 1.4rem;
+    border-bottom-right-radius: 1.4rem;
+    overflow: hidden;
+  }
 `;
 
 function MultiSelectActividades({ selected, onChange }) {
@@ -285,6 +282,16 @@ export default function Calendario() {
   const [formLotes, setFormLotes] = useState([]);
 
   const rangoRef = useRef({ startStr: null, endStr: null });
+  const calendarRef = useRef(null);
+
+  // selector mes/año
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth()); // 0-11
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [yearOptions, setYearOptions] = useState(() => {
+    const base = now.getFullYear();
+    return Array.from({ length: 5 }, (_, i) => base - 2 + i);
+  });
 
   // ======= Carga de combos =======
   useEffect(() => {
@@ -293,6 +300,7 @@ export default function Calendario() {
       .then((r) => setCampos(r.data))
       .catch(() => setCampos([]));
   }, []);
+
   useEffect(() => {
     if (!campo) {
       setLotes([]);
@@ -309,10 +317,21 @@ export default function Calendario() {
   const mapTareaToEvent = (t) => {
     const tipo = t?.tipo || "otra";
     const color = COLOR_MAP[tipo] || COLOR_MAP.otra;
-    const loteLabel = t?.lote_nombre || (t?.lote ? `Lote ${t.lote}` : "Lote");
+
+    const campoNombre = t.campo_nombre || "";
+    const loteNombre =
+      t.lote_nombre || (t?.lote ? `Lote ${t.lote}` : "Lote");
+
+    const titleBase = LABEL_MAP[tipo] || "Tarea";
+    const title = campoNombre
+      ? `${titleBase} · ${campoNombre} / ${loteNombre}`
+      : `${titleBase} · ${loteNombre}`;
+
     return {
-      id: String(t.id ?? `${tipo}-${t.fecha}-${t.lote ?? ""}-${Math.random()}`),
-      title: `${LABEL_MAP[tipo] || "Tarea"} · ${loteLabel}`,
+      id: String(
+        t.id ?? `${tipo}-${t.fecha}-${t.lote ?? ""}-${Math.random()}`
+      ),
+      title,
       start: t.fecha,
       allDay: true,
       extendedProps: {
@@ -320,24 +339,33 @@ export default function Calendario() {
         color,
         observaciones: t.observaciones || "",
         lote: t.lote,
-        lote_nombre: t.lote_nombre,
+        lote_nombre: loteNombre,
+        campo_nombre: campoNombre,
         raw: t,
       },
     };
   };
 
   const mapSiembraToEvent = (s) => {
-    const loteLabel = s?.lote_nombre || (s?.lote ? `Lote ${s.lote}` : "Lote");
+    const loteNombre =
+      s?.lote_nombre || (s?.lote ? `Lote ${s.lote}` : "Lote");
+    const campoNombre = s?.campo_nombre || "";
+    const titleBase = LABEL_MAP.siembra || "Siembra";
+    const title = campoNombre
+      ? `${titleBase} · ${campoNombre} / ${loteNombre}`
+      : `${titleBase} · ${loteNombre}`;
+
     return {
       id: `siembra-${s.id}`,
-      title: `Siembra · ${loteLabel}`,
-      start: s.fecha, // fecha de siembra
+      title,
+      start: s.fecha,
       allDay: true,
       extendedProps: {
         tipo: "siembra",
         color: COLOR_MAP.siembra,
         lote: s.lote,
-        lote_nombre: loteLabel,
+        lote_nombre: loteNombre,
+        campo_nombre: campoNombre,
         observaciones: "",
         raw: s,
       },
@@ -345,24 +373,69 @@ export default function Calendario() {
   };
 
   const mapCosechaToEvent = (c) => {
-    const loteLabel = c?.lote_nombre || (c?.lote ? `Lote ${c.lote}` : "Lote");
+    const loteNombre =
+      c?.lote_nombre || (c?.lote ? `Lote ${c.lote}` : "Lote");
+    const campoNombre = c?.campo_nombre || "";
+    const titleBase = LABEL_MAP.cosecha || "Cosecha";
+    const title = campoNombre
+      ? `${titleBase} · ${campoNombre} / ${loteNombre}`
+      : `${titleBase} · ${loteNombre}`;
+
     return {
       id: `cosecha-${c.id}`,
-      title: `Cosecha · ${loteLabel}`,
-      start: c.fecha, // fecha de cosecha
+      title,
+      start: c.fecha,
       allDay: true,
       extendedProps: {
         tipo: "cosecha",
         color: COLOR_MAP.cosecha,
         lote: c.lote,
-        lote_nombre: loteLabel,
+        lote_nombre: loteNombre,
+        campo_nombre: campoNombre,
         observaciones: c.rinde ? `Rinde: ${c.rinde}` : "",
         raw: c,
       },
     };
   };
 
-  // ======= Fetch de eventos (tareas + siembras + cosechas) =======
+  const mapAnotacionToEvent = (a) => {
+    const loteNombre =
+      a?.lote_nombre || (a?.lote ? `Lote ${a.lote}` : "Lote");
+    const campoNombre = a?.campo_nombre || "";
+    const titleBase = LABEL_MAP.anotacion || "Anotación";
+    const title = campoNombre
+      ? `${titleBase} · ${campoNombre} / ${loteNombre}`
+      : `${titleBase} · ${loteNombre}`;
+
+    const fecha = a.creado_en?.slice(0, 10); // fecha de creación
+
+    return {
+      id: `anotacion-${a.id}`,
+      title,
+      start: fecha,
+      allDay: true,
+      extendedProps: {
+        tipo: "anotacion",
+        color: COLOR_MAP.anotacion,
+        observaciones: a.texto || "",
+        lote: a.lote,
+        lote_nombre: loteNombre,
+        campo_nombre: campoNombre,
+        raw: a,
+      },
+    };
+  };
+
+  // helper de rango para distintos campos de fecha
+  const enRango = (it, field, startStr, endStr) => {
+    if (!startStr || !endStr) return true;
+    const raw = it[field];
+    if (!raw) return false;
+    const fecha = raw.slice(0, 10);
+    return fecha >= startStr && fecha < endStr;
+  };
+
+  // ======= Fetch de eventos (tareas + siembras + cosechas + anotaciones) =======
   const fetchEventos = async ({ startStr, endStr }) => {
     setLoading(true);
     setErrorTxt("");
@@ -373,30 +446,78 @@ export default function Calendario() {
       if (campo) params.campo = campo;
       if (lote) params.lote = lote;
 
-      // 1) Tareas
-      const { data: tareas } = await axios.get("/api/tareas/", { params });
-      // 2) Siembras
-      const { data: siembras } = await axios.get("/api/siembras/", { params });
-      // 3) Cosechas
-      const { data: cosechas } = await axios.get("/api/cosechas/", { params });
+      // 1) Tareas, Siembras, Cosechas (filtradas por backend + usuario)
+      const [tRes, sRes, cRes] = await Promise.all([
+        axios.get("/api/tareas/", { params }),
+        axios.get("/api/siembras/", { params }),
+        axios.get("/api/cosechas/", { params }),
+      ]);
 
-      const enRango = (it) =>
-        !startStr || !endStr ? true : it.fecha >= startStr && it.fecha < endStr;
+      const tareas = Array.isArray(tRes.data) ? tRes.data : [];
+      const siembras = Array.isArray(sRes.data) ? sRes.data : [];
+      const cosechas = Array.isArray(cRes.data) ? cRes.data : [];
 
-      const eventosTareas = (Array.isArray(tareas) ? tareas : [])
-        .filter(enRango)
+      // 2) Anotaciones de lotes
+      let anotaciones = [];
+      try {
+        let loteIds = [];
+
+        if (lote) {
+          // filtro por un lote puntual
+          loteIds = [lote];
+        } else if (campo) {
+          // filtro por todos los lotes de un campo
+          const { data: lotesCampo } = await axios.get(
+            `/api/lotes/por-campo/${campo}/`
+          );
+          loteIds = (Array.isArray(lotesCampo) ? lotesCampo : []).map(
+            (l) => l.id
+          );
+        } else {
+          // Campo = Todos, Lote = Todos -> TODOS los lotes del usuario
+          const { data: lotesUsuario } = await axios.get("/api/lotes/");
+          loteIds = (Array.isArray(lotesUsuario) ? lotesUsuario : []).map(
+            (l) => l.id
+          );
+        }
+
+        if (loteIds.length) {
+          const anotPromises = loteIds.map((id) =>
+            axios
+              .get(`/api/lotes/${id}/anotaciones/`)
+              .then((r) => r.data)
+              .catch(() => [])
+          );
+          const anotArrays = await Promise.all(anotPromises);
+          anotaciones = anotArrays.flat();
+        }
+      } catch (err) {
+        console.error("Error cargando anotaciones:", err);
+      }
+
+      const eventosTareas = tareas
+        .filter((t) => enRango(t, "fecha", startStr, endStr))
         .filter((t) => filtroActividades.has(t.tipo || "otra"))
         .map(mapTareaToEvent);
 
-      const eventosSiembras = (Array.isArray(siembras) ? siembras : [])
-        .filter(enRango)
+      const eventosSiembras = siembras
+        .filter((s) => enRango(s, "fecha", startStr, endStr))
         .map(mapSiembraToEvent);
 
-      const eventosCosechas = (Array.isArray(cosechas) ? cosechas : [])
-        .filter(enRango)
+      const eventosCosechas = cosechas
+        .filter((c) => enRango(c, "fecha", startStr, endStr))
         .map(mapCosechaToEvent);
 
-      setEventos([...eventosTareas, ...eventosSiembras, ...eventosCosechas]);
+      const eventosAnotaciones = anotaciones
+        .filter((a) => enRango(a, "creado_en", startStr, endStr))
+        .map(mapAnotacionToEvent);
+
+      setEventos([
+        ...eventosTareas,
+        ...eventosSiembras,
+        ...eventosCosechas,
+        ...eventosAnotaciones,
+      ]);
     } catch (err) {
       const msg = err?.response?.data
         ? typeof err.response.data === "string"
@@ -410,7 +531,14 @@ export default function Calendario() {
     }
   };
 
-  // ======= Eventos filtrados =======
+  // 🔁 Cada vez que cambia CAMPO o LOTE, recargo eventos con ese filtro
+  useEffect(() => {
+    if (rangoRef.current.startStr) {
+      fetchEventos(rangoRef.current);
+    }
+  }, [campo, lote]);
+
+  // ======= Eventos filtrados por tipo (checkbox de actividades) =======
   const eventosFiltrados = useMemo(
     () =>
       eventos.filter((ev) =>
@@ -424,10 +552,46 @@ export default function Calendario() {
     const startStr = arg?.startStr?.slice(0, 10);
     const endStr = arg?.endStr?.slice(0, 10);
     rangoRef.current = { startStr, endStr };
+
+    // calcular "mes visible" tomando una fecha intermedia del rango
+    if (arg.start) {
+      const midTime =
+        arg.start.getTime() + 20 * 24 * 60 * 60 * 1000; // +20 días aprox
+      const midDate = new Date(midTime);
+      const y = midDate.getFullYear();
+      const m = midDate.getMonth();
+      setSelectedYear(y);
+      setSelectedMonth(m);
+      // actualizar opciones de año centradas en el año actual de vista
+      setYearOptions(
+        Array.from({ length: 5 }, (_, i) => y - 2 + i)
+      );
+    }
+
     fetchEventos({ startStr, endStr });
   };
 
   const handleRefresh = () => fetchEventos(rangoRef.current || {});
+
+  // ======= Handlers mes / año =======
+  const gotoSelectedDate = (year, month) => {
+    const api = calendarRef.current?.getApi();
+    if (!api || !year && year !== 0 || !month && month !== 0) return;
+    const date = new Date(year, month, 1);
+    api.gotoDate(date);
+  };
+
+  const handleMonthChange = (e) => {
+    const newMonth = parseInt(e.target.value, 10);
+    setSelectedMonth(newMonth);
+    gotoSelectedDate(selectedYear, newMonth);
+  };
+
+  const handleYearChange = (e) => {
+    const newYear = parseInt(e.target.value, 10);
+    setSelectedYear(newYear);
+    gotoSelectedDate(newYear, selectedMonth);
+  };
 
   // ======= Helpers UI =======
   const renderEventContent = (info) => {
@@ -532,8 +696,8 @@ export default function Calendario() {
         borderRadius: "1.4rem",
         border: "none",
         overflow: "visible",
-        transform: "none",       
-        transition: "none"
+        transform: "none",
+        transition: "none",
       }}
     >
       <style>{styles}</style>
@@ -573,14 +737,16 @@ export default function Calendario() {
               ))}
             </Form.Select>
           </Col>
-          <Col md={4} className="d-flex gap-2 justify-content-md-end">
-            <MultiSelectActividades
-              selected={filtroActividades}
-              onChange={setFiltroActividades}
-            />
-            <Button variant="success" onClick={() => openForm({})}>
-              + Nuevo
-            </Button>
+          <Col md={4} className="d-flex flex-column align-items-md-end gap-2">
+            <div className="d-flex gap-2 w-100 justify-content-md-end">
+              <MultiSelectActividades
+                selected={filtroActividades}
+                onChange={setFiltroActividades}
+              />
+              <Button variant="success" onClick={() => openForm({})}>
+                + Nuevo
+              </Button>
+            </div>
           </Col>
         </Row>
 
@@ -629,7 +795,9 @@ export default function Calendario() {
             </div>
           )}
 
-          {/* Calendario envuelto para conservar esquinas redondeadas abajo */}
+         
+
+          {/* Calendario */}
           <div className="px-3">
             <div
               style={{
@@ -638,6 +806,7 @@ export default function Calendario() {
               }}
             >
               <FullCalendar
+                ref={calendarRef}
                 plugins={[dayGridPlugin, interactionPlugin]}
                 initialView="dayGridMonth"
                 height="auto"
@@ -649,6 +818,9 @@ export default function Calendario() {
                   left: "prev,next today",
                   center: "title",
                   right: "",
+                }}
+                buttonText={{
+                  today: "Hoy", // ← traducido
                 }}
                 events={eventosFiltrados}
                 datesSet={onDatesSet}
@@ -663,6 +835,7 @@ export default function Calendario() {
                       info.event.extendedProps?.observaciones || "",
                     lote: info.event.extendedProps?.lote,
                     lote_nombre: info.event.extendedProps?.lote_nombre,
+                    campo_nombre: info.event.extendedProps?.campo_nombre,
                     raw: info.event.extendedProps?.raw,
                   });
                 }}
@@ -673,7 +846,7 @@ export default function Calendario() {
             </div>
           </div>
 
-          {/* Empty state visual cuando no hay eventos filtrados */}
+          {/* Empty state */}
           {!loading && eventosFiltrados.length === 0 && (
             <div className="text-center py-5">
               <div className="mb-2">
@@ -706,7 +879,7 @@ export default function Calendario() {
         </div>
       </Card.Body>
 
-      {/* Modal detalle (header temático) */}
+      {/* Modal detalle */}
       <Modal show={!!detalle} onHide={() => setDetalle(null)} centered>
         <Modal.Header closeButton style={headerStyle(detalle?.tipo || "otra")}>
           <Modal.Title className="d-flex align-items-center gap-2">
@@ -723,12 +896,12 @@ export default function Calendario() {
             {detalle?.fecha || "-"}
           </p>
           <p className="mb-1">
+            <strong>Campo: </strong>
+            {detalle?.campo_nombre || detalle?.raw?.campo_nombre || "-"}
+          </p>
+          <p className="mb-1">
             <strong>Lote: </strong>
-            {detalle?.lote_nombre
-              ? detalle.lote_nombre
-              : detalle?.lote
-              ? `#${detalle.lote}`
-              : "-"}
+            {detalle?.lote_nombre || "-"}
           </p>
           <p className="mb-0">
             <strong>Observaciones: </strong>
@@ -742,9 +915,10 @@ export default function Calendario() {
               openForm({
                 dateStr: detalle?.fecha,
                 presetCampo: campo,
-                presetLote: detalle?.lote || lote || "",
+                presetLote: detalle?.raw?.lote || lote || "",
                 presetTipo:
-                  detalle?.tipo && ["siembra", "cosecha"].includes(detalle.tipo)
+                  detalle?.tipo &&
+                    ["siembra", "cosecha"].includes(detalle.tipo)
                     ? "otra"
                     : detalle?.tipo || "otra",
               });

@@ -9,7 +9,11 @@ class ReporteSerializer(serializers.ModelSerializer):
         model = Reporte
         fields = "__all__"
 
+
 class AnotacionSerializer(serializers.ModelSerializer):
+    lote_nombre = serializers.CharField(source="lote.nombre", read_only=True)
+    campo_nombre = serializers.CharField(source="lote.campo.nombre", read_only=True)
+
     class Meta:
         model = Anotacion
         fields = "__all__"

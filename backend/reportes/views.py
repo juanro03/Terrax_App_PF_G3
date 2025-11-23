@@ -59,6 +59,27 @@ class LoteAnotacionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        user = self.request.user
+
+        # Base: solo anotaciones creadas por este usuario
+        qs = Anotacion.objects.select_related("lote", "lote__campo")
+        if getattr(user, "rol", None) != "admin":
+            qs = qs.filter(creado_por=user)
+
+        # Filtro opcional por lote (cuando el endpoint es /lotes/<id>/anotaciones/)
+        lote_pk = self.kwargs.get("lote_pk") or self.request.query_params.get("lote")
+        if lote_pk:
+            qs = qs.filter(lote_id=lote_pk)
+
+        return qs.order_by("creado_en")
+
+    """
+    /api/lotes/<lote_pk>/anotaciones/
+    """
+    serializer_class = AnotacionSerializer
+    "permission_classes = [IsAuthenticated]"
+
+    def get_queryset(self):
         qs = Anotacion.objects.all()
         lote_pk = self.kwargs.get("lote_pk") or self.request.query_params.get("lote")
         if lote_pk:
