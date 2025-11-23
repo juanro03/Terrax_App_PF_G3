@@ -136,7 +136,7 @@ class SolicitarServicioView(APIView):
                 subject="Nueva solicitud de servicio",
                 message=plain_message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=['mati992008@gmail.com'],  # ajustar destinatarios
+                recipient_list=['terrax.jj@gmail.com'],  # ajustar destinatarios
                 fail_silently=False,
                 html_message=html_content
             )
