@@ -16,6 +16,7 @@ import ProductoForm from "./components/Productos/ProductosForm";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-draw";
+import Estadisticas from "./components/Estadisticas/Estadisticas";
 import VerLotesWrapper from "./components/lotes/VerLotesWrapper";
 import ResetPassword from "./components/Auth/ResetPassword";
 import DetalleLote from "./components/DetalleLote/DetalleLote";
@@ -87,6 +88,7 @@ function AppContent() {
               </AdminRoute>
             }
           />
+          <Route path="/estadisticas" element={<Estadisticas />} />
         </Routes>
       </div>
     </div>

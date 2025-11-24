@@ -157,6 +157,14 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 to="/alertas"
               />
             )}
+            {usuario.rol === "productor" && (
+              <SidebarItem
+                icon={<i class="bi bi-bar-chart-line"></i>}
+                label="Mis Estadísticas"
+                isOpen={isOpen}
+                to="/estadisticas"
+              />
+            )}
             <SidebarItem
               icon={<FlaskConical size={18} />}
               label="Calculadora"

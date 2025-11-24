@@ -34,3 +34,4 @@ class UnverifiedTLSEmailBackend(EmailBackend):
             self.connection.login(self.username, self.password)
 
         return True
+# Nota: Asegurarse de configurar EMAIL_BACKEND en settings.py para usar este backend

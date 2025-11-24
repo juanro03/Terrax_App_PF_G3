@@ -4,7 +4,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 # Serializer para login con email
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    username_field = 'email' 
+    username_field = 'email'
 
     @classmethod
     def get_token(cls, user):
@@ -18,9 +18,21 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'password', 'imagen_perfil', 'rol', 'is_active']
+        fields = [
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'password',
+            'imagen_perfil',
+            'rol',
+            'is_active',
+            'fecha_alta',      # 👈 NUEVO: la mandamos al frontend
+        ]
         extra_kwargs = {
-            'password': {'write_only': True}
+            'password': {'write_only': True},
+            'fecha_alta': {'read_only': True},  # 👈 para que no la seteen desde el frontend
         }
 
     def create(self, validated_data):
