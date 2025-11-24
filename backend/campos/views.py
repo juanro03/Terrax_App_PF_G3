@@ -1,19 +1,21 @@
 # backend/campos/views.py
 from rest_framework import viewsets
-from .models import Campo, Servicio     # <-- Servicio aquí debe estar definido en models.py
+from .models import Campo, Servicio
 from .serializers import CampoSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
+from email.mime.image import MIMEImage
 from datetime import date
+
 
 class CampoViewSet(viewsets.ModelViewSet):
     queryset = Campo.objects.all()
     serializer_class = CampoSerializer
-    permission_classes = [AllowAny]  # cambiar a IsAuthenticated en producción si corresponde
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         user = self.request.user
@@ -49,27 +51,23 @@ class MisCamposView(APIView):
 
 
 class SolicitarServicioView(APIView):
-    # Requiere que el usuario esté autenticado para poder asociar la solicitud.
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        # datos desde frontend
         campo_id = request.data.get('campo')
         tipo_tarea = request.data.get('tipoTarea')
         fecha_inicio = request.data.get('fechaInicio')
         fecha_fin = request.data.get('fechaFin')
         observaciones = request.data.get('observaciones', "")
 
-        # validación básica de presencia
         if not campo_id or not tipo_tarea or not fecha_inicio or not fecha_fin:
             return Response({"error": "Faltan datos"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # validar existencia de campo y permisos
         try:
             campo = Campo.objects.get(id=campo_id)
-            # si no es admin, el campo debe ser del usuario
             if getattr(request.user, "rol", None) != "admin" and campo.propietario != request.user:
-                return Response({"error": "No tiene permiso para solicitar servicio en este campo."}, status=status.HTTP_403_FORBIDDEN)
+                return Response({"error": "No tiene permiso para solicitar servicio en este campo."},
+                                status=status.HTTP_403_FORBIDDEN)
         except Campo.DoesNotExist:
             return Response({"error": "El campo no existe"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -79,17 +77,19 @@ class SolicitarServicioView(APIView):
             fecha_inicio_obj = date.fromisoformat(fecha_inicio)
             fecha_fin_obj = date.fromisoformat(fecha_fin)
         except ValueError:
-            return Response({"error": "Formato de fecha inválido. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Formato de fecha inválido. Use YYYY-MM-DD."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         if fecha_inicio_obj < today or fecha_fin_obj < today:
-            return Response({"error": "Las fechas no pueden ser anteriores a hoy"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Las fechas no pueden ser anteriores a hoy"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         if fecha_fin_obj < fecha_inicio_obj:
-            return Response({"error": "La fecha fin no puede ser anterior a la fecha inicio"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "La fecha fin no puede ser anterior a la fecha inicio"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        # Crear registro en la BD (si tenés el modelo Servicio con estos campos)
+        # Crear registro en BD
         try:
-            # Ajustá los nombres de campo si tu modelo Servicio tiene otros nombres
             servicio = Servicio.objects.create(
                 usuario=request.user,
                 campo=campo,
@@ -98,51 +98,91 @@ class SolicitarServicioView(APIView):
                 fecha_fin=fecha_fin_obj,
                 observaciones=observaciones
             )
-        except Exception as e:
-            # si no tenés Servicio o falló, lo logueamos y seguimos (no rompemos el envío de mail)
-            # print("Error al guardar Servicio:", e)
+        except Exception:
             servicio = None
 
-        # Preparar email (texto plano y html)
-        plain_message = (
-            f"Usuario: {request.user.username} ({request.user.email})\n"
+        # ===========================
+        # EMAIL
+        # ===========================
+
+        # destinatario: propietario del campo
+        email_destino = campo.propietario.email if campo.propietario else None
+        if not email_destino:
+            return Response({"error": "El campo no tiene propietario con email válido."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # texto plano
+        plain_text = (
+            f"Nueva Solicitud de Servicio\n\n"
+            f"Usuario: {request.user.get_full_name() or request.user.username} ({request.user.email})\n"
             f"Campo: {campo.nombre}\n"
             f"Tarea: {tipo_tarea}\n"
             f"Fecha inicio: {fecha_inicio}\n"
             f"Fecha fin: {fecha_fin}\n"
+            + (f"Observaciones: {observaciones}\n" if observaciones else "")
         )
-        if observaciones:
-            plain_message += f"Observaciones: {observaciones}\n"
 
+        # HTML con logo
         html_content = f"""
         <html>
         <body style="font-family: Arial, sans-serif; color: #333;">
-            <h2 style="color: #4CAF50;">Nueva Solicitud de Servicio</h2>
+            <div style="max-width: 640px; margin: 0 auto; padding: 16px; border-radius: 12px; border: 1px solid #e0e0e0; background: #f9faf9;">
+
+            <div style="text-align: center; margin-bottom: 16px;">
+                <img src="cid:logo"
+                    style="display: block; margin: 0 auto 8px auto; max-width: 320px; width: 100%; height: auto;"
+                    alt="Terrax"/>
+            </div>
+
+            <h2 style="color: #155a36; text-align: center; margin-bottom: 8px;">
+                Nueva Solicitud de Servicio
+            </h2>
+
             <p><strong>Usuario:</strong> {request.user.get_full_name() or request.user.username} ({request.user.email})</p>
             <p><strong>Campo:</strong> {campo.nombre}</p>
-            <p><strong>Tarea:</strong> {tipo_tarea}</p>
+            <p><strong>Tarea solicitada:</strong> {tipo_tarea}</p>
             <p><strong>Fecha de inicio:</strong> {fecha_inicio}</p>
             <p><strong>Fecha de fin:</strong> {fecha_fin}</p>
+
             {f"<p><strong>Observaciones:</strong> {observaciones}</p>" if observaciones else ""}
-            <hr>
-            <p style="font-size: 12px; color: #777;">Este es un mensaje automático, no responder.</p>
+
+            <hr style="margin: 20px 0;" />
+
+            <p style="font-size: 12px; color: #777; text-align: center;">
+                Este es un mensaje automático generado por Terrax. Por favor, no respondas a este correo.
+            </p>
+
+            </div>
         </body>
         </html>
         """
 
-        # enviar correo
-        try:
-            send_mail(
-                subject="Nueva solicitud de servicio",
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=['terrax.jj@gmail.com'],  # ajustar destinatarios
-                fail_silently=False,
-                html_message=html_content
-            )
-        except Exception as e:
-            # si el envío falla podes devolver un 500 o un 200 con mensaje de fallo de envío.
-            return Response({"error": "Error al enviar correo", "detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # Construcción EmailMultiAlternatives
+        msg = EmailMultiAlternatives(
+            subject="Nueva solicitud de servicio",
+            body=plain_text,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[email_destino],
+        )
 
-        # todo OK
+        msg.attach_alternative(html_content, "text/html")
+
+        # adjuntar logo embebido
+        try:
+            logo_path = settings.BASE_DIR / "campos" / "static"/ "img" / "logo.png"
+            with open(logo_path, "rb") as f:
+                logo = MIMEImage(f.read())
+            logo.add_header("Content-ID", "<logo>")
+            logo.add_header("Content-Disposition", "inline", filename="logo.png")
+            msg.attach(logo)
+        except FileNotFoundError:
+            pass
+
+        try:
+            msg.send(fail_silently=False)
+        except Exception as e:
+            return Response({"error": "Error al enviar correo", "detail": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         return Response({"mensaje": "Solicitud enviada con éxito"}, status=status.HTTP_200_OK)
+
