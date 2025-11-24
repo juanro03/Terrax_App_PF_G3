@@ -10,6 +10,9 @@ from django.core.mail import send_mail
 from django.conf import settings
 from datetime import date
 
+from django.core.mail import EmailMultiAlternatives
+from email.mime.image import MIMEImage
+
 class CampoViewSet(viewsets.ModelViewSet):
     queryset = Campo.objects.all()
     serializer_class = CampoSerializer
@@ -98,51 +101,87 @@ class SolicitarServicioView(APIView):
                 fecha_fin=fecha_fin_obj,
                 observaciones=observaciones
             )
-        except Exception as e:
-            # si no tenés Servicio o falló, lo logueamos y seguimos (no rompemos el envío de mail)
-            # print("Error al guardar Servicio:", e)
+        except Exception:
             servicio = None
 
-        # Preparar email (texto plano y html)
-        plain_message = (
-            f"Usuario: {request.user.username} ({request.user.email})\n"
+        # ===========================
+        # EMAIL
+        # ===========================
+
+        # destinatario: propietario del campo
+        email_destino = "terrax.jj@gmail.com"
+
+        # texto plano
+        plain_text = (
+            f"Nueva Solicitud de Servicio\n\n"
+            f"Usuario: {request.user.get_full_name() or request.user.username} ({request.user.email})\n"
             f"Campo: {campo.nombre}\n"
             f"Tarea: {tipo_tarea}\n"
             f"Fecha inicio: {fecha_inicio}\n"
             f"Fecha fin: {fecha_fin}\n"
+            + (f"Observaciones: {observaciones}\n" if observaciones else "")
         )
-        if observaciones:
-            plain_message += f"Observaciones: {observaciones}\n"
 
+        # HTML con logo
         html_content = f"""
         <html>
         <body style="font-family: Arial, sans-serif; color: #333;">
-            <h2 style="color: #4CAF50;">Nueva Solicitud de Servicio</h2>
+            <div style="max-width: 640px; margin: 0 auto; padding: 16px; border-radius: 12px; border: 1px solid #e0e0e0; background: #f9faf9;">
+
+            <div style="text-align: center; margin-bottom: 16px;">
+                <img src="cid:logo"
+                    style="display: block; margin: 0 auto 8px auto; max-width: 320px; width: 100%; height: auto;"
+                    alt="Terrax"/>
+            </div>
+
+            <h2 style="color: #155a36; text-align: center; margin-bottom: 8px;">
+                Nueva Solicitud de Servicio
+            </h2>
+
             <p><strong>Usuario:</strong> {request.user.get_full_name() or request.user.username} ({request.user.email})</p>
             <p><strong>Campo:</strong> {campo.nombre}</p>
-            <p><strong>Tarea:</strong> {tipo_tarea}</p>
+            <p><strong>Tarea solicitada:</strong> {tipo_tarea}</p>
             <p><strong>Fecha de inicio:</strong> {fecha_inicio}</p>
             <p><strong>Fecha de fin:</strong> {fecha_fin}</p>
+
             {f"<p><strong>Observaciones:</strong> {observaciones}</p>" if observaciones else ""}
-            <hr>
-            <p style="font-size: 12px; color: #777;">Este es un mensaje automático, no responder.</p>
+
+            <hr style="margin: 20px 0;" />
+
+            <p style="font-size: 12px; color: #777; text-align: center;">
+                Este es un mensaje automático generado por Terrax. Por favor, no respondas a este correo.
+            </p>
+
+            </div>
         </body>
         </html>
         """
 
-        # enviar correo
-        try:
-            send_mail(
-                subject="Nueva solicitud de servicio",
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=['mati992008@gmail.com'],  # ajustar destinatarios
-                fail_silently=False,
-                html_message=html_content
-            )
-        except Exception as e:
-            # si el envío falla podes devolver un 500 o un 200 con mensaje de fallo de envío.
-            return Response({"error": "Error al enviar correo", "detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # Construcción EmailMultiAlternatives
+        msg = EmailMultiAlternatives(
+            subject="Nueva solicitud de servicio",
+            body=plain_text,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[email_destino],
+        )
 
-        # todo OK
+        msg.attach_alternative(html_content, "text/html")
+
+        # adjuntar logo embebido
+        try:
+            logo_path = settings.BASE_DIR / "campos" / "static"/ "img" / "logo.png"
+            with open(logo_path, "rb") as f:
+                logo = MIMEImage(f.read())
+            logo.add_header("Content-ID", "<logo>")
+            logo.add_header("Content-Disposition", "inline", filename="logo.png")
+            msg.attach(logo)
+        except FileNotFoundError:
+            pass
+
+        try:
+            msg.send(fail_silently=False)
+        except Exception as e:
+            return Response({"error": "Error al enviar correo", "detail": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         return Response({"mensaje": "Solicitud enviada con éxito"}, status=status.HTTP_200_OK)
