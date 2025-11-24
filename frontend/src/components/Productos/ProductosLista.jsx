@@ -25,6 +25,8 @@ const ProductosLista = () => {
   const [error, setError] = useState("");
   const [categoriaSeleccionada, setCategoriaSeleccionada] =
     useState("COADYUVANTES");
+  const [productoAEliminar, setProductoAEliminar] = useState(null);
+
 
   const navigate = useNavigate();
 
@@ -44,23 +46,37 @@ const ProductosLista = () => {
       });
   }, []);
 
-  const handleEliminar = async (id) => {
-    const confirmacion = window.confirm(
-      "¿Estás seguro que deseas eliminar este producto?"
-    );
-    if (!confirmacion) return;
+  // pedir confirmación para eliminar (sin window.confirm)
+  const handleEliminar = (producto) => {
+    setProductoAEliminar(producto);
+  };
+
+  const confirmarEliminar = async () => {
+    if (!productoAEliminar) return;
 
     const token = localStorage.getItem("accessToken");
     try {
-      await axios.delete(`http://localhost:8000/api/productos/${id}/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setProductos((prev) => prev.filter((p) => p.id !== id));
+      await axios.delete(
+        `http://localhost:8000/api/productos/${productoAEliminar.id}/`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setProductos((prev) =>
+        prev.filter((p) => p.id !== productoAEliminar.id)
+      );
     } catch (err) {
       console.error("Error al eliminar el producto", err);
       alert("No se pudo eliminar el producto.");
+    } finally {
+      setProductoAEliminar(null);
     }
   };
+
+  const cancelarEliminar = () => {
+    setProductoAEliminar(null);
+  };
+
 
   const productosFiltrados = productos.filter(
     (prod) => prod.categoria === categoriaSeleccionada
@@ -80,9 +96,9 @@ const ProductosLista = () => {
     >
       <Card.Body>
         {/* Título */}
-        <Card.Title className="fw-bold mb-4" style={{ 
+        <Card.Title className="fw-bold mb-4" style={{
           color: verdeOscuro,
-          }}>
+        }}>
           Mis Productos — {categoriaSeleccionada}
         </Card.Title>
 
@@ -160,7 +176,7 @@ const ProductosLista = () => {
                 <Button
                   variant="outline-success"
                   size="sm"
-                  className="rounded-pill d-inline-flex align-items-center"
+                  className="d-inline-flex align-items-center"
                   style={{ fontWeight: "bold", borderColor: verde }}
                   onClick={() => navigate("/productos")}
                 >
@@ -195,7 +211,6 @@ const ProductosLista = () => {
                   <div className="d-flex justify-content-center gap-3">
                     <Button
                       variant="outline-success"
-                      className="rounded-pill px-4"
                       style={{ fontWeight: "bold", borderColor: verde }}
                       onClick={() => navigate("/productos")}
                     >
@@ -203,7 +218,6 @@ const ProductosLista = () => {
                     </Button>
                     <Button
                       variant="success"
-                      className="rounded-pill px-4"
                       style={{
                         fontWeight: "bold",
                         backgroundColor: verde,
@@ -285,10 +299,9 @@ const ProductosLista = () => {
                               <Button
                                 variant="outline-danger"
                                 size="sm"
-                                className="rounded-pill"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleEliminar(prod.id);
+                                  handleEliminar(prod);
                                 }}
                               >
                                 <FaTrash className="me-1" /> Eliminar
@@ -305,17 +318,17 @@ const ProductosLista = () => {
                     <Col className="d-flex justify-content-end gap-3">
                       <Button
                         variant="outline-success"
-                        className="rounded-pill px-4 shadow-sm d-flex align-items-center"
+                        className="px-4 shadow-sm d-flex align-items-center"
                         style={{ fontWeight: "bold", borderColor: verde }}
                         onClick={() => navigate("/productos/inicio")}
                       >
-                        <i className="bi bi-house-door me-2"></i> Inicio
-                        Productos
+                        <i className="bi bi-house-door me-2"></i> 
+                        Inicio Productos
                       </Button>
 
                       <Button
                         variant="success"
-                        className="rounded-pill px-4 shadow-sm d-flex align-items-center"
+                        className="px-4 shadow-sm d-flex align-items-center"
                         style={{
                           fontWeight: "bold",
                           backgroundColor: verde,
@@ -323,8 +336,8 @@ const ProductosLista = () => {
                         }}
                         onClick={() => navigate("/productos/agregar")}
                       >
-                        <i className="bi bi-plus-circle me-2"></i> Agregar
-                        producto
+                        <i className="bi bi-plus-circle me-2"></i> 
+                        Agregar producto
                       </Button>
                     </Col>
                   </Row>
@@ -333,6 +346,39 @@ const ProductosLista = () => {
             </div>
           </Col>
         </Row>
+
+        {productoAEliminar && (
+          <div className="confirm-overlay">
+            <div className="confirm-card p-4">
+              <h5 className="fw-bold mb-2">
+                ¿Seguro que desea eliminar el producto "
+                {productoAEliminar.nombre ||
+                  productoAEliminar.cultivo ||
+                  "sin nombre"}
+                "?
+              </h5>
+              <p className="mb-2">
+                Esta acción es irreversible y eliminará el producto de tu listado.
+              </p>
+
+              <div className="d-flex justify-content-end gap-2 mt-3">
+                <button
+                  className="btn btn-outline-secondary"
+                  onClick={cancelarEliminar}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={confirmarEliminar}
+                >
+                  Sí, eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </Card.Body>
     </Card>
   );

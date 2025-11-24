@@ -261,3 +261,12 @@ body,
 .leaflet-draw-tooltip {
   z-index: 999999 !important;
 }
+
+/* === Desactivar zoom en tarjetas que lo necesiten === */
+.no-zoom-card,
+.no-zoom-card:hover,
+.no-zoom-card:focus,
+.no-zoom-card:active {
+  transform: none !important;
+  transition: none !important;
+}

@@ -89,12 +89,8 @@ export default function SolicitarServicio({ onClose }) {
             disabled={!campo}
           >
             <option value="">Seleccione una opción</option>
-            <option value="Cobertura">Cobertura</option>
-            <option value="Cosecha">Cosecha</option>
             <option value="Fertilización">Fertilización</option>
-            <option value="Manejo de suelo">Manejo de suelo</option>
             <option value="Pulverización">Pulverización</option>
-            <option value="Riego">Riego</option>
             <option value="Siembra">Siembra</option>
           </select>
 

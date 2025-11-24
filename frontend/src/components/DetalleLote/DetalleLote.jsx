@@ -518,7 +518,7 @@ const DetalleLote = () => {
         </nav>
 
         <div className="ms-auto d-flex align-items-center gap-2">
-          <button className="btn btn-success">Actual</button>
+          <button className="btn btn-outline-success">Actual</button>
           <button
             className="btn btn-outline-success"
             onClick={() => {

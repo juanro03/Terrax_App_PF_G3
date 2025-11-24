@@ -156,6 +156,8 @@ const Calculadora = () => {
         background: "#fff",
         borderRadius: "1.4rem",
         border: "none",
+        transform: "none",
+        transition: "none",
       }}
     >
       <Card.Body>
@@ -221,9 +223,12 @@ const Calculadora = () => {
         </Form>
 
         {/* TABS */}
-        <Tabs defaultActiveKey="liquidos" className="mb-3">
+        <Tabs defaultActiveKey="liquidos" className="mb-3 calculadora-tabs">
           {/* TAB LÍQUIDOS */}
-          <Tab eventKey="liquidos" title="Líquidos">
+          <Tab
+            eventKey="liquidos"
+            title={<span style={{ color: "#000000" }}>Líquidos</span>}
+          >
             <Row className="mb-4">
               <Col md={6}>
                 <h5 style={{ color: verdeOscuro }}>Productos utilizados</h5>
@@ -346,7 +351,7 @@ const Calculadora = () => {
               </Col>
 
               <Col md={6}>
-                <h5 style={{ color: verdeOscuro }}>Resumen automático</h5>
+                <h5 style={{ color: verdeOscuro }}>Resúmen automático</h5>
 
                 <Table size="sm" bordered>
                   <thead>
@@ -542,7 +547,7 @@ const Calculadora = () => {
             <Row>
               <Col className="text-end">
                 <Button
-                  className="btn btn-outline-success"
+                  className="btn btn-success"
                   onClick={limpiarRegistros}
                 >
                   Limpiar registros
@@ -552,7 +557,10 @@ const Calculadora = () => {
           </Tab>
 
           {/* TAB SÓLIDOS */}
-          <Tab eventKey="solidos" title="Sólidos">
+          <Tab
+            eventKey="solidos"
+            title={<span style={{ color: "#000000" }}>Sólidos</span>}
+          >
             <Row className="mb-4">
               <Col md={6}>
                 <h5 style={{ color: verdeOscuro }}>Insumos sólidos</h5>
@@ -711,7 +719,7 @@ const Calculadora = () => {
             <Row>
               <Col className="text-end">
                 <Button
-                  className="btn btn-outline-success"
+                  className="btn btn-success"
                   onClick={limpiarRegistros}
                 >
                   Limpiar registros
@@ -721,8 +729,10 @@ const Calculadora = () => {
           </Tab>
 
           {/* TAB OBSERVACIONES */}
-          <Tab eventKey="observaciones" title="Observaciones">
-            <Card className="mb-4">
+          <Tab
+            eventKey="observaciones"
+            title={<span style={{ color: "#000000" }}>Observaciones</span>}
+          >            <Card className="mb-4">
               <Card.Body>
                 <h5 style={{ color: verdeOscuro }}>Observaciones</h5>
 

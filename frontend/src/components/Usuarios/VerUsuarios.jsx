@@ -14,6 +14,7 @@ import ModalNotificarUsuario from "./ModalNotificarUsuario";
 
 const VerUsuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
+  const [usuarioActual, setUsuarioActual] = useState(null);
   const [showImgModal, setShowImgModal] = useState(false);
   const [showPassModal, setShowPassModal] = useState(false);
   const [showCrearModal, setShowCrearModal] = useState(false);
@@ -29,6 +30,7 @@ const VerUsuarios = () => {
 
   useEffect(() => {
     fetchUsuarios();
+    fetchUsuarioActual();
   }, []);
 
   const fetchUsuarios = async () => {
@@ -40,7 +42,17 @@ const VerUsuarios = () => {
     }
   };
 
-  const handleDesactivar = async (id) => {{
+  const fetchUsuarioActual = async () => {
+    try {
+      const response = await axios.get("/api/usuarios/me/");
+      setUsuarioActual(response.data);   // { id, email, rol, ... }
+    } catch (error) {
+      console.error("Error al obtener usuario actual:", error);
+    }
+  };
+
+  const handleDesactivar = async (id) => {
+    {
       try {
         await axios.patch(`/api/usuarios/${id}/desactivar/`);
         setUsuarios(u => u.map(x =>
@@ -102,12 +114,14 @@ const VerUsuarios = () => {
             type="text"
             className="form-control form-control-sm"
             style={{
-              height: "32px",
-              backgroundColor: "#d1fae5",
-              width: "450px",
+              height: "38px",
+              backgroundColor: "#ffffffff",
+              width: "400px",
               marginLeft: 100,
               marginTop: 0,
               marginBottom: 0,
+              border: "1px solid #3d3d3dff",
+
             }}
             placeholder="Buscar nombre o usuario"
             value={filtroBusqueda}
@@ -115,8 +129,13 @@ const VerUsuarios = () => {
           />
 
           <select
-            className="form-select form-select-sm"
-            style={{ width: "150px", height: "32px", backgroundColor: "#d1fae5", }}
+            className="form-select form-select"
+            style={{
+              width: "160px",
+              backgroundColor: "#ffffffff",
+              border: "1px solid #3d3d3dff",
+
+            }}
             value={filtroRol}
             onChange={(e) => setFiltroRol(e.target.value)}
           >
@@ -125,18 +144,13 @@ const VerUsuarios = () => {
             <option value="productor">Productor</option>
           </select>
 
-          <button
-            className="btn btn-outline-secondary btn-sm"
-            onClick={limpiarFiltros}
-          >
-            Limpiar
-          </button>
+
         </div>
 
         {/* Derecha: Botón agregar */}
         <button
           onClick={() => setShowCrearModal(true)}
-          className="btn btn-success fw-bold btn-sm"
+          className="btn btn-success fw-bold"
           style={{ whiteSpace: "nowrap" }}
         >
           + Agregar Usuario
@@ -200,12 +214,12 @@ const VerUsuarios = () => {
                 <p
                   onClick={() => abrirModalPassword(user)}
                   style={{
-                    color: "#0d6efd",
+                    color: "#006015ff",
                     cursor: "pointer",
                     textDecoration: "underline",
                   }}
                 >
-                  Modificar contraseña
+                  Reestablecer contraseña
                 </p>
               </div>
               <div className="card-footer d-flex justify-content-around">
@@ -238,22 +252,37 @@ const VerUsuarios = () => {
 
                 {/* 3- Activar/Suspender */}
                 {user.is_active ? (
-                  // Está activo → mostrar ícono de suspensión (papelera)
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    className="rounded-circle"
-                    style={{ width: 34, height: 34, borderWidth: 2 }}
-                    title="Suspender usuario"
-                    onClick={() => {
-                      setUsuarioAConfirmar(user);
-                      setShowConfirmDesactivar(true);
-                    }}
-                  >
-                    <i className="bi bi-trash" />
-                  </Button>
+                  // 🟡 Usuario ACTIVO
+                  usuarioActual && user.id === usuarioActual.id ? (
+                    // ⛔ Si es el MISMO usuario logueado → NO permitir desactivarse
+                    <Button
+                      variant="outline-secondary"
+                      size="sm"
+                      className="rounded-circle"
+                      style={{ width: 34, height: 34, borderWidth: 2 }}
+                      title="No podés desactivar tu propia cuenta"
+                      disabled
+                    >
+                      <i className="bi bi-x-lg" />
+                    </Button>
+                  ) : (
+                    // ✅ Otro usuario → se puede desactivar
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      className="rounded-circle"
+                      style={{ width: 34, height: 34, borderWidth: 2 }}
+                      title="Desactivar usuario"
+                      onClick={() => {
+                        setUsuarioAConfirmar(user);
+                        setShowConfirmDesactivar(true);
+                      }}
+                    >
+                      <i className="bi bi-x-lg" />
+                    </Button>
+                  )
                 ) : (
-                  // Está inactivo → mostrar ícono de habilitar (check)
+                  // Usuario INACTIVO → sí se puede activar (incluido uno mismo)
                   <Button
                     variant="outline-success"
                     size="sm"
@@ -265,6 +294,7 @@ const VerUsuarios = () => {
                     <i className="bi bi-check-lg" />
                   </Button>
                 )}
+
 
 
               </div>

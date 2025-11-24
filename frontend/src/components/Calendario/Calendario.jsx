@@ -198,6 +198,15 @@ const styles = `
     border-bottom-right-radius: 1.4rem;
     overflow: hidden;
   }
+
+  /* Desactivar zoom de TODAS las cards dentro de no-card-zoom */
+  .no-card-zoom .card,
+  .no-card-zoom .card:hover,
+  .no-card-zoom .card:focus,
+  .no-card-zoom .card:active {
+    transform: none !important;
+    transition: none !important;
+  }
 `;
 
 function MultiSelectActividades({ selected, onChange }) {
@@ -688,8 +697,9 @@ export default function Calendario() {
   };
 
   return (
+
     <Card
-      className="mx-auto my-4 shadow position-relative"
+      className="mx-auto my-4 shadow position-relative no-zoom-card"
       style={{
         maxWidth: 1160,
         background: "#fff",
@@ -699,9 +709,7 @@ export default function Calendario() {
         transform: "none",
         transition: "none",
       }}
-    >
-      <style>{styles}</style>
-
+    ><style>{styles}</style>
       {/* Toolbar Sticky: filtros y acciones */}
       <div className="calendar-toolbar px-4 pt-3 pb-2">
         <Row className="g-3 align-items-end">
@@ -743,7 +751,7 @@ export default function Calendario() {
                 selected={filtroActividades}
                 onChange={setFiltroActividades}
               />
-              <Button variant="success" onClick={() => openForm({})}>
+              <Button variant="btn btn-outline-success" onClick={() => openForm({})}>
                 + Nuevo
               </Button>
             </div>
@@ -764,7 +772,7 @@ export default function Calendario() {
         </div>
       </div>
 
-      <Card.Body className="p-0">
+      <Card.Body className="p-0 calendario-card-body">
         {/* Mensajes */}
         <div className="px-4 pt-3">
           {okTxt && (
@@ -795,7 +803,7 @@ export default function Calendario() {
             </div>
           )}
 
-         
+
 
           {/* Calendario */}
           <div className="px-3">

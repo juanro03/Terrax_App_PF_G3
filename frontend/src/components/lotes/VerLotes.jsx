@@ -97,32 +97,18 @@ const VerLotes = ({ campoId }) => {
             type="text"
             className="form-control form-control-sm"
             style={{
-              height: "32px",
-              backgroundColor: "#d1fae5",
-              width: "450px",
-              marginLeft: 100,
-              borderRadius: "8px",
-              border: "1px solid #ced4da",
+              backgroundColor: "#ffffffff",
+              width: "400px",
+              marginLeft: 200,
+              marginTop: 0,
+              marginBottom: 0,
+              border: "1px solid #3d3d3dff",
               padding: "6px 12px",
             }}
             placeholder="Buscar por nombre de lote"
             value={filtroTexto}
             onChange={(e) => setFiltroTexto(e.target.value)}
           />
-
-          <button
-            className="btn btn-outline-secondary btn-sm"
-            style={{
-              height: "32px",
-              borderRadius: "8px",
-              padding: "6px 12px",
-              border: "1px solid #ced4da",
-              width: "100px",
-            }}
-            onClick={() => setFiltroTexto("")}
-          >
-            Limpiar
-          </button>
         </div>
 
         <button className="btn btn-outline-success" onClick={() => setShowCrear(true)}>

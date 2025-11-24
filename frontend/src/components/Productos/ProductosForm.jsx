@@ -271,6 +271,8 @@ const ProductosForm = () => {
         background: blanco,
         borderRadius: "1.4rem",
         border: "none",
+        transform: "none",
+        transition: "none",
       }}
     >
       <Card.Body>
@@ -354,7 +356,7 @@ const ProductosForm = () => {
                   <Button
                     variant="outline-success"
                     size="sm"
-                    className="rounded-pill d-inline-flex align-items-center"
+                    className=" d-inline-flex align-items-center"
                     style={{ fontWeight: "bold", borderColor: verde }}
                     onClick={() => navigate("/productos")}
                   >
@@ -378,7 +380,7 @@ const ProductosForm = () => {
                       <Button
                         type="submit"
                         disabled={submitting}
-                        className="rounded-pill shadow-sm"
+                        className="shadow-sm"
                         style={{
                           backgroundColor: verde,
                           color: blanco,
@@ -447,7 +449,7 @@ const ProductosForm = () => {
               <Col className="d-flex justify-content-end gap-3">
                 <Button
                   variant="outline-success"
-                  className="rounded-pill px-4 shadow-sm d-flex align-items-center"
+                  className="px-4 shadow-sm d-flex align-items-center"
                   style={{ fontWeight: "bold", borderColor: verde }}
                   onClick={() => navigate("/productos")}
                 >
@@ -456,7 +458,7 @@ const ProductosForm = () => {
 
                 <Button
                   variant="success"
-                  className="rounded-pill px-4 shadow-sm d-flex align-items-center"
+                  className="px-4 shadow-sm d-flex align-items-center"
                   style={{
                     fontWeight: "bold",
                     backgroundColor: verde,

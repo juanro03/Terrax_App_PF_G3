@@ -2,12 +2,11 @@ import React, { useEffect, useState } from "react";
 import axios from "../../axiosconfig";
 import "./Campos.css";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import { Button} from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import ModalCrearCampo from "./ModalCrearCampo";
 import ModalEditarCampo from "./ModalEditarCampo";
 import { useNavigate } from "react-router-dom";
 import SolicitarServicio from "./SolicitarServicio";
-
 
 const VerCampos = () => {
   const [campos, setCampos] = useState([]);
@@ -15,8 +14,10 @@ const VerCampos = () => {
   const [showEditar, setShowEditar] = useState(false);
   const [campoSeleccionado, setCampoSeleccionado] = useState(null);
   const [filtroTexto, setFiltroTexto] = useState("");
-  const navigate = useNavigate();
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [campoAEliminar, setCampoAEliminar] = useState(null); // ← nuevo estado para confirmación
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCampos();
@@ -31,15 +32,29 @@ const VerCampos = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar este campo?")) {
-      try {
-        await axios.delete(`http://127.0.0.1:8000/api/campos/${id}/`);
-        fetchCampos();
-      } catch (error) {
-        console.error("Error al eliminar el campo:", error);
-      }
+  // Ahora handleDelete SOLO abre la confirmación
+  const handleDelete = (id) => {
+    const campo = campos.find((c) => c.id === id);
+    setCampoAEliminar(campo || null);
+  };
+
+  const confirmarEliminarCampo = async () => {
+    if (!campoAEliminar) return;
+
+    try {
+      await axios.delete(
+        `http://127.0.0.1:8000/api/campos/${campoAEliminar.id}/`
+      );
+      await fetchCampos();
+    } catch (error) {
+      console.error("Error al eliminar el campo:", error);
+    } finally {
+      setCampoAEliminar(null);
     }
+  };
+
+  const cancelarEliminarCampo = () => {
+    setCampoAEliminar(null);
   };
 
   const handleEditar = (campo) => {
@@ -66,16 +81,14 @@ const VerCampos = () => {
           </h2>
           <input
             type="text"
-            className="form-control form-control-sm"
+            className="form-control form-control"
             style={{
-              height: "32px",
-              backgroundColor: "#d1fae5",
-              width: "350px",
-              marginLeft: 100,
+              backgroundColor: "#ffffffff",
+              width: "400px",
+              marginLeft: 150,
               marginTop: 0,
               marginBottom: 0,
-              borderRadius: "8px",
-              border: "1px solid #ced4da",
+              border: "1px solid #3d3d3dff",
               padding: "6px 12px",
             }}
             placeholder="Buscar por nombre o ubicación"
@@ -83,26 +96,10 @@ const VerCampos = () => {
             onChange={(e) => setFiltroTexto(e.target.value)}
           />
           <button
-            className="btn btn-outline-secondary btn-sm"
+            className="btn btn-success btn"
             style={{
-              height: "32px",
-              borderRadius: "8px",
               padding: "6px 12px",
-              border: "1px solid #ced4da",
-              width: "100px",
-            }}
-            onClick={() => setFiltroTexto("")}
-          >
-            Limpiar
-          </button>
-          <button
-            className="btn btn-success btn-sm"
-            style={{
-              height: "32px",
-              borderRadius: "8px",
-              padding: "6px 12px",
-              border: "1px solid #ced4da",
-
+              border: "1px solid #2c2c2cff",
             }}
             onClick={() => setMostrarModal(true)}
           >
@@ -110,12 +107,17 @@ const VerCampos = () => {
           </button>
         </div>
 
-        <button className="btn btn-outline-success" onClick={() => setShowCrear(true)}>
+        <button
+          className="btn btn-outline-success"
+          onClick={() => setShowCrear(true)}
+        >
           + Agregar Campo
         </button>
       </div>
 
-      {mostrarModal && <SolicitarServicio onClose={() => setMostrarModal(false)} />}
+      {mostrarModal && (
+        <SolicitarServicio onClose={() => setMostrarModal(false)} />
+      )}
 
       <div className="row justify-content-center">
         <div className="container mt-4">
@@ -159,12 +161,14 @@ const VerCampos = () => {
                     className="card-body text-center"
                     style={{ padding: "12px", backgroundColor: "#fff" }}
                   >
-                    <p className="card-text text-dark m-0" style={{ fontSize: "14px" }}>
+                    <p
+                      className="card-text text-dark m-0"
+                      style={{ fontSize: "14px" }}
+                    >
                       {campo.localidad}, {campo.provincia}
                     </p>
                   </div>
 
-                  {/* Botones */}
                   {/* Footer con fondo gris y botones más separados */}
                   <div
                     className="card-footer d-flex justify-content-center gap-4"
@@ -197,12 +201,9 @@ const VerCampos = () => {
                     >
                       <i className="bi bi-trash" />
                     </Button>
-
                   </div>
                 </div>
-
               ))}
-
           </div>
         </div>
       </div>
@@ -221,6 +222,34 @@ const VerCampos = () => {
         />
       )}
 
+      {/* Confirmación Eliminar Campo */}
+      {campoAEliminar && (
+        <div className="confirm-overlay">
+          <div className="confirm-card p-4">
+            <h5 className="fw-bold mb-2">
+              ¿Seguro que desea eliminar el campo "{campoAEliminar.nombre}"?
+            </h5>
+            <p className="mb-2">
+              Esta acción es irreversible y eliminará el registro permanentemente.
+            </p>
+
+            <div className="d-flex justify-content-end gap-2 mt-3">
+              <button
+                className="btn btn-outline-secondary"
+                onClick={cancelarEliminarCampo}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={confirmarEliminarCampo}
+              >
+                Sí, eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

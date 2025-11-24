@@ -173,6 +173,8 @@ export default function TrazabilidadEmbed({
   const [editEv, setEditEv] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [saving, setSaving] = useState(false);
+  const [deleteEv, setDeleteEv] = useState(null);
+
 
   // sync selects del padre
   useEffect(() => { if (Array.isArray(camposProp)) setCampos(camposProp); }, [camposProp]);
@@ -382,20 +384,41 @@ export default function TrazabilidadEmbed({
     }
   };
 
-  const deleteTask = async (ev) => {
+  // pedir confirmación de borrado (sin window.confirm)
+  const askDeleteTask = (ev) => {
     if (!ev?.serverId || !ev?.serverModel) return;
     const url = getEndpointFor(ev.serverModel, ev.serverId);
-    if (!url) { alert("Este tipo de evento no se puede eliminar desde aquí."); return; }
-    const ok = window.confirm("¿Eliminar este registro? No se puede deshacer.");
-    if (!ok) return;
+    if (!url) {
+      alert("Este tipo de evento no se puede eliminar desde aquí.");
+      return;
+    }
+    setDeleteEv(ev);
+  };
+
+  const confirmDeleteTask = async () => {
+    if (!deleteEv?.serverId || !deleteEv?.serverModel) {
+      setDeleteEv(null);
+      return;
+    }
+    const url = getEndpointFor(deleteEv.serverModel, deleteEv.serverId);
+    if (!url) {
+      alert("Este tipo de evento no se puede eliminar desde aquí.");
+      setDeleteEv(null);
+      return;
+    }
+
     try {
       await axios.delete(url);
-      setAllTasks((prev) => prev.filter((x) => x.id !== ev.id));
+      setAllTasks((prev) => prev.filter((x) => x.id !== deleteEv.id));
     } catch (e) {
       console.error(e);
       alert("No se pudo eliminar el registro.");
+    } finally {
+      setDeleteEv(null);
     }
   };
+
+  const cancelDeleteTask = () => setDeleteEv(null);
 
   // ---------- UI ----------
   return (
@@ -542,7 +565,7 @@ export default function TrazabilidadEmbed({
                           size="sm"
                           className="rounded-circle"
                           style={{ width: 34, height: 34, borderWidth: 2 }}
-                          onClick={() => deleteTask(ev)}
+                          onClick={() => askDeleteTask(ev)}
                           title="Borrar"
                           disabled={!canEditDelete}
                         >
@@ -576,6 +599,36 @@ export default function TrazabilidadEmbed({
           </tbody>
         </Table>
       </div>
+
+      {/* Confirmación eliminar tarea */}
+      {deleteEv && (
+        <div className="confirm-overlay">
+          <div className="confirm-card p-4">
+            <h5 className="fw-bold mb-2">
+              ¿Seguro que desea eliminar esta tarea?
+            </h5>
+            <p className="mb-2">
+              Esta acción es irreversible y eliminará el registro de la trazabilidad.
+            </p>
+
+            <div className="d-flex justify-content-end gap-2 mt-3">
+              <button
+                className="btn btn-outline-secondary"
+                onClick={cancelDeleteTask}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={confirmDeleteTask}
+              >
+                Sí, eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Modal editar en dos columnas */}
       <Modal show={editOpen} onHide={() => setEditOpen(false)} centered>

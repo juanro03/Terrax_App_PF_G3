@@ -6,7 +6,6 @@ import Clima from "./Clima";
 import CotizacionDolar from "./CotizacionDolar";
 import PreciosGranos from "./PreciosGranos";
 import GeoConsentBanner from "../common/GeoConsentBanner";
-
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import {
   Chart as ChartJS,
@@ -20,7 +19,6 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import "./Inicio.css";
-
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -36,6 +34,27 @@ const VERDE_OSCURO = "#155a36";
 const TEXTO = "#000000ff";
 const GRID = "#dddddd";
 
+function getUserRolFromToken() {
+  const token = localStorage.getItem("accessToken");
+  if (!token) return null;
+
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    const payload = JSON.parse(jsonPayload);
+    return payload.rol || null; // 👈 acá viene el 'admin' o 'productor'
+  } catch (e) {
+    console.error("Error decodificando token JWT:", e);
+    return null;
+  }
+}
+
 const Inicio = () => {
   const token = localStorage.getItem("accessToken");
   const navigate = useNavigate();
@@ -44,34 +63,40 @@ const Inicio = () => {
     return null;
   }
 
+  const userRol = getUserRolFromToken();
+
+
   return (
     <div className="inicio-wrapper">
       {/* HERO */}
-      <section className="mb-5" style={{ color: TEXTO}}>
+      <section className="mb-5" style={{ color: TEXTO }}>
         <Container fluid>
           <Row className="justify-content-center">
             <Col lg={10}>
               {/*<GeoConsentBanner />*/}
               <div >
-                <h1 className="display-4" style={{color: TEXTO}}>Bienvenido a Terrax</h1>
-                <p className="lead" style={{color: TEXTO}}>
+                <h1 className="display-4" style={{ color: TEXTO }}>Bienvenido a Terrax</h1>
+                <p className="lead" style={{ color: TEXTO }}>
                   Gestiona tus lotes agrícolas, monitorea índices y planifica tu
                   producción en un solo lugar.
                 </p>
                 <div className="d-flex flex-wrap gap-2">
-                  <Button
-                    variant="success"
-                    size="lg"
-                    onClick={() => navigate("/VerCampos")}
-                  >
-                    Mis Campos
-                  </Button>
+                  {userRol === "productor" && (
+                    <Button
+                      variant="success"
+                      size="lg"
+                      onClick={() => navigate("/VerCampos")}
+                    >
+                      Mis Campos
+                    </Button>
+                  )}
+
                   <Button
                     variant="success"
                     size="lg"
                     onClick={() => navigate("/reportes")}
                   >
-                    Mis Reportes
+                    Reportes
                   </Button>
                   <Button
                     variant="success"
@@ -79,6 +104,13 @@ const Inicio = () => {
                     onClick={() => navigate("/calendario")}
                   >
                     Calendario
+                  </Button>
+                  <Button
+                    variant="success"
+                    size="lg"
+                    onClick={() => navigate("/calculadora")}
+                  >
+                    Calculadora
                   </Button>
                 </div>
               </div>

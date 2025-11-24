@@ -147,6 +147,21 @@ def desactivar_usuario(request, pk):
     except Usuario.DoesNotExist:
         return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
+    # No permitir que un admin se desactive a sí mismo
+    if request.user.is_authenticated and request.user.id == usuario.id and usuario.rol == "admin":
+        return Response(
+            {"error": "No podés desactivar tu propia cuenta de administrador."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    usuario.is_active = False
+    usuario.save()
+    return Response({"mensaje": "Usuario desactivado correctamente"}, status=status.HTTP_200_OK)
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+    except Usuario.DoesNotExist:
+        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
     usuario.is_active = False
     usuario.save()
     return Response({"mensaje": "Usuario desactivado correctamente"}, status=status.HTTP_200_OK)
@@ -230,8 +245,8 @@ class PasswordResetConfirmAPIView(APIView):
         return Response({"detail": "Contraseña actualizada con éxito."}, status=status.HTTP_200_OK)
     
 class UsuarioActualAPIView(APIView):
+    permission_classes = [IsAuthenticated]   # ⬅️ IMPORTANTE
 
     def get(self, request):
         serializer = UsuarioSerializer(request.user)
         return Response(serializer.data)
-    
