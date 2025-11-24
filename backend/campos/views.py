@@ -106,10 +106,7 @@ class SolicitarServicioView(APIView):
         # ===========================
 
         # destinatario: propietario del campo
-        email_destino = campo.propietario.email if campo.propietario else None
-        if not email_destino:
-            return Response({"error": "El campo no tiene propietario con email válido."},
-                            status=status.HTTP_400_BAD_REQUEST)
+        email_destino = "terrax.jj@gmail.com"
 
         # texto plano
         plain_text = (
