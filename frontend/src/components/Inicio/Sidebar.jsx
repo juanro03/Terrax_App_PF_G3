@@ -28,7 +28,11 @@ function SidebarItem({ icon, label, isOpen, to, onClick }) {
         title={label}
         onClick={onClick}
         className={`nav-link d-flex align-items-center rounded w-100 text-white 
-          ${isOpen ? "gap-4 justify-content-start ps-2" : "justify-content-center"} 
+          ${
+            isOpen
+              ? "gap-4 justify-content-start ps-2"
+              : "justify-content-center"
+          } 
           ${active ? "active bg-white bg-opacity-25" : ""}`}
       >
         {icon}
@@ -145,6 +149,22 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               isOpen={isOpen}
               to="/productos"
             />
+            {usuario.rol === "productor" && (
+              <SidebarItem
+                icon={<i class="bi bi-exclamation-triangle"></i>}
+                label="Alertas Climáticas"
+                isOpen={isOpen}
+                to="/alertas"
+              />
+            )}
+            {usuario.rol === "productor" && (
+              <SidebarItem
+                icon={<i class="bi bi-bar-chart-line"></i>}
+                label="Mis Estadísticas"
+                isOpen={isOpen}
+                to="/estadisticas"
+              />
+            )}
             <SidebarItem
               icon={<FlaskConical size={18} />}
               label="Calculadora"
@@ -187,7 +207,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           </div>
 
           {/* Renderizar modal */}
-          {showModal && <SolicitarServicio onClose={() => setShowModal(false)} />}
+          {showModal && (
+            <SolicitarServicio onClose={() => setShowModal(false)} />
+          )}
 
           {/* Usuario logeado */}
           {isOpen ? (

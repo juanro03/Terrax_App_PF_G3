@@ -1,6 +1,11 @@
 import os
 from pathlib import Path
 from datetime import timedelta
+from dotenv import load_dotenv
+
+
+# Cargar archivo .env
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -102,12 +107,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 FRONTEND_RESET_PASSWORD_URL = "http://localhost:3000/reset-password"
-EMAIL_BACKEND      = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_BACKEND      = "backend.email_backend.UnverifiedTLSEmailBackend"
 EMAIL_HOST         = "smtp.gmail.com"
 EMAIL_PORT         = 587
 EMAIL_HOST_USER     = "terrax.app@gmail.com"
 EMAIL_HOST_PASSWORD = "qpvkabvwflsiiatc"
 EMAIL_USE_TLS      = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 LANGUAGE_CODE = 'en-us'
@@ -128,3 +135,5 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
+
+OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")

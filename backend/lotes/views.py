@@ -10,6 +10,10 @@ from tareas.models import Tarea
 from django.db import transaction
 from .models import (Lote, Siembra, Cosecha, Campania, Cobertura)
 from .serializers import (LoteSerializer, SiembraSerializer, CosechaSerializer, CampaniaSerializer, CoberturaSerializer)
+from .services import calcular_centroide
+from .services import obtener_alertas_para_lote
+from django.core.mail import send_mail
+from django.conf import settings
 
 #   LOTES
 class LoteViewSet(viewsets.ModelViewSet):
@@ -25,6 +29,56 @@ class LoteViewSet(viewsets.ModelViewSet):
         lotes = Lote.objects.filter(campo_id=campo_id)
         serializer = self.get_serializer(lotes, many=True)
         return Response(serializer.data)
+    @action(detail=True, methods=["get"], url_path="clima")
+    def obtener_clima(self, request, pk=None):
+        lote = self.get_object()
+        lat, lon = calcular_centroide(lote.coordenadas)
+
+        if not lat or not lon:
+            return Response({"error": "El lote no tiene coordenadas válidas."}, status=400)
+
+        # Ejemplo: respuesta temporal
+        return Response({
+            "latitud": lat,
+            "longitud": lon,
+            "mensaje": "Coordenadas listas para consultar clima"
+        })
+    @action(detail=True, methods=["get"], url_path="alertas")
+    @action(detail=True, methods=["get"], url_path="alertas")
+    @action(detail=True, methods=["get"], url_path="alertas")
+    def alertas_climaticas(self, request, pk=None):
+        lote = self.get_object()
+
+        eventos, lat, lon = obtener_alertas_para_lote(lote.coordenadas)
+
+        return Response({
+            "lote": lote.nombre,
+            "campo": lote.campo.nombre,
+            "provincia": lote.campo.provincia,
+            "localidad": lote.campo.localidad,
+            "lat": lat,
+            "lon": lon,
+            "alertas": eventos
+        })
+    def _get_email_destino(self, request, lote):
+        """
+        Obtiene el mail del productor al que se le debe avisar:
+        1) Primero usa Campo.propietario.email (si existe)
+        2) Si no, usa request.user.email si está autenticado
+        """
+        campo = lote.campo
+
+        # 1) Mail del propietario del campo
+        propietario = getattr(campo, "propietario", None)
+        if propietario and getattr(propietario, "email", None):
+            return propietario.email
+
+        # 2) Fallback: usuario autenticado
+        user = getattr(request, "user", None)
+        if user and getattr(user, "is_authenticated", False) and getattr(user, "email", None):
+            return user.email
+
+        return None
 
 #   SIEMBRAS
 class SiembraViewSet(viewsets.ModelViewSet):
@@ -80,6 +134,7 @@ class SiembraViewSet(viewsets.ModelViewSet):
 
         lote.estado = "sembrado"
         lote.save(update_fields=["estado"])
+
 
 #   COBERTURAS
 class CoberturaViewSet(viewsets.ModelViewSet):

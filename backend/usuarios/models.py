@@ -11,7 +11,7 @@ class Usuario(AbstractUser):
     rol = models.CharField(max_length=20, choices=ROL_CHOICES, default='productor')
 
     imagen_perfil = models.ImageField(upload_to='perfiles/', default='imagenes/user.jpg')
-
+    fecha_alta = models.DateTimeField(auto_now_add=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'imagen_perfil']
 

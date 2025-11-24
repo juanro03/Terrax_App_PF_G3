@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Lote  # o como se llame tu modelo
+from .models import AlertaClimatica, Lote  # o como se llame tu modelo
 from .models import Siembra
 from .models import Cosecha
 from .models import Campania
@@ -32,3 +32,10 @@ class CoberturaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cobertura
         fields = '__all__'
+
+class AlertaClimaticaSerializer(serializers.ModelSerializer):
+    lote_nombre = serializers.CharField(source="lote.nombre", read_only=True)
+
+    class Meta:
+        model = AlertaClimatica
+        fields = "__all__"

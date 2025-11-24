@@ -16,6 +16,7 @@ import ProductoForm from "./components/Productos/ProductosForm";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-draw";
+import Estadisticas from "./components/Estadisticas/Estadisticas";
 import VerLotesWrapper from "./components/lotes/VerLotesWrapper";
 import ResetPassword from "./components/Auth/ResetPassword";
 import DetalleLote from "./components/DetalleLote/DetalleLote";
@@ -24,7 +25,7 @@ import Reportes from "./components/Reportes/reportes.jsx";
 import HistorialCampanias from "./components/DetalleLote/HistorialCampanias";
 import TareasAgricolas from "./components/TareasAgricolas/TareasAgricolas";
 import TrazabilidadEmbed from "./components/TareasAgricolas/TrazabilidadEmbed";
-
+import AlertasClimaticas from "./components/Alertas/Alertas";
 
 function AppContent() {
   const location = useLocation();
@@ -74,11 +75,11 @@ function AppContent() {
           <Route path="/tareas/trazabilidad" element={<TrazabilidadEmbed />} />
 
           <Route path="/lote/:loteId" element={<DetalleLote />} />
-          {/*<Route path="/lotes/:loteId/historial" element={<HistorialCampanias />} />*/}
-
-
-
-
+          {/*<Route
+            path="/lotes/:loteId/historial"
+            element={<HistorialCampanias />}
+          />*/}
+          <Route path="/alertas" element={<AlertasClimaticas />} />
           <Route
             path="/usuarios"
             element={
@@ -87,6 +88,7 @@ function AppContent() {
               </AdminRoute>
             }
           />
+          <Route path="/estadisticas" element={<Estadisticas />} />
         </Routes>
       </div>
     </div>
