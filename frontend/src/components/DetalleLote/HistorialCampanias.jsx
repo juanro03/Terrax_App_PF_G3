@@ -39,7 +39,7 @@ const CampaignCard = ({ c, onEdit, onDelete }) => {
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-2">
           <h5 className="mb-0">
-            Campaña - {format(c.fecha_siembra)} - {format(c.fecha_creacion)}
+            Campaña - {format(c.fecha_siembra)} - {format(c.fecha_cosecha)}
           </h5>
           <div className="d-flex gap-2">
             <button
@@ -60,6 +60,7 @@ const CampaignCard = ({ c, onEdit, onDelete }) => {
             </button>
           </div>
         </div>
+
 
         <hr className="camp-divider" />
 
@@ -471,6 +472,19 @@ const HistorialCampanias = ({ embedded = false, loteId: loteIdProp, campoInfoPro
                 }));
                 return;
               }
+
+              // Validación: fecha de cosecha posterior a fecha de siembra
+              const fechaC = new Date(editForm.fecha_cosecha);
+              const fechaS = new Date(editForm.fecha_siembra);
+
+              if (fechaC <= fechaS) {
+                setEditForm((p) => ({
+                  ...p,
+                  errorMsg: "La cosecha debe ser posterior a la fecha de siembra.",
+                }));
+                return;
+              }
+
               setEditForm((p) => ({ ...p, errorMsg: null }));
               await saveEdit();
             }}

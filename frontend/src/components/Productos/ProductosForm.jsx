@@ -3,6 +3,8 @@ import axios from "axios";
 import { Card, Button, Form, Row, Col } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
+import SuccessAlert from "../common/SuccessAlert";
+
 
 // === PALETA / TOKENS (misma que Calculadora)
 const verde = "#198754";
@@ -54,31 +56,28 @@ const opciones = {
     "OTROS",
   ],
   SEMILLAS: [
-    "MAIZ",
-    "TRIGO",
-    "AVENA",
-    "SORGO",
-    "CEBADA",
-    "SOJA",
-    "GIRASOL",
+    "ALFALFA",
     "ALGODON",
     "ARROZ",
-    "CENTENO",
-    "ALFALFA",
-    "LINO",
-    "CHÍA",
-    "PAPA",
-    "MANÍ",
-    "TREBOL",
-    "LENTEJA",
-    "GARBANZO",
-    "POROTO",
+    "AVENA",
     "BATATA",
-    "ALGODÓN",
-    "VICIA",
+    "CEBADA",
+    "CENTENO",
+    "CHÍA",
+    "GARBANZO",
+    "GIRASOL",
+    "LENTEJA",
+    "LINO",
+    "MAIZ",
+    "MANÍ",
     "MOHA",
-    "ARROZ",
-    "ARVEJA",
+    "PAPA",
+    "POROTO",
+    "SORGO",
+    "SOJA",
+    "TREBOL",
+    "TRIGO",
+    "VICIA",
     "OTROS",
   ],
 };
@@ -96,6 +95,7 @@ const ProductosForm = () => {
     variedad: "",
     diasMadurez: "",
   });
+  const [showSuccess, setShowSuccess] = useState(null);
 
   const [inputOtroTipo, setInputOtroTipo] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -129,7 +129,8 @@ const ProductosForm = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert("Producto agregado con éxito");
+      setShowSuccess("Producto agregado con éxito");
+
       setFormData({
         nombre: "",
         tipo: "",
@@ -137,7 +138,10 @@ const ProductosForm = () => {
         variedad: "",
         diasMadurez: "",
       });
+
       setInputOtroTipo("");
+
+
     } catch (error) {
       console.error(
         "Error al guardar producto:",
@@ -209,8 +213,8 @@ const ProductosForm = () => {
       categoriaSeleccionada === "FERTILIZANTES"
         ? "Nutriente principal"
         : categoriaSeleccionada === "AGROQUIMICOS"
-        ? "Tipo de agroquímico"
-        : "Tipo";
+          ? "Tipo de agroquímico"
+          : "Tipo";
 
     return (
       <>
@@ -280,6 +284,15 @@ const ProductosForm = () => {
         <Card.Title className="fw-bold mb-4" style={{ color: verdeOscuro }}>
           Registrar Productos — {categoriaSeleccionada}
         </Card.Title>
+
+        <SuccessAlert
+          show={!!showSuccess}
+          title={showSuccess}
+          onClose={() => {
+            setShowSuccess(null);
+          }}
+        />
+
 
         {/* IMPORTANTE: igualar alturas */}
         <Row className="g-4 align-items-stretch">

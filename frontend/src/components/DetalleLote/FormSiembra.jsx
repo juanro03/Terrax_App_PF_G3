@@ -11,11 +11,19 @@ const FormSiembra = ({
   errorsSiembra,
   guardarSiembra,
   errorDensidad,
-  setErrorDensidad
+  setErrorDensidad,
+  isEditing,
+  canRegister,
 }) => {
+  const readOnly = !isEditing && !canRegister;
+
+  const inputStyle = readOnly
+    ? { backgroundColor: "#f3f3f3", cursor: "not-allowed" }
+    : {};
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setSiembra(prev => ({ ...prev, [name]: value }));
+    setSiembra((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -32,6 +40,9 @@ const FormSiembra = ({
           type="date"
           name="fecha"
           className="form-control"
+          style={inputStyle}
+          disabled={readOnly}
+          readOnly={readOnly}
           value={siembra.fecha || ""}
           onChange={handleInputChange}
           onClick={openDatePicker}
@@ -42,72 +53,80 @@ const FormSiembra = ({
       {/* CULTIVO */}
       <div className="mb-2">
         <label className="form-label mb-0">Cultivo</label>
-        <small className="text-muted d-block mb-1">(Registrar nuevos cultivos en la sección de productos)</small>
+        <small className="text-muted d-block mb-1">
+          (Registrar nuevos cultivos en la sección de productos)
+        </small>
+
         {!siembra.modoCultivoLibre ? (
           <select
             name="cultivo"
             className="form-control"
+            style={inputStyle}
+            disabled={readOnly}
+            readOnly={readOnly}
             value={siembra.cultivo || ""}
             onChange={(e) => {
               const value = e.target.value;
-
-              // Si selecciona "otro", habilitamos modo libre
               if (value === "__otro__") {
-                setSiembra(prev => ({
+                setSiembra((prev) => ({
                   ...prev,
                   cultivo: "",
                   variedad: "",
                   dias_madurez_manual: "",
-                  modoCultivoLibre: true
+                  modoCultivoLibre: true,
                 }));
                 return;
               }
-
-              // Seleccionó un cultivo normal
-              setSiembra(prev => ({
+              setSiembra((prev) => ({
                 ...prev,
                 cultivo: value,
                 variedad: "",
-                modoCultivoLibre: false
+                modoCultivoLibre: false,
               }));
             }}
             required={!siembra.modoCultivoLibre}
           >
             <option value="">Seleccionar cultivo</option>
-            {cultivosDisponibles.map((cultivo, i) => (
-              <option key={i} value={cultivo}>{cultivo}</option>
+            {cultivosDisponibles.map((c, i) => (
+              <option key={i} value={c}>
+                {c}
+              </option>
             ))}
 
-            {/* Opción especial */}
             <option value="__otro__">➕ Registrar otro cultivo</option>
           </select>
-
         ) : (
           <>
             <input
               type="text"
               name="cultivo"
               className="form-control mb-2"
+              style={inputStyle}
+              disabled={readOnly}
+              readOnly={readOnly}
               placeholder="Ingresá el cultivo"
               value={siembra.cultivo}
               onChange={handleInputChange}
               required
             />
-            <button
-              type="button"
-              className="btn btn-sm btn-outline-secondary"
-              onClick={() =>
-                setSiembra(prev => ({
-                  ...prev,
-                  modoCultivoLibre: false,
-                  cultivo: "",
-                  variedad: "",
-                  dias_madurez_manual: ""
-                }))
-              }
-            >
-              Volver a selección
-            </button>
+
+            {!readOnly && (
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                onClick={() =>
+                  setSiembra((prev) => ({
+                    ...prev,
+                    modoCultivoLibre: false,
+                    cultivo: "",
+                    variedad: "",
+                    dias_madurez_manual: "",
+                  }))
+                }
+              >
+                Volver a selección
+              </button>
+            )}
           </>
         )}
       </div>
@@ -121,6 +140,9 @@ const FormSiembra = ({
             type="text"
             name="variedad"
             className="form-control"
+            style={inputStyle}
+            disabled={readOnly}
+            readOnly={readOnly}
             placeholder="Ingresá la variedad"
             value={siembra.variedad || ""}
             onChange={handleInputChange}
@@ -130,21 +152,24 @@ const FormSiembra = ({
           <select
             name="variedad"
             className="form-control"
+            style={inputStyle}
+            disabled={readOnly || !siembra.cultivo}
+            readOnly={readOnly}
             value={siembra.variedad || ""}
             onChange={handleInputChange}
-            disabled={!siembra.cultivo}
             required
           >
             <option value="">Seleccionar variedad</option>
-            {variedadesDisponibles.map((variedad, i) => (
-              <option key={i} value={variedad}>{variedad}</option>
+            {variedadesDisponibles.map((v, i) => (
+              <option key={i} value={v}>
+                {v}
+              </option>
             ))}
           </select>
         )}
-
       </div>
 
-      {/* DIAS MADURACION (solo modo libre) */}
+      {/* DIAS MADURACION */}
       {siembra.modoCultivoLibre && (
         <div className="mb-2">
           <label className="form-label">Días de maduración</label>
@@ -152,6 +177,9 @@ const FormSiembra = ({
             type="number"
             name="dias_madurez_manual"
             className="form-control"
+            style={inputStyle}
+            disabled={readOnly}
+            readOnly={readOnly}
             placeholder="Ej: 120"
             value={siembra.dias_madurez_manual || ""}
             onChange={handleInputChange}
@@ -160,12 +188,12 @@ const FormSiembra = ({
         </div>
       )}
 
-
       {/* DENSIDAD */}
       <div className="mb-2">
         <label className="form-label mb-0">Densidad de siembra</label>
+
         {errorDensidad && (
-          <div className="form-text text-danger mt-0 mb-2">{errorDensidad}</div>
+          <div className="form-text text-danger">{errorDensidad}</div>
         )}
 
         <div className="input-group">
@@ -173,32 +201,31 @@ const FormSiembra = ({
             type="text"
             name="densidad"
             className="form-control"
+            style={inputStyle}
+            disabled={readOnly}
+            readOnly={readOnly}
             value={siembra.densidad || ""}
-            placeholder="Ejemplo: 120,5"
+            placeholder="Ej: 120,5"
             onChange={(e) => {
               let valor = e.target.value.replace(".", ",");
-              setSiembra(prev => ({ ...prev, densidad: valor }));
+              setSiembra((p) => ({ ...p, densidad: valor }));
               setErrorDensidad("");
-            }}
-            onBlur={() => {
-              const d = (siembra.densidad || "").trim();
-              const regex = /^\d+(,\d{1,2})?$/;
-
-              if (d === "") return;
-              if (!regex.test(d)) {
-                setErrorDensidad("Formato inválido. Use coma decimal. Ej: 120,5");
-              }
             }}
             required
           />
 
           <button
             type="button"
-            className={`btn ${unidadDensidad === "Kg/Ha" ? "btn-success" : "btn-outline-success"}`}
-            style={{ height: "48px" }}
+            disabled={readOnly}
+            className={`btn ${
+              unidadDensidad === "Kg/Ha"
+                ? "btn-success"
+                : "btn-outline-success"
+            }`}
+            style={{ height: "45px" }}
             onClick={() => {
               setUnidadDensidad("Kg/Ha");
-              setSiembra(p => ({ ...p, unidad: "Kg/Ha" }));
+              setSiembra((p) => ({ ...p, unidad: "Kg/Ha" }));
             }}
           >
             Kg/Ha
@@ -206,11 +233,16 @@ const FormSiembra = ({
 
           <button
             type="button"
-            className={`btn ${unidadDensidad === "Pl/Ha" ? "btn-success" : "btn-outline-success"}`}
-            style={{ height: "48px" }}
+            disabled={readOnly}
+            className={`btn ${
+              unidadDensidad === "Pl/Ha"
+                ? "btn-success"
+                : "btn-outline-success"
+            }`}
+            style={{ height: "45px" }}
             onClick={() => {
               setUnidadDensidad("Pl/Ha");
-              setSiembra(p => ({ ...p, unidad: "Pl/Ha" }));
+              setSiembra((p) => ({ ...p, unidad: "Pl/Ha" }));
             }}
           >
             Pl/Ha
@@ -221,33 +253,40 @@ const FormSiembra = ({
       {/* FECHA ESTIMADA */}
       <div className="mb-2">
         <label className="form-label mb-0">Fecha estimada de cosecha</label>
-        <small className="text-muted d-block mb-2">
-          (Se calcula automáticamente)
-        </small>
+        <small className="text-muted d-block">(Se calcula automáticamente)</small>
         <input
           type="text"
           className="form-control"
-          value={siembra.fechaEstimadaCosecha || ""}
+          style={{ backgroundColor: "#f3f3f3" }}
           readOnly
+          value={siembra.fechaEstimadaCosecha || ""}
         />
       </div>
 
-      {/* ANALISIS OPCIONAL */}
+      {/* ANALISIS */}
       <div className="mb-2">
-        <label className="form-label">Último análisis de suelo (opcional)</label>
+        <label className="form-label">Análisis de suelo (opcional)</label>
         <input
           type="file"
-          name="analisisSuelo"
           className="form-control"
+          style={inputStyle}
+          disabled={readOnly}
+          readOnly={readOnly}
           onChange={(e) =>
-            setSiembra(prev => ({ ...prev, analisisSuelo: e.target.files[0] }))
+            setSiembra((prev) => ({
+              ...prev,
+              analisisSuelo: e.target.files[0],
+            }))
           }
         />
       </div>
 
-      <button className="btn btn-success w-100 mt-2" type="submit">
-        Registrar Siembra
-      </button>
+      {/* BOTÓN REGISTRAR */}
+      {canRegister && !isEditing && (
+        <button className="btn btn-success w-100 mt-2" type="submit">
+          Registrar Siembra
+        </button>
+      )}
     </form>
   );
 };

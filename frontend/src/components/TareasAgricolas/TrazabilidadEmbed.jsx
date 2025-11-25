@@ -1,10 +1,11 @@
 // src/components/TareasAgricolas/TrazabilidadEmbed.jsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Row, Col, Form, Button, Table, Modal } from "react-bootstrap";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import axios from "../../axiosconfig";
 import "bootstrap-icons/font/bootstrap-icons.css";
+
 dayjs.locale("es");
 
 // ---------- Helpers de endpoints (editar / borrar) ----------
@@ -109,12 +110,23 @@ const EDITABLE_BY_TYPE = {
   RIEGO: ["tipo_riego", "volumen", "observaciones"],
   LABOREO: ["tipo_laboreo", "operario", "observaciones"],
   FERTILIZACION: [
-    "tipo_fertilizante", "de", "producto_aplicar", "concentracion", "fabricante",
-    "litros_por_ha", "hectareas_aplicadas", "observaciones",
+    "tipo_fertilizante",
+    "de",
+    "producto_aplicar",
+    "concentracion",
+    "fabricante",
+    "litros_por_ha",
+    "hectareas_aplicadas",
+    "observaciones",
   ],
   MALEZAS: [
-    "tipo_fitosanitario", "plaga_maleza", "producto_aplicar", "fabricante",
-    "lkg_por_ha", "hectareas_aplicadas", "observaciones",
+    "tipo_fitosanitario",
+    "plaga_maleza",
+    "producto_aplicar",
+    "fabricante",
+    "lkg_por_ha",
+    "hectareas_aplicadas",
+    "observaciones",
   ],
   FITOSANITARIA: ["producto_aplicar", "plaga_maleza", "observaciones"],
   COSECHA: ["rinde", "unidad_rinde", "observaciones"],
@@ -122,11 +134,23 @@ const EDITABLE_BY_TYPE = {
 };
 
 const NUMERIC_KEYS = new Set([
-  "volumen", "litros_por_ha", "hectareas_aplicadas", "lkg_por_ha", "rinde", "densidad",
+  "volumen",
+  "litros_por_ha",
+  "hectareas_aplicadas",
+  "lkg_por_ha",
+  "rinde",
+  "densidad",
 ]);
 
 const pickServerId = (o = {}) =>
-  o.source_pk ?? o.pk ?? o.uuid ?? o.tarea_id ?? o.task_id ?? o.tarea ?? o.id ?? null;
+  o.source_pk ??
+  o.pk ??
+  o.uuid ??
+  o.tarea_id ??
+  o.task_id ??
+  o.tarea ??
+  o.id ??
+  null;
 
 // calcula si el texto debe ser blanco o negro para contrastar con el fondo
 const textColorFor = (hex) => {
@@ -135,97 +159,155 @@ const textColorFor = (hex) => {
     const r = parseInt(c.substring(0, 2), 16);
     const g = parseInt(c.substring(2, 4), 16);
     const b = parseInt(c.substring(4, 6), 16);
-    // luminancia relativa
     const L = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-    return L > 0.7 ? "#1f2937" : "#ffffff"; // fondo claro -> texto oscuro
+    return L > 0.7 ? "#1f2937" : "#ffffff";
   } catch {
     return "#ffffff";
   }
 };
 
 export default function TrazabilidadEmbed({
+  // opcionales: si los pasás, el componente se adapta
   campos: camposProp,
   lotes: lotesProp,
   campo: campoProp,
   setCampo: setCampoProp,
   lote: loteProp,
   setLote: setLoteProp,
-  refreshKey
+  refreshKey,
 }) {
-  // filtros
+  // ---------- Controlado vs no controlado ----------
+  const isCampoControlled = campoProp !== undefined && typeof setCampoProp === "function";
+  const isLoteControlled = loteProp !== undefined && typeof setLoteProp === "function";
+
+  const [campoState, setCampoState] = useState(campoProp ?? "");
+  const [loteState, setLoteState] = useState(loteProp ?? "");
+
+  // Si viene controlado desde el padre, se sincroniza
+  useEffect(() => {
+    if (isCampoControlled) {
+      setCampoState(campoProp ?? "");
+    }
+  }, [campoProp, isCampoControlled]);
+
+  useEffect(() => {
+    if (isLoteControlled) {
+      setLoteState(loteProp ?? "");
+    }
+  }, [loteProp, isLoteControlled]);
+
+  const campo = isCampoControlled ? (campoProp ?? "") : campoState;
+  const lote = isLoteControlled ? (loteProp ?? "") : loteState;
+
+  const onCampoChange = (v) => {
+    if (isCampoControlled) setCampoProp(v);
+    else setCampoState(v);
+  };
+
+  const onLoteChange = (v) => {
+    if (isLoteControlled) setLoteProp(v);
+    else setLoteState(v);
+  };
+
+  // ---------- Listas de campos / lotes ----------
   const [campos, setCampos] = useState(camposProp || []);
   const [lotes, setLotes] = useState(lotesProp || []);
-  const [campo, setCampo] = useState(campoProp || "");
-  const [lote, setLote] = useState(loteProp || "");
-  const [tipo, setTipo] = useState("");
 
-  const [desde, setDesde] = useState("");
-  const [hasta, setHasta] = useState("");
-
-
-  // data
-  const [allTasks, setAllTasks] = useState([]);   // /api/tareas/
-  const [loading, setLoading] = useState(false);
-  const [expanded, setExpanded] = useState(() => new Set());
-
-  // edición
-  const [editOpen, setEditOpen] = useState(false);
-  const [editEv, setEditEv] = useState(null);
-  const [editForm, setEditForm] = useState({});
-  const [saving, setSaving] = useState(false);
-  const [deleteEv, setDeleteEv] = useState(null);
-
-
-  // sync selects del padre
-  useEffect(() => { if (Array.isArray(camposProp)) setCampos(camposProp); }, [camposProp]);
-  useEffect(() => { if (Array.isArray(lotesProp)) setLotes(lotesProp); }, [lotesProp]);
-  useEffect(() => { if (campoProp !== undefined) setCampo(campoProp); }, [campoProp]);
-  useEffect(() => { if (loteProp !== undefined) setLote(loteProp); }, [loteProp]);
-
-  // cargar listas si no vienen por props
+  // sync con props si cambian
   useEffect(() => {
-    if (camposProp) return;
-    axios.get("/api/campos/").then((r) => setCampos(r.data)).catch(() => setCampos([]));
+    if (Array.isArray(camposProp)) setCampos(camposProp);
   }, [camposProp]);
 
   useEffect(() => {
+    if (Array.isArray(lotesProp)) setLotes(lotesProp);
+  }, [lotesProp]);
 
-    setLotes([]); // limpiar para evitar ver lotes viejos
-    if (!campo) return;
+  // cargar campos si no vienen por props
+  useEffect(() => {
+    if (camposProp) return;
+    axios
+      .get("/api/campos/")
+      .then((r) => setCampos(r.data))
+      .catch(() => setCampos([]));
+  }, [camposProp]);
+
+  // Cargar lotes según campo (si NO vienen por props)
+  useEffect(() => {
+    if (lotesProp) return;
+
     const fetchLotes = async () => {
       try {
-        const { data } = await axios.get(`/api/lotes/por-campo/${campo}/`);
-        setLotes(data || []);
-        const loteIds = new Set((data || []).map((l) => String(l.id)));
-        if (!loteIds.has(String(lote))) {
-          setLote("");
+        let url;
+        if (campo) {
+          url = `/api/lotes/por-campo/${campo}/`;
+        } else {
+          url = "/api/lotes/";
         }
-      }
-      catch {
+
+        const { data } = await axios.get(url);
+        const lista = data || [];
+        setLotes(lista);
+
+        // Si el lote seleccionado ya no pertenece al campo actual, lo reseteamos
+        if (campo && lote) {
+          const ids = new Set(lista.map((l) => String(l.id)));
+          if (!ids.has(String(lote))) {
+            onLoteChange("");
+          }
+        }
+      } catch (err) {
+        console.error("Error cargando lotes:", err);
         setLotes([]);
-        setLote("");
+        if (campo) onLoteChange("");
       }
     };
+
     fetchLotes();
-  }, [campo]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campo, lotesProp]); // depende de campo y de si hay lotesProp o no
 
-
+  // si el campo vuelve a "Todos", resetea lote
   useEffect(() => {
-    if (!campo) setLote(""); // si el campo vuelve a "Todos", resetea lote
+    if (!campo) onLoteChange("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campo]);
 
+  // ---------- Data de tareas ----------
+  const [tipo, setTipo] = useState("");
+  const [desde, setDesde] = useState("");
+  const [hasta, setHasta] = useState("");
 
+  const [allTasks, setAllTasks] = useState([]); // /api/tareas/
+  const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState(() => new Set());
 
-  // normalizador
+  // Normalizador usando campos del serializer
   const normalizeFromTarea = (it, idx) => {
     const t = mapTipo(it.tipo);
     const serverId = pickServerId(it);
+
+    // TareaSerializer trae campo_id, campo_nombre, lote (id) y lote_nombre
+    const campoId =
+      it.campo_id ??
+      (typeof it.campo === "object" ? it.campo?.id : it.campo) ??
+      null;
+
+    const loteId =
+      (typeof it.lote === "object" ? it.lote?.id : it.lote) ?? null;
+
+    const campoNombre = it.campo_nombre ?? "";
+    const loteNombre = it.lote_nombre ?? "";
+
     return {
       id: `tarea-${serverId ?? idx}-${it.fecha ?? idx}`,
       serverId,
       serverModel: "tarea",
       tipo: t,
       fecha: it.fecha,
+      campoId,
+      loteId,
+      campoNombre,
+      loteNombre,
       raw: it,
     };
   };
@@ -236,7 +318,9 @@ export default function TrazabilidadEmbed({
       setLoading(true);
       try {
         const { data } = await axios.get("/api/tareas/");
-        const normalized = (Array.isArray(data) ? data : []).map(normalizeFromTarea);
+        const normalized = (Array.isArray(data) ? data : []).map(
+          normalizeFromTarea
+        );
         setAllTasks(normalized);
         setExpanded(new Set());
       } catch (e) {
@@ -249,6 +333,39 @@ export default function TrazabilidadEmbed({
     loadTasks();
   }, [refreshKey]);
 
+  // helpers para nombres de campo / lote
+  const getCampoName = (ev) => {
+    if (ev.campoNombre) return ev.campoNombre;
+
+    const r = ev.raw || {};
+    if (typeof r.campo_nombre === "string") return r.campo_nombre;
+
+    const rc = r.campo ?? null;
+    if (typeof rc === "string") return rc;
+    if (rc && typeof rc === "object") {
+      return rc.nombre ?? rc.name ?? "";
+    }
+
+    const found = campos.find((c) => String(c.id) === String(ev.campoId));
+    return found?.nombre || "";
+  };
+
+  const getLoteName = (ev) => {
+    if (ev.loteNombre) return ev.loteNombre;
+
+    const r = ev.raw || {};
+    if (typeof r.lote_nombre === "string") return r.lote_nombre;
+
+    const rl = r.lote ?? null;
+    if (typeof rl === "string") return rl;
+    if (rl && typeof rl === "object") {
+      return rl.nombre ?? rl.name ?? "";
+    }
+
+    const found = lotes.find((l) => String(l.id) === String(ev.loteId));
+    return found?.nombre || "";
+  };
+
   // filtrado local
   const filtered = useMemo(() => {
     const dDesde = desde ? dayjs(desde).startOf("day") : null;
@@ -260,16 +377,13 @@ export default function TrazabilidadEmbed({
         if (tipo && ev.tipo !== tipo) return false;
 
         // campo
-        if (campo && lotes.length > 0) {
-          const loteId = ev?.raw?.lote ?? ev?.raw?.lote_id ?? null;
-          const lotesDeCampo = new Set(lotes.map((l) => String(l.id)));
-          if (!lotesDeCampo.has(String(loteId))) return false;
+        if (campo) {
+          if (String(ev.campoId ?? "") !== String(campo)) return false;
         }
 
         // lote
         if (lote) {
-          const loteId = String(ev?.raw?.lote ?? ev?.raw?.lote_id ?? "");
-          if (String(loteId) !== String(lote)) return false;
+          if (String(ev.loteId ?? "") !== String(lote)) return false;
         }
 
         // fechas
@@ -283,8 +397,7 @@ export default function TrazabilidadEmbed({
         return true;
       })
       .sort((a, b) => dayjs(a.fecha).valueOf() - dayjs(b.fecha).valueOf());
-  }, [allTasks, tipo, campo, lote, desde, hasta, lotes]);
-
+  }, [allTasks, tipo, campo, lote, desde, hasta]);
 
   // helpers UI
   const toggleRow = (id) => {
@@ -306,12 +419,23 @@ export default function TrazabilidadEmbed({
       RIEGO: ["tipo_riego", "volumen", "observaciones"],
       LABOREO: ["tipo_laboreo", "operario", "observaciones"],
       FERTILIZACION: [
-        "tipo_fertilizante", "de", "producto_aplicar", "concentracion", "fabricante",
-        "litros_por_ha", "hectareas_aplicadas", "observaciones",
+        "tipo_fertilizante",
+        "de",
+        "producto_aplicar",
+        "concentracion",
+        "fabricante",
+        "litros_por_ha",
+        "hectareas_aplicadas",
+        "observaciones",
       ],
       MALEZAS: [
-        "tipo_fitosanitario", "plaga_maleza", "producto_aplicar", "fabricante",
-        "lkg_por_ha", "hectareas_aplicadas", "observaciones",
+        "tipo_fitosanitario",
+        "plaga_maleza",
+        "producto_aplicar",
+        "fabricante",
+        "lkg_por_ha",
+        "hectareas_aplicadas",
+        "observaciones",
       ],
       FITOSANITARIA: ["producto_aplicar", "plaga_maleza", "observaciones"],
       COSECHA: ["rinde", "unidad_rinde", "observaciones"],
@@ -327,50 +451,71 @@ export default function TrazabilidadEmbed({
     return pairs;
   };
 
-  // selects controlados opcionalmente por el padre
-  const onCampoChange = (v) => (setCampoProp ? setCampoProp(v) : setCampo(v));
-  const onLoteChange = (v) => (setLoteProp ? setLoteProp(v) : setLote(v));
+  // ---------- Edición / Borrado ----------
+  const [editOpen, setEditOpen] = useState(false);
+  const [editEv, setEditEv] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [deleteEv, setDeleteEv] = useState(null);
 
-  // ---------- Editar / Borrar ----------
   const openEdit = (ev) => {
     const r = ev.raw || {};
     const keys = EDITABLE_BY_TYPE[ev.tipo] || EDITABLE_BY_TYPE.OTRA;
     const base = { fecha: r.fecha ? dayjs(r.fecha).format("YYYY-MM-DD") : "" };
     const dynamic = {};
-    keys.forEach((k) => { dynamic[k] = r[k] ?? ""; });
+    keys.forEach((k) => {
+      dynamic[k] = r[k] ?? "";
+    });
     setEditEv(ev);
     setEditForm({ ...base, ...dynamic });
     setEditOpen(true);
   };
 
   const saveEdit = async () => {
-    if (!editEv?.serverId || !editEv?.serverModel) { setEditOpen(false); return; }
+    if (!editEv?.serverId || !editEv?.serverModel) {
+      setEditOpen(false);
+      return;
+    }
     const url = getEndpointFor(editEv.serverModel, editEv.serverId);
-    if (!url) { alert("Este tipo de evento no se puede editar desde aquí."); return; }
+    if (!url) {
+      alert("Este tipo de evento no se puede editar desde aquí.");
+      return;
+    }
 
     setSaving(true);
-    try {
+    const send = async (method) => {
       const fd = new FormData();
       Object.entries(editForm).forEach(([k, v]) => fd.append(k, v ?? ""));
-      await axios.patch(url, fd, { headers: { "Content-Type": "multipart/form-data" } });
+      return axios[method](url, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    };
 
+    try {
+      await send("patch");
       setAllTasks((prev) =>
         prev.map((ev) => {
           if (ev.id !== editEv.id) return ev;
-          const newRaw = { ...ev.raw, ...editForm, fecha: editForm.fecha || ev.raw.fecha };
+          const newRaw = {
+            ...ev.raw,
+            ...editForm,
+            fecha: editForm.fecha || ev.raw.fecha,
+          };
           return { ...ev, fecha: newRaw.fecha, raw: newRaw };
         })
       );
       setEditOpen(false);
     } catch (err) {
       try {
-        const fd = new FormData();
-        Object.entries(editForm).forEach(([k, v]) => fd.append(k, v ?? ""));
-        await axios.put(url, fd, { headers: { "Content-Type": "multipart/form-data" } });
+        await send("put");
         setAllTasks((prev) =>
           prev.map((ev) => {
             if (ev.id !== editEv.id) return ev;
-            const newRaw = { ...ev.raw, ...editForm, fecha: editForm.fecha || ev.raw.fecha };
+            const newRaw = {
+              ...ev.raw,
+              ...editForm,
+              fecha: editForm.fecha || ev.raw.fecha,
+            };
             return { ...ev, fecha: newRaw.fecha, raw: newRaw };
           })
         );
@@ -384,7 +529,6 @@ export default function TrazabilidadEmbed({
     }
   };
 
-  // pedir confirmación de borrado (sin window.confirm)
   const askDeleteTask = (ev) => {
     if (!ev?.serverId || !ev?.serverModel) return;
     const url = getEndpointFor(ev.serverModel, ev.serverId);
@@ -426,7 +570,12 @@ export default function TrazabilidadEmbed({
       {/* Filtros en una sola línea */}
       <Row className="g-2 flex-wrap mb-3">
         <Col md="auto">
-          <Form.Label className="fw-semibold" style={{ color: "#16543a" }}>Campo</Form.Label>
+          <Form.Label
+            className="fw-semibold"
+            style={{ color: "#16543a" }}
+          >
+            Campo
+          </Form.Label>
           <Form.Select
             value={campo}
             onChange={(e) => onCampoChange(e.target.value)}
@@ -434,27 +583,44 @@ export default function TrazabilidadEmbed({
             style={{ minWidth: 210 }}
           >
             <option value="">Todos</option>
-            {campos.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+            {campos.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nombre}
+              </option>
+            ))}
           </Form.Select>
         </Col>
 
         <Col md="auto">
-          <Form.Label className="fw-semibold" style={{ color: "#16543a" }}>Lote</Form.Label>
+          <Form.Label
+            className="fw-semibold"
+            style={{ color: "#16543a" }}
+          >
+            Lote
+          </Form.Label>
           <Form.Select
             value={lote}
             onChange={(e) => onLoteChange(e.target.value)}
-            disabled={!campo} // deshabilita si no hay campo
+            disabled={!campo}
             className="input-terrax"
             style={{ minWidth: 210 }}
           >
             <option value="">Todos</option>
-            {lotes.map((l) => <option key={l.id} value={l.id}>{l.nombre}</option>)}
+            {lotes.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.nombre}
+              </option>
+            ))}
           </Form.Select>
-
         </Col>
 
         <Col md="auto">
-          <Form.Label className="fw-semibold" style={{ color: "#16543a" }}>Tipo</Form.Label>
+          <Form.Label
+            className="fw-semibold"
+            style={{ color: "#16543a" }}
+          >
+            Tipo
+          </Form.Label>
           <Form.Select
             value={tipo}
             onChange={(e) => setTipo(e.target.value)}
@@ -462,13 +628,20 @@ export default function TrazabilidadEmbed({
             style={{ minWidth: 210 }}
           >
             {TIPO_OPTIONS.map((t) => (
-              <option key={t.key} value={t.key}>{t.label}</option>
+              <option key={t.key} value={t.key}>
+                {t.label}
+              </option>
             ))}
           </Form.Select>
         </Col>
 
         <Col md="auto">
-          <Form.Label className="fw-semibold" style={{ color: "#16543a" }}>Desde</Form.Label>
+          <Form.Label
+            className="fw-semibold"
+            style={{ color: "#16543a" }}
+          >
+            Desde
+          </Form.Label>
           <Form.Control
             type="date"
             value={desde}
@@ -478,7 +651,12 @@ export default function TrazabilidadEmbed({
         </Col>
 
         <Col md="auto">
-          <Form.Label className="fw-semibold" style={{ color: "#16543a" }}>Hasta</Form.Label>
+          <Form.Label
+            className="fw-semibold"
+            style={{ color: "#16543a" }}
+          >
+            Hasta
+          </Form.Label>
           <Form.Control
             type="date"
             value={hasta}
@@ -494,16 +672,21 @@ export default function TrazabilidadEmbed({
           <thead style={{ background: "#e9f6ee" }}>
             <tr>
               <th style={{ width: 140 }}>Fecha</th>
-              <th style={{ width: 280 }}>Tipo de tarea</th>
-              <th className="text-center" style={{ width: 210 }}>Acciones</th>
-
+              <th style={{ width: 220 }}>Tipo de tarea</th>
+              <th style={{ width: 220 }}>Campo</th>
+              <th style={{ width: 220 }}>Lote</th>
+              <th className="text-center" style={{ width: 210 }}>
+                Acciones
+              </th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={3} className="text-center text-muted py-4">
-                  {loading ? "Cargando…" : "No hay eventos para los filtros seleccionados."}
+                <td colSpan={5} className="text-center text-muted py-4">
+                  {loading
+                    ? "Cargando…"
+                    : "No hay eventos para los filtros seleccionados."}
                 </td>
               </tr>
             )}
@@ -511,31 +694,59 @@ export default function TrazabilidadEmbed({
             {filtered.map((ev) => {
               const meta = TYPE_META[ev.tipo] || TYPE_META.OTRA;
               const isOpen = expanded.has(ev.id);
-              const canEditDelete = !!(ev.serverId != null && ev.serverModel && getEndpointFor(ev.serverModel, ev.serverId));
+              const canEditDelete = !!(
+                ev.serverId != null &&
+                ev.serverModel &&
+                getEndpointFor(ev.serverModel, ev.serverId)
+              );
               const pillBg = meta.dot;
               const pillFg = textColorFor(pillBg);
+
+              const campoName = getCampoName(ev) || "-";
+              const loteName = getLoteName(ev) || "-";
 
               return (
                 <React.Fragment key={ev.id}>
                   <tr style={{ background: meta.bg }}>
                     <td className="fw-semibold">
-                      {ev.fecha ? dayjs(ev.fecha).format("DD/MM/YYYY") : "-"}
+                      {ev.fecha
+                        ? dayjs(ev.fecha).format("DD/MM/YYYY")
+                        : "-"}
                     </td>
 
                     <td>
                       <span
                         className="me-2 d-inline-block"
-                        style={{ width: 10, height: 10, borderRadius: 999, background: meta.dot, transform: "translateY(-1px)" }}
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: 999,
+                          background: meta.dot,
+                          transform: "translateY(-1px)",
+                        }}
                       />
                       <span
                         className="badge"
-                        style={{ background: pillBg, color: pillFg, fontWeight: 600, fontSize: "0.95rem", padding: "0.45em 0.9em", letterSpacing: "0.3px" }}
+                        style={{
+                          background: pillBg,
+                          color: pillFg,
+                          fontWeight: 600,
+                          fontSize: "0.95rem",
+                          padding: "0.45em 0.9em",
+                          letterSpacing: "0.3px",
+                        }}
                       >
                         {meta.label}
                       </span>
                     </td>
 
-                    <td className="text-center" style={{ width: 1, whiteSpace: "nowrap" }}>
+                    <td>{campoName}</td>
+                    <td>{loteName}</td>
+
+                    <td
+                      className="text-center"
+                      style={{ width: 1, whiteSpace: "nowrap" }}
+                    >
                       <div className="d-inline-flex gap-2">
                         <Button
                           variant="outline-success"
@@ -543,9 +754,15 @@ export default function TrazabilidadEmbed({
                           className="rounded-circle"
                           style={{ width: 34, height: 34, borderWidth: 2 }}
                           onClick={() => toggleRow(ev.id)}
-                          title={isOpen ? "Ocultar detalle" : "Ver detalle"}
+                          title={
+                            isOpen ? "Ocultar detalle" : "Ver detalle"
+                          }
                         >
-                          <i className={`bi ${isOpen ? "bi-chevron-up" : "bi-chevron-down"}`} />
+                          <i
+                            className={`bi ${
+                              isOpen ? "bi-chevron-up" : "bi-chevron-down"
+                            }`}
+                          />
                         </Button>
 
                         <Button
@@ -577,15 +794,26 @@ export default function TrazabilidadEmbed({
 
                   {isOpen && (
                     <tr>
-                      <td colSpan={3} style={{ background: "#fafdfb" }}>
-                        <div className="p-3 border rounded-3" style={{ borderColor: "#d9efe3", background: "#ffffff" }}>
+                      <td colSpan={5} style={{ background: "#fafdfb" }}>
+                        <div
+                          className="p-3 border rounded-3"
+                          style={{
+                            borderColor: "#d9efe3",
+                            background: "#ffffff",
+                          }}
+                        >
                           <Row className="g-3">
                             {buildDetailPairs(ev).map(([k, v]) => (
                               <Col md={6} key={k}>
                                 <Form.Label className="text-muted small mb-1">
                                   {FIELD_LABELS[k] || k}
                                 </Form.Label>
-                                <Form.Control size="sm" value={v} readOnly style={{ background: "#f7faf9" }} />
+                                <Form.Control
+                                  size="sm"
+                                  value={v}
+                                  readOnly
+                                  style={{ background: "#f7faf9" }}
+                                />
                               </Col>
                             ))}
                           </Row>
@@ -608,7 +836,8 @@ export default function TrazabilidadEmbed({
               ¿Seguro que desea eliminar esta tarea?
             </h5>
             <p className="mb-2">
-              Esta acción es irreversible y eliminará el registro de la trazabilidad.
+              Esta acción es irreversible y eliminará el registro de la
+              trazabilidad.
             </p>
 
             <div className="d-flex justify-content-end gap-2 mt-3">
@@ -629,7 +858,6 @@ export default function TrazabilidadEmbed({
         </div>
       )}
 
-
       {/* Modal editar en dos columnas */}
       <Modal show={editOpen} onHide={() => setEditOpen(false)} centered>
         <Modal.Header closeButton>
@@ -644,41 +872,65 @@ export default function TrazabilidadEmbed({
                 <Form.Control
                   type="date"
                   value={editForm.fecha || ""}
-                  onChange={(e) => setEditForm((p) => ({ ...p, fecha: e.target.value }))}
+                  onChange={(e) =>
+                    setEditForm((p) => ({
+                      ...p,
+                      fecha: e.target.value,
+                    }))
+                  }
                 />
               </Col>
 
-              {/* Campos específicos por tipo -> 2 columnas; largos ocupan toda la fila */}
-              {(EDITABLE_BY_TYPE[editEv.tipo] || EDITABLE_BY_TYPE.OTRA).map((k) => {
-                const isLong = k === "observaciones" || k === "descripcion";
-                return (
-                  <Col md={isLong ? 12 : 6} key={k}>
-                    <Form.Label>{FIELD_LABELS[k] || k}</Form.Label>
-                    {k === "observaciones" ? (
-                      <Form.Control
-                        as="textarea"
-                        rows={3}
-                        value={editForm[k] ?? ""}
-                        onChange={(e) => setEditForm((p) => ({ ...p, [k]: e.target.value }))}
-                      />
-                    ) : (
-                      <Form.Control
-                        type={NUMERIC_KEYS.has(k) ? "number" : "text"}
-                        value={editForm[k] ?? ""}
-                        onChange={(e) => setEditForm((p) => ({ ...p, [k]: e.target.value }))}
-                      />
-                    )}
-                  </Col>
-                );
-              })}
+              {(EDITABLE_BY_TYPE[editEv.tipo] || EDITABLE_BY_TYPE.OTRA).map(
+                (k) => {
+                  const isLong = k === "observaciones" || k === "descripcion";
+                  return (
+                    <Col md={isLong ? 12 : 6} key={k}>
+                      <Form.Label>{FIELD_LABELS[k] || k}</Form.Label>
+                      {k === "observaciones" ? (
+                        <Form.Control
+                          as="textarea"
+                          rows={3}
+                          value={editForm[k] ?? ""}
+                          onChange={(e) =>
+                            setEditForm((p) => ({
+                              ...p,
+                              [k]: e.target.value,
+                            }))
+                          }
+                        />
+                      ) : (
+                        <Form.Control
+                          type={NUMERIC_KEYS.has(k) ? "number" : "text"}
+                          value={editForm[k] ?? ""}
+                          onChange={(e) =>
+                            setEditForm((p) => ({
+                              ...p,
+                              [k]: e.target.value,
+                            }))
+                          }
+                        />
+                      )}
+                    </Col>
+                  );
+                }
+              )}
             </Row>
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setEditOpen(false)} disabled={saving}>
+          <Button
+            variant="secondary"
+            onClick={() => setEditOpen(false)}
+            disabled={saving}
+          >
             Cancelar
           </Button>
-          <Button variant="success" onClick={saveEdit} disabled={saving || !editEv?.serverId}>
+          <Button
+            variant="success"
+            onClick={saveEdit}
+            disabled={saving || !editEv?.serverId}
+          >
             {saving ? "Guardando..." : "Guardar cambios"}
           </Button>
         </Modal.Footer>

@@ -28,10 +28,9 @@ function SidebarItem({ icon, label, isOpen, to, onClick }) {
         title={label}
         onClick={onClick}
         className={`nav-link d-flex align-items-center rounded w-100 text-white 
-          ${
-            isOpen
-              ? "gap-4 justify-content-start ps-2"
-              : "justify-content-center"
+          ${isOpen
+            ? "gap-4 justify-content-start ps-2"
+            : "justify-content-center"
           } 
           ${active ? "active bg-white bg-opacity-25" : ""}`}
       >
@@ -60,9 +59,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   return (
     <>
       <div
-        className={`bg-success text-white shadow-sm transition-all p-3 d-flex flex-column justify-content-between rounded-end ${
-          isOpen ? "" : "collapsed-sidebar"
-        }`}
+        className={`bg-success text-white shadow-sm transition-all p-3 d-flex flex-column justify-content-between rounded-end ${isOpen ? "" : "collapsed-sidebar"
+          }`}
         style={{
           position: "fixed",
           top: 0,
@@ -75,11 +73,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         <div>
           {/* Logo + botón colapsar */}
           <div
-            className={`d-flex align-items-center mb-3 mt-3 ${
-              isOpen
-                ? "justify-content-start px-2 gap-2"
-                : "justify-content-center"
-            }`}
+            className={`d-flex align-items-center mb-3 mt-3 ${isOpen
+              ? "justify-content-start px-2 gap-2"
+              : "justify-content-center"
+              }`}
           >
             <div>
               <button
@@ -115,20 +112,19 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               isOpen={isOpen}
               to="/inicio"
             />
-            <SidebarItem
-              icon={<Calendar size={18} />}
-              label="Calendario"
-              isOpen={isOpen}
-              to="/calendario"
-            />
             {usuario.rol === "productor" && (
               <SidebarItem
                 icon={<Map size={18} />}
                 label="Mis campos"
                 isOpen={isOpen}
                 to="/VerCampos"
-              />
-            )}
+              />)}
+            <SidebarItem
+              icon={<BarChart2 size={18} />}
+              label="Reportes"
+              isOpen={isOpen}
+              to="/reportes"
+            />
             {usuario.rol === "productor" && (
               <SidebarItem
                 icon={<Sprout size={18} />}
@@ -138,16 +134,22 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               />
             )}
             <SidebarItem
-              icon={<BarChart2 size={18} />}
-              label="Reportes"
+              icon={<Calendar size={18} />}
+              label="Calendario"
               isOpen={isOpen}
-              to="/reportes"
+              to="/calendario"
             />
             <SidebarItem
               icon={<FaStackOverflow size={18} />}
               label="Productos"
               isOpen={isOpen}
               to="/productos"
+            />
+            <SidebarItem
+              icon={<FlaskConical size={18} />}
+              label="Calculadora"
+              isOpen={isOpen}
+              to="/calculadora"
             />
             {usuario.rol === "productor" && (
               <SidebarItem
@@ -165,12 +167,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 to="/estadisticas"
               />
             )}
-            <SidebarItem
-              icon={<FlaskConical size={18} />}
-              label="Calculadora"
-              isOpen={isOpen}
-              to="/calculadora"
-            />
             {usuario.rol === "admin" && (
               <SidebarItem
                 icon={<User size={18} />}
@@ -186,15 +182,13 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         <div className="d-flex flex-column">
           {/* Botón Solicitar Servicio justo encima del usuario */}
           <div
-            className={`d-flex ${
-              isOpen ? "justify-content-start" : "justify-content-center"
-            } mb-2`}
+            className={`d-flex ${isOpen ? "justify-content-start" : "justify-content-center"
+              } mb-2`}
           >
             <button
               onClick={() => setShowModal(true)}
-              className={`btn btn-outline-light d-flex align-items-center gap-2 w-100 ${
-                isOpen ? "px-3" : "justify-content-center"
-              }`}
+              className={`btn btn-outline-light d-flex align-items-center gap-2 w-100 ${isOpen ? "px-3" : "justify-content-center"
+                }`}
               style={{
                 borderRadius: "8px",
                 fontSize: "1rem",

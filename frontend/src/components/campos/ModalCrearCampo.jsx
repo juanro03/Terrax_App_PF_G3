@@ -128,10 +128,6 @@ const ModalCrearCampo = ({ show, onHide, onSuccess }) => {
             </Form.Select>
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label className="modal-label">Cantidad de Lotes</Form.Label>
-            <Form.Control type="number" name="cantidadLotes" value={form.cantidadLotes} onChange={handleChange} required />
-          </Form.Group>
-          <Form.Group className="mb-3">
             <Form.Label className="modal-label fw-bold">Imagen Satelital</Form.Label>
             <Form.Control
               type="file"
@@ -177,11 +173,6 @@ const ModalCrearCampo = ({ show, onHide, onSuccess }) => {
                 </div>
               </div>
             )}
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label className="modal-label">Observaciones</Form.Label>
-            <Form.Control as="textarea" name="observacion" value={form.observacion} onChange={handleChange} />
           </Form.Group>
           <div className="text-end">
             <Button variant="secondary" onClick={onHide} className="me-2">Cancelar</Button>

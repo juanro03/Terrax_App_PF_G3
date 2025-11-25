@@ -14,6 +14,7 @@ from .services import calcular_centroide
 from .services import obtener_alertas_para_lote
 from django.core.mail import send_mail
 from django.conf import settings
+from django.core.files.storage import default_storage
 
 #   LOTES
 class LoteViewSet(viewsets.ModelViewSet):
@@ -300,14 +301,23 @@ class CampaniaViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance: Campania = self.get_object()
 
-        # Borrar archivos asociados si existen (opcional pero recomendado)
-        if instance.analisis_suelo and default_storage.exists(instance.analisis_suelo.name):
-            default_storage.delete(instance.analisis_suelo.name)
-        if instance.archivo_rendimiento and default_storage.exists(instance.archivo_rendimiento.name):
-            default_storage.delete(instance.archivo_rendimiento.name)
+        # Borrar archivo de análisis de suelo
+        try:
+            if instance.analisis_suelo:
+                instance.analisis_suelo.delete(save=False)
+        except Exception as e:
+            print("Error borrando analisis_suelo:", e)
 
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        # Borrar archivo de rendimiento
+        try:
+            if instance.archivo_rendimiento:
+                instance.archivo_rendimiento.delete(save=False)
+        except Exception as e:
+            print("Error borrando archivo_rendimiento:", e)
+
+        # Finalmente eliminar la campaña
+        return super().destroy(request, *args, **kwargs)
+
 
 #   FINALIZAR CAMPAÑA / HISTORIAL
 class FinalizarCampaniaView(APIView):

@@ -60,7 +60,7 @@ export default function ActividadesAgricolas() {
     concentracion: "", fabricante: "", litrosPorHa: "", hectareasAplicadas: "",
     observaciones: "", mapaAdjunto: null,
   });
-  const [otros, setOtros] = useState({  fecha: "",  nombre: "",  observaciones: "",});
+  const [otros, setOtros] = useState({ fecha: "", nombre: "", observaciones: "", });
   const [riego, setRiego] = useState({ fecha: "", tipoRiego: "", volumen: "", observaciones: "" });
   const [laboreo, setLaboreo] = useState({ fecha: "", tipoLaboreo: "", operario: "", observaciones: "" });
   const [maleza, setMaleza] = useState({
@@ -200,15 +200,15 @@ export default function ActividadesAgricolas() {
   };
 
   const canSubmit = Boolean(
-  lote && actividad && (
-    (actividad === "Fertilización" && fert.fecha) ||
-    (actividad === "Riego" && riego.fecha) ||
-    (actividad === "Laboreos de Lote" && laboreo.fecha) ||
-    (actividad === "Manejo de Malezas" && maleza.fecha) ||
-    (actividad === "Aplicación Fitosanitaria" && fito.fecha) ||
-    (actividad === "Otros" && otros.fecha)  
-  )
-);
+    lote && actividad && (
+      (actividad === "Fertilización" && fert.fecha) ||
+      (actividad === "Riego" && riego.fecha) ||
+      (actividad === "Laboreos de Lote" && laboreo.fecha) ||
+      (actividad === "Manejo de Malezas" && maleza.fecha) ||
+      (actividad === "Aplicación Fitosanitaria" && fito.fecha) ||
+      (actividad === "Otros" && otros.fecha)
+    )
+  );
 
   return (
     <Card className="mx-auto my-5 shadow"
@@ -495,7 +495,7 @@ export default function ActividadesAgricolas() {
         {showTraz && (
           <div className="mt-4 p-3 rounded-4" style={{ background: "#f3fbf6", border: "1px solid #d9efe3" }}>
             <h5 className="fw-bold mb-3" style={{ color: verdeOscuro }}>Trazabilidad Agrícola</h5>
-            <TrazabilidadEmbed campos={campos} lotes={lotes} refreshKey={refreshKey} />
+            <TrazabilidadEmbed refreshKey={refreshKey} />
 
           </div>
         )}

@@ -125,30 +125,11 @@ const ModalEditarCampo = ({ show, onHide, campo, onSuccess }) => {
             </Form.Select>
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label className="modal-label">Cantidad de Lotes</Form.Label>
-            <Form.Control
-              type="number"
-              name="cantidadLotes"
-              value={form.cantidadLotes}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
             <Form.Label className="modal-label">Imagen Satelital</Form.Label>
             <Form.Control
               type="file"
               name="imagen_satelital"
               accept="image/*"
-              onChange={handleChange}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label className="modal-label">Observaciones</Form.Label>
-            <Form.Control
-              as="textarea"
-              name="observacion"
-              value={form.observacion}
               onChange={handleChange}
             />
           </Form.Group>

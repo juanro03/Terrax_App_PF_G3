@@ -287,7 +287,7 @@ const Clima = () => {
         const p = precipitation_sum[i];
         const tmin = temperature_2m_min[i];
         if (typeof p === "number" && p > 5) rDays.push({ date, precip: p });
-        if (typeof tmin === "number" && tmin < 0) fDays.push({ date, tmin });
+        if (typeof tmin === "number" && tmin <= 0) fDays.push({ date, tmin });
       }
 
       setRainDays(rDays);
@@ -455,7 +455,7 @@ const Clima = () => {
       {activeTab === "precipitaciones" && (
         <div className="hist-tab">
           <h4>{displayCiudad}</h4>
-          <p className="hist-sub">Días con precipitación &gt; 5 mm en los últimos 3 meses</p>
+          <p className="hist-sub">Precipitaciones mayores a 5mm en los últimos 90 días</p>
 
           {loadingHist && <p>Cargando...</p>}
           {histError && <p className="error">{histError}</p>}
@@ -512,8 +512,6 @@ const Clima = () => {
                   </div>
                 );
               })()}
-
-              <div className="hist-foot">Total días con lluvia &gt; 5 mm: {rainDays.length}</div>
             </>
           )}
         </div>
@@ -523,7 +521,7 @@ const Clima = () => {
       {activeTab === "heladas" && (
         <div className="hist-tab">
           <h4>{displayCiudad}</h4>
-          <p className="hist-sub">Días con temperatura mínima menor a 0°C en los últimos 3 meses</p>
+          <p className="hist-sub">Días con temperatura de 0°C o menos en los últimos 3 meses</p>
 
           {loadingHist && <p>Cargando...</p>}
           {histError && <p className="error">{histError}</p>}
@@ -534,7 +532,7 @@ const Clima = () => {
                 {frostDays.length === 0 && <p>No hubo heladas en este período.</p>}
                 {frostDays.map((d, i) => (
                   <div key={i} className="hist-card helada">
-                    <span className="hist-date">{formatearFechaCorta(d.date)}</span>
+                    <p className="hist-date mb-1">{formatearFechaCorta(d.date)}</p>
                     <span className="hist-value">{Math.round(d.tmin)}°C</span>
                   </div>
                 ))}

@@ -3,6 +3,10 @@ import React from "react";
 import { Carousel } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+const sombraTexto = {
+  textShadow: "2px 2px 3px rgba(0, 0, 0, 0.69)",
+};
+
 const Carrusel = () => {
   return (
     <Carousel>
@@ -14,10 +18,9 @@ const Carrusel = () => {
           style={{ maxHeight: "400px", objectFit: "cover" }}
         />
         <Carousel.Caption>
-          <h3>Registro de tus lotes</h3>
-          <p>
-            Mantené un historial en tiempo real de las tareas realizadas en cada
-            uno de tus lotes
+          <h3 style={sombraTexto}>Registro de tus lotes</h3>
+          <p style={sombraTexto}>
+            Registrá tus lotes y llevá un control sobre las campañas realizadas
           </p>
         </Carousel.Caption>
       </Carousel.Item>
@@ -26,14 +29,12 @@ const Carrusel = () => {
         <img
           className="d-block w-100"
           src="/2.jpg"
-          style={{ maxHeight: "400px", objectFit: "cover" }}
-          //alt="Segunda imagen"
+          style={{ maxHeight: "400px", objectFit: "cover" }}          
         />
         <Carousel.Caption>
-          <h3>Mapeo de Malezas</h3>
-          <p>
-            Mapeo exhaustivo de malezas con tecnología Marrón sobre Verde,
-            permitiendo identificar con precisión su distribución en el lote. .
+          <h3 style={sombraTexto}>Mapeo de Malezas</h3>
+          <p style={sombraTexto}>
+            Visualizá el estado de tus lotes a través de mapas de malezas desde la pestaña "Reportes"
           </p>
         </Carousel.Caption>
       </Carousel.Item>
@@ -45,12 +46,9 @@ const Carrusel = () => {
           style={{ maxHeight: "400px", objectFit: "cover" }}
         />
         <Carousel.Caption>
-          <h3>Pulverización Variable con Maquina</h3>
-          <p>
-            Preparamos la prescripción exacta para la maquinaria o monitor a
-            usar, a partir del mapeo multiespectral, lo que permite la
-            aplicación fitosanitaria exactamente donde el cultivo lo necesita,
-            optimizando insumos y reduciendo costos.{" "}
+          <h3 style={sombraTexto}>Aplicaciones con drones</h3>
+          <p style={sombraTexto}>
+            Solicitá aplicaciones de agroquímicos o fertilizantes a través del botón "Solicitar Servicio"
           </p>
         </Carousel.Caption>
       </Carousel.Item>
@@ -63,12 +61,9 @@ const Carrusel = () => {
           //alt="Segunda imagen"
         />
         <Carousel.Caption>
-          <h3>Procesamiento de mapas de Rinde</h3>
-          <p>
-            Conocer el rendimiento de cada zona ayuda a planificar mejor la
-            próxima campaña y maximizar tu producción. Nosotros preparamos el
-            monitor antes de la cosecha y nos encargamos del post-procesamiento
-            e informe.
+          <h3 style={sombraTexto}>Trazabilidad de tus tareas</h3>
+          <p style={sombraTexto}>
+            Llevá un control detallado de todas las tareas y campañas realizadas en tus lotes 
           </p>
         </Carousel.Caption>
       </Carousel.Item>
