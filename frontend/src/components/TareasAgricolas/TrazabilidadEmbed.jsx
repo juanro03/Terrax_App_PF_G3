@@ -54,16 +54,19 @@ const TYPE_META = {
 
 const mapTipo = (raw) => {
   const s = (raw || "").toString().toLowerCase();
-  if (s.includes("siembr")) return "SIEMBRA";
+
+  if (s.includes("fitosan")) return "FITOSANITARIA"; // Aplicación Fitosanitaria
   if (s.includes("cobert")) return "COBERTURA";
-  if (s.includes("fertili")) return "FERTILIZACION";
-  if (s.includes("maleza")) return "MALEZAS";
-  if (s.includes("laboreo")) return "LABOREO";
-  if (s.includes("riego")) return "RIEGO";
-  if (s.includes("fitosan")) return "FITOSANITARIA";
   if (s.includes("cosech")) return "COSECHA";
+  if (s.includes("fertili")) return "FERTILIZACION";
+  if (s.includes("laboreo")) return "LABOREO";
+  if (s.includes("maleza")) return "MALEZAS";
+  if (s.includes("riego")) return "RIEGO";
+  if (s.includes("siembr")) return "SIEMBRA";
+
   return "OTRA";
 };
+
 
 const FIELD_LABELS = {
   fecha: "Fecha",
@@ -92,15 +95,15 @@ const FIELD_LABELS = {
 };
 
 const TIPO_OPTIONS = [
-  { key: "", label: "Todos" },
-  { key: "SIEMBRA", label: "Siembra" },
-  { key: "COBERTURA", label: "Cobertura" },
-  { key: "FERTILIZACION", label: "Fertilización" },
-  { key: "MALEZAS", label: "Manejo de Malezas" },
-  { key: "LABOREO", label: "Laboreos de Lote" },
-  { key: "RIEGO", label: "Riego" },
   { key: "FITOSANITARIA", label: "Aplicación Fitosanitaria" },
+  { key: "COBERTURA", label: "Cobertura" },
   { key: "COSECHA", label: "Cosecha" },
+  { key: "FERTILIZACION", label: "Fertilización" },
+  { key: "LABOREO", label: "Laboreos de Lote" },
+  { key: "MALEZAS", label: "Manejo de Malezas" },
+  { key: "", label: "Todos" },
+  { key: "RIEGO", label: "Riego" },
+  { key: "SIEMBRA", label: "Siembra" },
 ];
 
 // campos editables según tipo
@@ -704,6 +707,8 @@ export default function TrazabilidadEmbed({
 
               const campoName = getCampoName(ev) || "-";
               const loteName = getLoteName(ev) || "-";
+              const detailPairs = buildDetailPairs(ev).filter(([k, v]) => k !== "fecha" && v !== null && v !== "" && v !== undefined);
+
 
               return (
                 <React.Fragment key={ev.id}>
@@ -759,9 +764,8 @@ export default function TrazabilidadEmbed({
                           }
                         >
                           <i
-                            className={`bi ${
-                              isOpen ? "bi-chevron-up" : "bi-chevron-down"
-                            }`}
+                            className={`bi ${isOpen ? "bi-chevron-up" : "bi-chevron-down"
+                              }`}
                           />
                         </Button>
 
@@ -802,25 +806,32 @@ export default function TrazabilidadEmbed({
                             background: "#ffffff",
                           }}
                         >
-                          <Row className="g-3">
-                            {buildDetailPairs(ev).map(([k, v]) => (
-                              <Col md={6} key={k}>
-                                <Form.Label className="text-muted small mb-1">
-                                  {FIELD_LABELS[k] || k}
-                                </Form.Label>
-                                <Form.Control
-                                  size="sm"
-                                  value={v}
-                                  readOnly
-                                  style={{ background: "#f7faf9" }}
-                                />
-                              </Col>
-                            ))}
-                          </Row>
+                          {detailPairs.length === 0 ? (
+                            <p className="text-center text-muted m-0">
+                              No hay detalles cargados para esta tarea
+                            </p>
+                          ) : (
+                            <Row className="g-3">
+                              {detailPairs.map(([k, v]) => (
+                                <Col md={6} key={k}>
+                                  <Form.Label className="text-muted small mb-1">
+                                    {FIELD_LABELS[k] || k}
+                                  </Form.Label>
+                                  <Form.Control
+                                    size="sm"
+                                    value={v}
+                                    readOnly
+                                    style={{ background: "#f7faf9" }}
+                                  />
+                                </Col>
+                              ))}
+                            </Row>
+                          )}
                         </div>
                       </td>
                     </tr>
                   )}
+
                 </React.Fragment>
               );
             })}

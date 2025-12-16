@@ -133,18 +133,22 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 to="/tareas"
               />
             )}
-            <SidebarItem
-              icon={<Calendar size={18} />}
-              label="Calendario"
-              isOpen={isOpen}
-              to="/calendario"
-            />
-            <SidebarItem
-              icon={<FaStackOverflow size={18} />}
-              label="Productos"
-              isOpen={isOpen}
-              to="/productos"
-            />
+            {usuario.rol === "productor" && (
+              <SidebarItem
+                icon={<Calendar size={18} />}
+                label="Calendario"
+                isOpen={isOpen}
+                to="/calendario"
+              />
+            )}
+            {usuario.rol === "productor" && (
+              <SidebarItem
+                icon={<FaStackOverflow size={18} />}
+                label="Productos"
+                isOpen={isOpen}
+                to="/productos"
+              />
+            )}
             <SidebarItem
               icon={<FlaskConical size={18} />}
               label="Calculadora"
@@ -185,19 +189,22 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             className={`d-flex ${isOpen ? "justify-content-start" : "justify-content-center"
               } mb-2`}
           >
-            <button
-              onClick={() => setShowModal(true)}
-              className={`btn btn-outline-light d-flex align-items-center gap-2 w-100 ${isOpen ? "px-3" : "justify-content-center"
-                }`}
-              style={{
-                borderRadius: "8px",
-                fontSize: "1rem",
-                fontWeight: 500,
-              }}
-            >
-              <Wrench size={18} />
-              {isOpen && <span>Solicitar Servicio</span>}
-            </button>
+            {usuario.rol === "productor" && (
+
+              <button
+                onClick={() => setShowModal(true)}
+                className={`btn btn-outline-light d-flex align-items-center gap-2 w-100 ${isOpen ? "px-3" : "justify-content-center"
+                  }`}
+                style={{
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                  fontWeight: 500,
+                }}
+              >
+                <Wrench size={18} />
+                {isOpen && <span>Solicitar Servicio</span>}
+              </button>
+            )}
           </div>
 
           {/* Renderizar modal */}

@@ -321,9 +321,12 @@ const Reportes = () => {
             className="mb-3 d-flex justify-content-end"
             style={{ width: "100%" }}
           >
-            <button className="btn-terrax" onClick={() => setShowModal(true)}>
-              Agregar nuevo reporte
-            </button>
+            <div style={{ textAlign: "center", width: "100%" }}>
+              <button className="btn-terrax" onClick={() => setShowModal(true)}>
+                Agregar nuevo reporte
+              </button>
+            </div>
+
           </div>
         )}
 

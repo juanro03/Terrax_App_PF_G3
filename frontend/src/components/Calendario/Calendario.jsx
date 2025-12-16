@@ -916,8 +916,8 @@ export default function Calendario() {
             {detalle?.observaciones || "—"}
           </p>
         </Modal.Body>
-        <Modal.Footer className="d-flex justify-content-between">
-          <Button
+        <Modal.Footer className="d-flex justify-content-end gap-2">
+          {/*<Button
             variant="outline-success"
             onClick={() => {
               openForm({
@@ -934,8 +934,8 @@ export default function Calendario() {
             }}
           >
             + Agregar comentario este día
-          </Button>
-          <Button variant="secondary" onClick={() => setDetalle(null)}>
+          </Button>*/}
+          <Button variant="success" onClick={() => setDetalle(null)}>
             Cerrar
           </Button>
         </Modal.Footer>

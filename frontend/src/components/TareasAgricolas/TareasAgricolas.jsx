@@ -10,12 +10,12 @@ const verdeOscuro = "#155a36";
 const blanco = "#fff";
 
 const actividades = [
-  "Fertilización",
-  "Manejo de Malezas",
-  "Laboreos de Lote",
-  "Riego",
   "Aplicación Fitosanitaria",
+  "Fertilización",
+  "Laboreos de Lote",
+  "Manejo de Malezas",
   "Otros",
+  "Riego",
 ];
 
 const TIPO_MAP = {
@@ -29,16 +29,17 @@ const TIPO_MAP = {
 
 const TIPOS_LABOREO = [
   "Cincel",
-  "Rastra disco",
-  "Desmalezadora",
-  "Rabasto",
-  "Rolo",
-  "Rastra diamante",
-  "Disco, rastra y rolo",
   "Cultivador de campo",
-  "Rabasto con rolo",
+  "Desmalezadora",
+  "Disco, rastra y rolo",
   "Labranza convencional",
+  "Rabasto",
+  "Rabasto con rolo",
+  "Rastra diamante",
+  "Rastra disco",
+  "Rolo",
 ];
+
 
 export default function ActividadesAgricolas() {
   const [campo, setCampo] = useState("");
@@ -71,6 +72,33 @@ export default function ActividadesAgricolas() {
     fecha: "", porcentaje: "", plaga: "", estadoFen: "", producto: "", maquinaria: "",
     mapa: false, observaciones: "",
   });
+  const resetTodo = () => {
+    setCampo("");
+    setLote("");
+    setActividad("");
+    setFertVista("variable");
+
+    setFert({
+      fecha: "", tipoFertilizante: "", de: "", productoAplicar: "",
+      concentracion: "", fabricante: "", litrosPorHa: "", hectareasAplicadas: "",
+      observaciones: "", mapaAdjunto: null,
+    });
+
+    setRiego({ fecha: "", tipoRiego: "", volumen: "", observaciones: "" });
+    setLaboreo({ fecha: "", tipoLaboreo: "", operario: "", observaciones: "" });
+    setMaleza({
+      fecha: "", tipoFitosanitario: "", plagaMaleza: "", productoAplicar: "",
+      fabricante: "", lkgPorHa: "", hectareasAplicadas: "", observaciones: "", mapaVariable: null,
+    });
+    setFito({
+      fecha: "", porcentaje: "", plaga: "", estadoFen: "", producto: "",
+      maquinaria: "", mapa: false, observaciones: "",
+    });
+    setOtros({ fecha: "", observaciones: "" });
+
+    setMensaje("");
+  };
+
 
   // ---- cargar listas
   useEffect(() => {
@@ -128,10 +156,15 @@ export default function ActividadesAgricolas() {
         });
 
         setMensajeOk(true);
-        setMensaje("Actividad 'Otros' registrada correctamente");
+        setMensaje("¡Actividad registrada correctamente!");
         setRefreshKey((k) => k + 1);
+
+        // ✅ RESET TOTAL
+        resetTodo();
+
         return;
       }
+
       if (actividad === "Fertilización") {
         if (!fert.fecha) throw new Error("La fecha es obligatoria.");
         formData.append("fecha", fert.fecha);
@@ -187,6 +220,7 @@ export default function ActividadesAgricolas() {
       setMensajeOk(true);
       setMensaje("¡Actividad registrada correctamente!");
       setRefreshKey((k) => k + 1);
+      resetTodo();
 
     } catch (err) {
       setMensajeOk(false);
@@ -222,7 +256,7 @@ export default function ActividadesAgricolas() {
       }}>
       <Card.Body>
         <Card.Title className="fw-bold mb-3" style={{ color: verdeOscuro }}>
-          Registrar Actividad Agrícola
+          Registrar Tarea Agrícola
         </Card.Title>
 
         {mensaje && (
@@ -487,7 +521,7 @@ export default function ActividadesAgricolas() {
 
 
           <div className="d-flex align-items-center mt-4 gap-2">
-            <Button variant="success" type="submit" disabled={!canSubmit}>Registrar Actividad</Button>
+            <Button variant="success" type="submit" disabled={!canSubmit}>Registrar Tarea</Button>
 
           </div>
         </Form>

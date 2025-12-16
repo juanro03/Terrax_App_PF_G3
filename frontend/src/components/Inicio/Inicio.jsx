@@ -98,13 +98,15 @@ const Inicio = () => {
                   >
                     Reportes
                   </Button>
-                  <Button
-                    variant="success"
-                    size="lg"
-                    onClick={() => navigate("/calendario")}
-                  >
-                    Calendario
-                  </Button>
+                  {userRol === "productor" && (
+                    <Button
+                      variant="success"
+                      size="lg"
+                      onClick={() => navigate("/calendario")}
+                    >
+                      Calendario
+                    </Button>
+                  )}
                   <Button
                     variant="success"
                     size="lg"

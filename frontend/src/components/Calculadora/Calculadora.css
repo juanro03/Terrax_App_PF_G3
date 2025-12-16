@@ -107,4 +107,12 @@ h6 {
   opacity: 1;
 }
 
+.card:hover {
+  transform: none !important;
+}
 
+
+
+.calculadora-card:hover {
+  transform: none !important;
+}

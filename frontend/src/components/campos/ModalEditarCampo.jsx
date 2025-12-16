@@ -3,15 +3,35 @@ import { Modal, Button, Form } from "react-bootstrap";
 import axios from "../../axiosconfig";
 
 const ModalEditarCampo = ({ show, onHide, campo, onSuccess }) => {
-  const [form, setForm] = useState({ ...campo });
+  const [form, setForm] = useState({
+    nombre: "",
+    provincia: "",
+    localidad: "",
+    imagen_satelital: null,
+  });
   const [provincias, setProvincias] = useState([]);
   const [localidades, setLocalidades] = useState([]);
 
   useEffect(() => {
-    if (campo) {
-      setForm({ ...campo });
+    if (show && campo) {
+      setForm({
+        nombre: campo.nombre || "",
+        provincia: campo.provincia || "",
+        localidad: campo.localidad || "",
+        imagen_satelital: null,
+      });
     }
-  }, [campo]);
+
+    if (!show) {
+      setForm({
+        nombre: "",
+        provincia: "",
+        localidad: "",
+        imagen_satelital: null,
+      });
+    }
+  }, [show, campo]);
+
 
   useEffect(() => {
     axios.get("https://apis.datos.gob.ar/georef/api/provincias").then((res) => {

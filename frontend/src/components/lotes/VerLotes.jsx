@@ -2,11 +2,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../axiosconfig";
 import "./Lotes.css";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
 import ModalCrearLote from "./ModalCrearLote";
 import ModalEditarLote from "./ModalEditarLote";
 import { Button } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const VerLotes = ({ campoId }) => {
   const [lotes, setLotes] = useState([]);
@@ -85,13 +85,23 @@ const VerLotes = ({ campoId }) => {
         padding: "20px",
       }}
     >
+
       {/* barra superior */}
       <div
         className="d-flex justify-content-between align-items-center mb-4"
         style={{ gap: "10px", flexWrap: "wrap" }}
       >
         <div className="d-flex align-items-center flex-grow-1 flex-wrap gap-2">
-          <h2 className="fw-bold mb-0 me-2">{`Campo: ${campoNombre}`}</h2>
+            <button
+              type="button"
+              className="btn btn-outline-success btn-sm d-inline-flex align-items-center"
+              onClick={() => navigate("/VerCampos")}
+            >
+              <FaArrowLeft className="me-2" />
+              Volver
+            </button>
+
+          <h2 className="fw-bold mb-0 me-2 ms-4">{`Campo: ${campoNombre}`}</h2>
 
           <input
             type="text"
@@ -99,7 +109,7 @@ const VerLotes = ({ campoId }) => {
             style={{
               backgroundColor: "#ffffffff",
               width: "400px",
-              marginLeft: 200,
+              marginLeft: 180,
               marginTop: 0,
               marginBottom: 0,
               border: "1px solid #3d3d3dff",
