@@ -90,15 +90,24 @@ const Inicio = () => {
                       Mis Campos
                     </Button>
                   )}
-
+                  {userRol === "admin" && (
                   <Button
-                    variant="Usuarios"
+                    variant="success"
                     size="lg"
                     onClick={() => navigate("/usuarios")}
                   >
                     Usuarios
                   </Button>
-
+                  )}
+                  {userRol === "admin" && (
+                  <Button
+                    variant="success"
+                    size="lg"
+                    onClick={() => navigate("/dashboard")}
+                  >
+                    Panel de Control
+                  </Button>
+                  )}
                   <Button
                     variant="success"
                     size="lg"

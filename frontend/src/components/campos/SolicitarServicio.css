@@ -69,3 +69,29 @@
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #fff;
+  border-top: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.success-modal {
+  text-align: center;
+  padding: 30px;
+}
+
+.success-modal h3 {
+  color: #198754;
+  margin-bottom: 10px;
+}
