@@ -167,14 +167,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 to="/alertas"
               />
             )}
-            {usuario.rol === "productor" && (
-              <SidebarItem
-                icon={<i class="bi bi-bar-chart-line"></i>}
-                label="Mis Estadísticas"
-                isOpen={isOpen}
-                to="/estadisticas"
-              />
-            )}
             {usuario.rol === "admin" && (
               <SidebarItem
                 icon={<User size={18} />}
@@ -186,7 +178,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             {usuario.rol === "admin" && (
               <SidebarItem
                 icon={<User size={18} />}
-                label="Estadísticas Terrax"
+                label="Gestión de Usuarios"
                 isOpen={isOpen}
                 to="/dashboard"
               />
