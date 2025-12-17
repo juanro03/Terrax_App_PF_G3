@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'tareas',
     'productos',
     'reportes',
-]
+    'dashboard',
+    ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
