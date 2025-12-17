@@ -92,12 +92,21 @@ const Inicio = () => {
                   )}
 
                   <Button
+                    variant="Usuarios"
+                    size="lg"
+                    onClick={() => navigate("/usuarios")}
+                  >
+                    Usuarios
+                  </Button>
+
+                  <Button
                     variant="success"
                     size="lg"
                     onClick={() => navigate("/reportes")}
                   >
                     Reportes
                   </Button>
+                  
                   {userRol === "productor" && (
                     <Button
                       variant="success"

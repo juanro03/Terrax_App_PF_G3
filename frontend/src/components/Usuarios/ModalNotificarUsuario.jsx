@@ -26,7 +26,7 @@ const ModalNotificarUsuario = ({ show, onHide, usuarioId }) => {
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Enviar notificación</Modal.Title>
+        <Modal.Title>Enviar notificación de mora</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form.Group controlId="tipoNotificacion">

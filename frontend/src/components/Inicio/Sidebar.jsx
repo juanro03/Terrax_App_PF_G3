@@ -170,7 +170,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             {usuario.rol === "admin" && (
               <SidebarItem
                 icon={<User size={18} />}
-                label="Panel de control"
+                label="Usuarios"
                 isOpen={isOpen}
                 to="/usuarios"
               />
@@ -178,7 +178,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             {usuario.rol === "admin" && (
               <SidebarItem
                 icon={<User size={18} />}
-                label="Gestión de Usuarios"
+                label="Panel de control"
                 isOpen={isOpen}
                 to="/dashboard"
               />
