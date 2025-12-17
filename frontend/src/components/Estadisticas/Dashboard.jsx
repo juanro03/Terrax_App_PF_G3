@@ -79,12 +79,13 @@ export default function Dashboard() {
   const [mostrarGraficoNotificaciones, setMostrarGraficoNotificaciones] =
     useState(false);
 
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
-
   const [mostrarActivos, setMostrarActivos] = useState(false);
   const [mostrarInactivos, setMostrarInactivos] = useState(false);
   const [mostrarDetalleTareas, setMostrarDetalleTareas] = useState(false);
+
+  // Modal Doble Confirmación
+  const [showModal1, setShowModal1] = useState(false);
+  const [showModal2, setShowModal2] = useState(false);
 
   /* =======================
      DATA FETCH
@@ -104,7 +105,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-
     if (!token) return;
 
     axios
@@ -121,7 +121,6 @@ export default function Dashboard() {
       );
   }, []);
 
-  // NUEVO — Cargar notificaciones de mora
   useEffect(() => {
     axios
       .get("http://localhost:8000/api/notificaciones-mora/")
@@ -130,7 +129,7 @@ export default function Dashboard() {
   }, []);
 
   /* =======================
-     NUEVO — Checkbox handler
+     CHECKBOX HANDLER
   ======================= */
   const toggleSeleccion = (id) => {
     setSeleccionadas((prev) =>
@@ -138,43 +137,10 @@ export default function Dashboard() {
     );
   };
 
-  const eliminarSeleccionadas = () => {
-    if (seleccionadas.length === 0) {
-      alert("No seleccionaste ninguna notificación.");
-      return;
-    }
-
-    if (!window.confirm("¿Confirmás eliminar estas notificaciones?")) return;
-    if (
-      !window.confirm(
-        "⚠️ CONFIRMACIÓN FINAL: Esta acción es irreversible. ¿Continuar?"
-      )
-    )
-      return;
-
-    axios
-      .delete("http://localhost:8000/api/notificaciones-mora/eliminar/", {
-        data: { ids: seleccionadas },
-      })
-      .then(() => {
-        alert("Notificaciones eliminadas.");
-        setNotificaciones((prev) =>
-          prev.filter((n) => !seleccionadas.includes(n.id))
-        );
-        setSeleccionadas([]);
-      });
-  };
-
   /* =======================
      DERIVED DATA
   ======================= */
-  const filteredActivities = useMemo(() => {
-    return tareas.filter((a) => {
-      if (fromDate && a.fecha < fromDate) return false;
-      if (toDate && a.fecha > toDate) return false;
-      return true;
-    });
-  }, [tareas, fromDate, toDate]);
+  const filteredActivities = useMemo(() => tareas, [tareas]);
 
   const tareasPorTipo = useMemo(() => {
     const map = {};
@@ -188,36 +154,40 @@ export default function Dashboard() {
   const usuariosActivos = usuarios.filter((u) => u.is_active);
   const usuariosInactivos = usuarios.filter((u) => !u.is_active);
 
-  /* =========================
-     NUEVO — GRÁFICO NOTIFICACIONES
-  ========================= */
-  const graficoNotificaciones = {
-    labels: notificaciones.map((n) => n.fecha.slice(0, 10)),
-    datasets: [
-      {
-        label: "Notificaciones enviadas",
-        data: notificaciones.map(() => 1),
-        backgroundColor: "#66BB6A",
-        borderRadius: 6,
-      },
-    ],
-  };
+  /* =======================
+   GRAFICO NOTIFICACIONES (AGRUPADO)
+======================= */
+  const graficoNotificaciones = useMemo(() => {
+    const conteoPorFecha = {};
 
-  if (!stats) {
-    return <p className="text-center mt-5">Cargando dashboard…</p>;
-  }
+    // Agrupar notificaciones por fecha
+    notificaciones.forEach((n) => {
+      const fecha = n.fecha.slice(0, 10);
+      conteoPorFecha[fecha] = (conteoPorFecha[fecha] || 0) + 1;
+    });
+
+    const labels = Object.keys(conteoPorFecha);
+    const values = Object.values(conteoPorFecha);
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: "Notificaciones enviadas",
+          data: values,
+          backgroundColor: "#66BB6A",
+          borderRadius: 6,
+        },
+      ],
+    };
+  }, [notificaciones]);
+
+  if (!stats) return <p className="text-center mt-5">Cargando dashboard…</p>;
 
   return (
     <div style={dashboardWrapper}>
-      {/* TÍTULO PRINCIPAL */}
-      <h2
-        style={{
-          fontWeight: 700,
-          color: "#2E7D32",
-          marginBottom: "24px",
-          textAlign: "left",
-        }}
-      >
+      {/* TÍTULO */}
+      <h2 style={{ fontWeight: 700, color: "#2E7D32", marginBottom: "24px" }}>
         Gestión de Usuarios
       </h2>
 
@@ -395,9 +365,7 @@ export default function Dashboard() {
               options={{
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                scales: {
-                  y: { beginAtZero: true, ticks: { precision: 0 } },
-                },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
               }}
             />
           </div>
@@ -432,7 +400,7 @@ export default function Dashboard() {
       </div>
 
       {/* =======================
-          NOTIFICACIONES DE MORA (TABLA ORIGINAL + CHECKBOX)
+          NOTIFICACIONES MORA
       ======================= */}
       <div style={cardStyle} className="mt-4">
         <div className="d-flex justify-content-between align-items-center">
@@ -442,14 +410,17 @@ export default function Dashboard() {
             className="btn btn-sm btn-outline-success"
             onClick={() => setMostrarGraficoNotificaciones((p) => !p)}
           >
-            Más info de notificaciones
+            {mostrarGraficoNotificaciones
+              ? "Ocultar estadísticas"
+              : "Más info de notificaciones"}
           </button>
         </div>
 
+        {/* Tabla */}
         <table className="table table-hover">
           <thead className="table-light">
             <tr>
-              <th></th> {/* COL CHECKBOX */}
+              <th></th>
               <th>Usuario</th>
               <th>Email</th>
               <th>Fecha</th>
@@ -458,14 +429,14 @@ export default function Dashboard() {
           </thead>
 
           <tbody>
-            {notificaciones.map((n, idx) => {
+            {notificaciones.map((n) => {
               const usuario = usuarios.find((u) => u.id === n.usuario);
               const cantidad = notificaciones.filter(
                 (x) => x.usuario === n.usuario
               ).length;
 
               return (
-                <tr key={idx}>
+                <tr key={n.id}>
                   <td>
                     <input
                       type="checkbox"
@@ -487,9 +458,11 @@ export default function Dashboard() {
           </tbody>
         </table>
 
+        {/* Botón eliminar */}
         <button
           className="btn btn-danger btn-sm mt-2"
-          onClick={eliminarSeleccionadas}
+          disabled={seleccionadas.length === 0}
+          onClick={() => setShowModal1(true)}
         >
           Eliminar seleccionadas
         </button>
@@ -502,14 +475,142 @@ export default function Dashboard() {
               options={{
                 maintainAspectRatio: false,
                 plugins: { legend: { display: true } },
-                scales: {
-                  y: { beginAtZero: true, ticks: { precision: 0 } },
-                },
+                scales: { y: { beginAtZero: true } },
               }}
             />
           </div>
         )}
       </div>
+
+      {/* =======================================
+          MODAL 1 — primera confirmación
+      ======================================= */}
+      {showModal1 && (
+        <div
+          className="modal-backdrop fade show"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.45)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              padding: "24px",
+              borderRadius: "12px",
+              width: "420px",
+              boxShadow: "0px 4px 18px rgba(0,0,0,0.15)",
+            }}
+          >
+            <h5 className="fw-bold mb-2">
+              ¿Deseas continuar con la eliminación?
+            </h5>
+
+            <p className="mb-3">
+              Seleccionaste <strong>{seleccionadas.length}</strong>{" "}
+              notificaciones.
+            </p>
+
+            <div className="d-flex justify-content-end gap-2 mt-3">
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => setShowModal1(false)}
+              >
+                Cancelar
+              </button>
+
+              <button
+                className="btn btn-danger"
+                onClick={() => {
+                  setShowModal1(false);
+                  setShowModal2(true);
+                }}
+              >
+                Sí, continuar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =======================================
+          MODAL 2 — confirmación irreversible
+      ======================================= */}
+      {showModal2 && (
+        <div
+          className="modal-backdrop fade show"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.45)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              padding: "24px",
+              borderRadius: "12px",
+              width: "420px",
+              boxShadow: "0px 4px 18px rgba(0,0,0,0.15)",
+            }}
+          >
+            <h5 className="fw-bold mb-2">
+              Confirmación final — acción irreversible
+            </h5>
+
+            <p className="mb-3">
+              Se eliminarán permanentemente{" "}
+              <strong>{seleccionadas.length}</strong> notificaciones.
+            </p>
+
+            <div className="d-flex justify-content-end gap-2 mt-3">
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => setShowModal2(false)}
+              >
+                Cancelar
+              </button>
+
+              <button
+                className="btn btn-danger"
+                onClick={() => {
+                  axios
+                    .delete(
+                      "http://localhost:8000/api/notificaciones-mora/eliminar/",
+                      {
+                        data: { ids: seleccionadas },
+                      }
+                    )
+                    .then(() => {
+                      setNotificaciones((prev) =>
+                        prev.filter((n) => !seleccionadas.includes(n.id))
+                      );
+                      setSeleccionadas([]);
+                      setShowModal2(false);
+                    });
+                }}
+              >
+                Sí, eliminar definitivamente
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
