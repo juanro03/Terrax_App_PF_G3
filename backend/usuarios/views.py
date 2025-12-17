@@ -140,6 +140,16 @@ def enviar_notificacion(request):
         print("Error al enviar correo:", e)
         return Response({"error": "Error interno"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(["DELETE"])
+def eliminar_notificaciones_mora(request):
+    ids = request.data.get("ids", [])
+
+    if not ids:
+        return Response({"error": "No se enviaron IDs"}, status=400)
+
+    NotificacionMora.objects.filter(id__in=ids).delete()
+    return Response({"message": "Notificaciones eliminadas correctamente"})
+
 @api_view(['PATCH'])
 def desactivar_usuario(request, pk):
     try:
@@ -250,3 +260,55 @@ class UsuarioActualAPIView(APIView):
     def get(self, request):
         serializer = UsuarioSerializer(request.user)
         return Response(serializer.data)
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Usuario, NotificacionMora
+from .serializers import NotificacionMoraSerializer
+
+
+@api_view(["POST"])
+def enviar_notificacion(request):
+    try:
+        usuario_id = request.data.get("usuario_id")
+        usuario = Usuario.objects.get(pk=usuario_id)
+
+        # ✔ GUARDAR NOTIFICACIÓN DE MORA
+        NotificacionMora.objects.create(usuario=usuario)
+
+        # ----- cuerpo del correo -----
+        context = {"nombre": usuario.first_name or usuario.username}
+
+        text_body = (
+            f"Estimado/a {context['nombre']},\n\n"
+            "Tiene una suscripción pendiente de pago. "
+            "Para regularizarla, por favor contacte a los administradores.\n\n"
+            "Saludos,\nEquipo Terrax"
+        )
+        html_body = render_to_string("correos/deuda.html", context)
+
+        # ----- envío -----
+        email = EmailMultiAlternatives(
+            subject="Aviso de suscripción pendiente – Terrax",
+            body=text_body,
+            from_email="Terrax <no-reply@terrax.com>",
+            to=[usuario.email],
+        )
+        email.attach_alternative(html_body, "text/html")
+        email.send()
+
+        return Response({"mensaje": "Notificación enviada + registrada"}, status=status.HTTP_200_OK)
+
+    except Usuario.DoesNotExist:
+        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        print("Error al enviar correo:", e)
+        return Response({"error": "Error interno"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["GET"])
+def listar_notificaciones_mora(request):
+    notificaciones = NotificacionMora.objects.all().order_by("-fecha")
+    serializer = NotificacionMoraSerializer(notificaciones, many=True)
+    return Response(serializer.data)

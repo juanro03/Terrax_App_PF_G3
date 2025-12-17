@@ -26,6 +26,7 @@ import HistorialCampanias from "./components/DetalleLote/HistorialCampanias";
 import TareasAgricolas from "./components/TareasAgricolas/TareasAgricolas";
 import TrazabilidadEmbed from "./components/TareasAgricolas/TrazabilidadEmbed";
 import AlertasClimaticas from "./components/Alertas/Alertas";
+import Dashboard from "./components/Estadisticas/Dashboard";
 
 function AppContent() {
   const location = useLocation();
@@ -38,8 +39,8 @@ function AppContent() {
   const contentMarginLeft = !isSidebarVisible
     ? "0px"
     : sidebarOpen
-      ? "250px"
-      : "70px";
+    ? "250px"
+    : "70px";
 
   return (
     <div className="d-flex" style={{ minHeight: "100vh" }}>
@@ -89,6 +90,14 @@ function AppContent() {
             }
           />
           <Route path="/estadisticas" element={<Estadisticas />} />
+          <Route
+            path="/dashboard"
+            element={
+              <AdminRoute>
+                <Dashboard />
+              </AdminRoute>
+            }
+          />
         </Routes>
       </div>
     </div>

@@ -1,0 +1,108 @@
+/* ================================
+   ESTILO GENERAL DEL DASHBOARD
+   Inspirado en Tabler UI
+================================ */
+
+/* --- Tipografía suave --- */
+.dashboard-title {
+  font-weight: 700;
+  font-size: 1.9rem;
+  letter-spacing: -0.5px;
+}
+
+.dashboard-wrapper {
+  margin-left: 250px; /* ancho del sidebar */
+  padding-left: 28000000px;
+  padding-right: 24px;
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+/* Responsive: en mobile el sidebar suele ocultarse */
+@media (max-width: 992px) {
+  .dashboard-wrapper {
+    margin-left: 0;
+  }
+}
+
+/* --- Tarjetas --- */
+.card {
+  border: none !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+.card.shadow-sm {
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* --- Card Header mejorado --- */
+.card-header {
+  background: #f8f9fa !important;
+  border-bottom: 1px solid #eee !important;
+  padding: 12px 16px !important;
+}
+
+.card-header h6 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #555;
+}
+
+/* --- Valores grandes de las StatsCards --- */
+.card-body h2 {
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+}
+
+/* --- Texto secundario --- */
+.card-body .text-muted {
+  font-size: 0.8rem;
+  color: #6c757d !important;
+}
+
+/* --- Espaciado global --- */
+.container-fluid {
+  padding-left: 25px !important;
+  padding-right: 25px !important;
+}
+
+/* --- Gráficos centrados --- */
+.chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* --- Tabla --- */
+.table-hover tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.table thead th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* --- Badge para mejoras futuras --- */
+.badge-custom {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* --- Responsivo --- */
+@media (max-width: 768px) {
+  .dashboard-title {
+    font-size: 1.4rem;
+  }
+
+  .card-body h2 {
+    font-size: 1.6rem !important;
+  }
+}

@@ -1,5 +1,6 @@
 # usuarios/serializers.py
 from rest_framework import serializers
+from django.utils.timezone import now
 from .models import Usuario
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -20,6 +21,12 @@ class UsuarioSerializer(serializers.ModelSerializer):
     # password solo para alta/cambio explícito
     password = serializers.CharField(write_only=True, required=False)
 
+    # 👉 fecha_alta solo lectura (la setea el modelo con auto_now_add)
+    fecha_alta = serializers.DateTimeField(read_only=True)
+
+    # 👉 campo calculado: días de uso desde la fecha de alta
+    dias_uso = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Usuario
         fields = [
@@ -32,12 +39,22 @@ class UsuarioSerializer(serializers.ModelSerializer):
             "imagen_perfil",
             "rol",
             "is_active",
+            "fecha_alta",
+            "dias_uso",
         ]
         extra_kwargs = {
             "username": {"required": False},
             "email": {"required": True},
         }
 
+    def get_dias_uso(self, obj):
+        """
+        Calcula la cantidad de días de uso como diferencia
+        entre hoy y la fecha_alta del usuario.
+        """
+        if not obj.fecha_alta:
+            return None
+        return (now().date() - obj.fecha_alta.date()).days
 
     def create(self, validated_data):
         password = validated_data.pop("password", None)
@@ -62,3 +79,11 @@ class UsuarioSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+from rest_framework import serializers
+from .models import NotificacionMora
+
+
+class NotificacionMoraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificacionMora
+        fields = "__all__"
