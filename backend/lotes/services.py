@@ -29,6 +29,7 @@ def calcular_centroide(coordenadas):
         return None, None
     return lat_sum / n, lon_sum / n
 
+print("🔑 OPENWEATHER_API_KEY:", OPENWEATHER_API_KEY)
 
 def obtener_forecast(lat, lon):
     if not OPENWEATHER_API_KEY:
@@ -54,10 +55,22 @@ def detectar_alertas_forecast(datos):
     if not datos:
         return []
 
-    alertas = []
+    alertas_por_dia = {}
+
+    # prioridad de severidad
+    prioridad = {
+        "crítica": 3,
+        "alta": 2,
+        "moderada": 1,
+    }
 
     for entry in datos.get("list", []):
         dt_txt = entry.get("dt_txt")
+        if not dt_txt:
+            continue
+
+        dia = dt_txt.split(" ")[0]  # YYYY-MM-DD
+
         main = entry.get("main", {})
         weather = entry.get("weather", [{}])[0]
         wind = entry.get("wind", {})
@@ -65,63 +78,76 @@ def detectar_alertas_forecast(datos):
         temp = main.get("temp")
         desc = (weather.get("description") or "").lower()
 
-        # Temperaturas
+        alerta = None
+
+        # 🌡 Temperaturas
         if temp is not None:
-            if temp <= 0:
-                alertas.append({
+            if temp <= 5:
+                alerta = {
                     "fecha": dt_txt,
                     "tipo": "temp_baja",
-                    "mensaje": f"Heladas posibles ({temp} °C)",
-                    "nivel": "alta",
-                })
-            elif temp >= 35:
-                alertas.append({
+                    "mensaje": f"Bajas temperaturas previstas ({temp} °C)",
+                    "nivel": "moderada",
+                }
+            elif temp >= 32:
+                alerta = {
                     "fecha": dt_txt,
                     "tipo": "temp_alta",
-                    "mensaje": f"Temperaturas extremas ({temp} °C)",
+                    "mensaje": f"Altas temperaturas previstas ({temp} °C)",
                     "nivel": "moderada",
-                })
+                }
 
-        # Tormentas
-        if "tormenta" in desc or "storm" in desc:
-            alertas.append({
+        # ⛈ Tormenta
+        if "thunderstorm" in desc or "tormenta" in desc:
+            alerta = {
                 "fecha": dt_txt,
                 "tipo": "tormenta",
                 "mensaje": f"Tormenta prevista ({desc})",
                 "nivel": "alta",
-            })
+            }
 
-        # Lluvia fuerte
-        if "lluvia" in desc:
-            rain = entry.get("rain", {}).get("3h", 0)
-            if rain >= 10:
-                alertas.append({
-                    "fecha": dt_txt,
-                    "tipo": "lluvia_fuerte",
-                    "mensaje": f"Lluvia intensa: {rain} mm",
-                    "nivel": "moderada",
-                })
-
-        # Viento fuerte
-        viento = wind.get("speed")
-        if viento and viento >= 40:
-            alertas.append({
+        # 🌧 Lluvia
+        rain = entry.get("rain", {}).get("3h", 0)
+        if rain >= 5:
+            alerta = {
                 "fecha": dt_txt,
-                "tipo": "viento_fuerte",
-                "mensaje": f"Vientos fuertes: {viento} km/h",
-                "nivel": "alta",
-            })
+                "tipo": "lluvia",
+                "mensaje": f"Lluvia prevista: {rain} mm",
+                "nivel": "moderada",
+            }
 
-        # Granizo
+        # 💨 Viento (m/s → km/h)
+        viento = wind.get("speed")
+        if viento:
+            kmh = viento * 3.6
+            if kmh >= 30:
+                alerta = {
+                    "fecha": dt_txt,
+                    "tipo": "viento_fuerte",
+                    "mensaje": f"Vientos fuertes: {int(kmh)} km/h",
+                    "nivel": "alta",
+                }
+
+        # 🧊 Granizo
         if "hail" in desc or "granizo" in desc:
-            alertas.append({
+            alerta = {
                 "fecha": dt_txt,
                 "tipo": "granizo",
                 "mensaje": "Posible caída de granizo",
                 "nivel": "crítica",
-            })
+            }
 
-    return alertas
+        if not alerta:
+            continue
+
+        # 👉 quedarse con la alerta más grave del día
+        actual = alertas_por_dia.get(dia)
+
+        if not actual or prioridad[alerta["nivel"]] > prioridad[actual["nivel"]]:
+            alertas_por_dia[dia] = alerta
+
+    # devolver solo una alerta por día
+    return list(alertas_por_dia.values())
 
 
 def obtener_alertas_para_lote(coordenadas):
