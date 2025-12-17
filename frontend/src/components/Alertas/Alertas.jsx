@@ -10,12 +10,47 @@ export default function AlertasClimaticas() {
   const [alertas, setAlertas] = useState([]);
   const [campoSeleccionado, setCampoSeleccionado] = useState(null);
 
-  // Cargar campos
+  /* =========================
+     HELPERS FECHA / HORA
+  ========================== */
+  const formatearDia = (fechaISO) => {
+    const f = new Date(fechaISO);
+    return f.toLocaleDateString("es-AR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+  };
+
+  const formatearHora = (fechaISO) => {
+    const f = new Date(fechaISO);
+    return f.toLocaleTimeString("es-AR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const labelTipoAlerta = (tipo) => {
+    const map = {
+      temp_alta: "Temperaturas Altas",
+      temp_baja: "Temperaturas Bajas",
+      viento_fuerte: "Vientos Fuertes",
+      lluvia: "Lluvias",
+      lluvia_fuerte: "Lluvias Fuertes",
+      tormenta: "Tormenta",
+      granizo: "Granizo",
+    };
+
+    return map[tipo] || tipo.replace("_", " ").toUpperCase();
+  };
+
+  /* =========================
+     CARGA DE DATOS
+  ========================== */
   useEffect(() => {
     axios.get("/api/campos/").then((r) => setCampos(r.data));
   }, []);
 
-  // Cargar lotes según campo
   useEffect(() => {
     if (!campoId) return;
 
@@ -31,7 +66,9 @@ export default function AlertasClimaticas() {
     setAlertas(r.data.alertas);
   };
 
-  // ===== Agrupa alertas por día =====
+  /* =========================
+     AGRUPAR POR DÍA
+  ========================== */
   const alertasPorDia = alertas.reduce((acc, alerta) => {
     const fecha = alerta.fecha.split(" ")[0]; // YYYY-MM-DD
     if (!acc[fecha]) acc[fecha] = [];
@@ -39,7 +76,9 @@ export default function AlertasClimaticas() {
     return acc;
   }, {});
 
-  // Calcula días restantes
+  /* =========================
+     DÍAS RESTANTES
+  ========================== */
   const diasHasta = (fechaISO) => {
     if (!fechaISO) return null;
     const hoy = new Date();
@@ -52,7 +91,7 @@ export default function AlertasClimaticas() {
     <div className="terrax-card mx-auto p-4 mt-3">
       <h2 className="titulo">Alertas Climáticas</h2>
 
-      {/* Tarjeta de ubicación */}
+      {/* Ubicación */}
       {campoSeleccionado && (
         <div className="ubicacion-card">
           <div className="ubicacion-icono">📍</div>
@@ -65,7 +104,7 @@ export default function AlertasClimaticas() {
         </div>
       )}
 
-      {/* Select Campo */}
+      {/* Campo */}
       <label className="fw-bold">Campo</label>
       <select
         className="form-control"
@@ -85,7 +124,7 @@ export default function AlertasClimaticas() {
         ))}
       </select>
 
-      {/* Select Lote */}
+      {/* Lote */}
       <label className="fw-bold mt-3">Lote</label>
       <select
         className="form-control"
@@ -103,30 +142,30 @@ export default function AlertasClimaticas() {
           </option>
         ))}
       </select>
+
       <button className="btn btn-success mt-3" onClick={obtenerAlertas}>
         Actualizar Datos Meteorológicos
       </button>
 
       <h4 className="mt-3">Alertas encontradas</h4>
 
-      {/* Si no hay alertas */}
       {alertas.length === 0 && (
         <p className="text-muted">No hay alertas registradas.</p>
       )}
 
       {/* ===== AGRUPADAS POR DÍA ===== */}
-      {Object.entries(alertasPorDia).map(([dia, alertasDelDia]) => (
-        <div key={dia} className="dia-group">
-          {/* Título del día */}
-          <h5 className="dia-titulo">🌤 {dia}</h5>
+      <div className="dias-grid">
+        {Object.entries(alertasPorDia).map(([dia, alertasDelDia]) => {
+          const al = alertasDelDia[0]; // 👈 solo una alerta por día
+          const dias = diasHasta(al.fecha);
 
-          {alertasDelDia.map((al, idx) => {
-            const dias = diasHasta(al.fecha);
+          return (
+            <div key={dia} className="dia-card">
+              <h5 className="dia-titulo">🌤 {formatearDia(dia)}</h5>
 
-            return (
-              <div className={`alerta-card alerta-${al.nivel}`} key={idx}>
+              <div className={`alerta-card alerta-${al.nivel}`}>
                 <div className="alerta-header">
-                  <strong>{al.tipo.replace("_", " ").toUpperCase()}</strong>
+                  <strong>{labelTipoAlerta(al.tipo)}</strong>
                   <span className={`badge nivel-${al.nivel}`}>
                     {al.nivel.toUpperCase()}
                   </span>
@@ -138,18 +177,20 @@ export default function AlertasClimaticas() {
                   </div>
                 )}
 
-                <p className="fecha">{al.fecha}</p>
+                <p className="hora-alerta">⏰ {formatearHora(al.fecha)}</p>
+
                 <p>{al.mensaje}</p>
 
-                {al.valor !== null && (
-                  <p>
-                    <strong>Valor:</strong> {al.valor}
-                    {al.tipo.includes("temp") ? " °C" : ""}
-                  </p>
-                )}
-
-                {al.descripcion && (
-                  <p className="text-muted">Condición: {al.descripcion}</p>
+                {al.valor !== undefined && al.valor !== null && (
+                  <div className="valor-box">
+                    <span className="valor-label">Valor detectado</span>
+                    <span className="valor-numero">
+                      {al.valor}
+                      {al.tipo.includes("temp") && " °C"}
+                      {al.tipo.includes("viento") && " km/h"}
+                      {al.tipo.includes("lluvia") && " mm"}
+                    </span>
+                  </div>
                 )}
 
                 {al.icon && (
@@ -160,10 +201,11 @@ export default function AlertasClimaticas() {
                   />
                 )}
               </div>
-            );
-          })}
-        </div>
-      ))}
+            </div>
+          );
+        })}
+      </div>
+
     </div>
   );
 }

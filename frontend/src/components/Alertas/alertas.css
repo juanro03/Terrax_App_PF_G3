@@ -83,18 +83,28 @@
 /* =============================
    GRUPO POR DÍA
 ============================= */
-.alerta-dia-group {
+.dia-group {
   margin-top: 25px;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
-.alerta-dia-title {
-  font-size: 17px;
+.dia-titulo {
+  font-size: 18px;
   font-weight: 700;
   color: #155a36;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
   border-left: 5px solid #155a36;
-  padding-left: 8px;
+  padding-left: 10px;
+}
+
+/* =============================
+   GRILLA DE ALERTAS
+============================= */
+.alertas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
 }
 
 /* =============================
@@ -105,13 +115,18 @@
   padding: 18px;
   border-radius: 14px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 15px;
   border-left: 6px solid #999;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  /* 🔴 CLAVE PARA LA GRILLA */
+  width: 100%;
+  max-width: none;
+  margin-bottom: 0;
 }
 
 .alerta-card:hover {
   transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
 }
 
 /* COLORES POR NIVEL */
@@ -130,7 +145,9 @@
   background: #f8e2e2;
 }
 
-/* HEADER */
+/* =============================
+   HEADER DE ALERTA
+============================= */
 .alerta-header {
   display: flex;
   justify-content: space-between;
@@ -138,7 +155,9 @@
   margin-bottom: 6px;
 }
 
-/* BADGES */
+/* =============================
+   BADGES
+============================= */
 .badge {
   font-size: 0.75rem;
   padding: 4px 10px;
@@ -160,14 +179,19 @@
   background: #8b0000;
 }
 
-/* Fecha */
-.fecha {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 8px;
+/* =============================
+   HORA
+============================= */
+.hora-alerta {
+  font-size: 13px;
+  font-weight: 600;
+  color: #5f6f68;
+  margin: 6px 0;
 }
 
-/* Pastilla “EN X DÍAS” */
+/* =============================
+   PASTILLA “EN X DÍAS”
+============================= */
 .dias-label {
   margin-top: 6px;
   font-weight: bold;
@@ -192,9 +216,82 @@
   color: #8b0000;
 }
 
-/* Icono del clima */
+/* =============================
+   VALOR DESTACADO
+============================= */
+.valor-box {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(21, 90, 54, 0.08);
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.valor-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #155a36;
+  font-weight: 700;
+}
+
+.valor-numero {
+  font-size: 18px;
+  font-weight: 800;
+  color: #155a36;
+}
+
+/* =============================
+   ICONO CLIMA
+============================= */
 .icono-clima {
   width: 60px;
   height: 60px;
-  margin-top: 10px;
+  margin-top: 12px;
+}
+
+/* =============================
+   RESPONSIVE
+============================= */
+@media (max-width: 992px) {
+  .alertas-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .alertas-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =============================
+   GRILLA DE DÍAS
+============================= */
+.dias-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+}
+
+/* Tarjeta del día */
+.dia-card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .dias-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .dias-grid {
+    grid-template-columns: 1fr;
+  }
 }
