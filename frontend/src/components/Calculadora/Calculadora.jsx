@@ -44,11 +44,11 @@ const realLabels = [
 // Acción para exportar a PDF el contenido del modal
 
 const Calculadora = () => {
-  const [hectareas, setHectareas] = useState(0);
+  const [hectareas, setHectareas] = useState("");
   const [showResumen, setShowResumen] = useState(false);
   const resumenRef = useRef();
-  const [ltsPorHa, setLtsPorHa] = useState(0);
-  const [tamanoTanque, setTamanoTanque] = useState(0);
+  const [ltsPorHa, setLtsPorHa] = useState("");
+  const [tamanoTanque, setTamanoTanque] = useState("");
   const [litrosTotales, setLitrosTotales] = useState(0);
   const [productos, setProductos] = useState([
     { id: Date.now(), envase: "", producto: "", dosis: "", unidad: "L" },
@@ -461,7 +461,7 @@ const Calculadora = () => {
               </Form.Label>
               <Form.Control
                 type="number"
-                placeholder="150"
+                placeholder="0"
                 value={hectareas}
                 min={0}
                 onChange={(e) => setHectareas(+e.target.value)}
@@ -477,7 +477,7 @@ const Calculadora = () => {
               </Form.Label>
               <Form.Control
                 type="number"
-                placeholder="10"
+                placeholder="0"
                 value={ltsPorHa}
                 min={0}
                 onChange={(e) => setLtsPorHa(+e.target.value)}
@@ -493,7 +493,7 @@ const Calculadora = () => {
               </Form.Label>
               <Form.Control
                 type="number"
-                placeholder="400"
+                placeholder="0"
                 value={tamanoTanque}
                 min={0}
                 onChange={(e) => setTamanoTanque(+e.target.value)}
@@ -953,23 +953,27 @@ const Calculadora = () => {
                             className="input-terrax"
                           />
                         </td>
-                        <td>
+                        <td style={{ width: "80px", minWidth: "80px" }}>
                           <Form.Select
-                            size="sm"
                             value={p.unidad}
                             onChange={(e) =>
-                              actualizarProductoSolido(
-                                p.id,
-                                "unidad",
-                                e.target.value
-                              )
+                              actualizarProductoSolido(p.id, "unidad", e.target.value)
                             }
+                            style={{
+                              width: "120px",
+                              minWidth: "120px",
+                              height: "45px",
+                              padding: "6px 34px 6px 12px",
+                              fontWeight: 600,
+                              textAlign: "center",
+                            }}
                             className="input-terrax"
                           >
-                            <option>Kg/ha</option>
-                            <option>g/ha</option>
+                            <option value="Kg/ha">Kg/ha</option>
+                            <option value="g/ha">g/ha</option>
                           </Form.Select>
                         </td>
+
                         <td>
                           <Button
                             variant="outline-danger"

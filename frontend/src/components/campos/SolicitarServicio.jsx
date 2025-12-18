@@ -114,6 +114,15 @@ export default function SolicitarServicio({ onClose }) {
               onChange={(e) => setObservaciones(e.target.value)}
               rows="4"
               placeholder="Escriba aquí cualquier detalle adicional..."
+              style={{
+                width: "100%",         //  mismo ancho que selects/inputs
+                padding: "8px",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+                fontFamily: "inherit",
+                fontSize: "1rem",
+                resize: "vertical",    //  deja redimensionar solo en altura
+              }}
             />
 
             <div className="modal-botones">

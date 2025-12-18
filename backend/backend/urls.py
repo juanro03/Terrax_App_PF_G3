@@ -22,16 +22,17 @@ urlpatterns = [
 
     # Auth
     path("api/auth/login/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/auth/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/auth/password_reset/", PasswordResetRequestAPIView.as_view()),
     path("api/auth/password_reset/confirm/", PasswordResetConfirmAPIView.as_view()),
+    path("api/auth/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+
 
     # APIs
     path("api/", include("usuarios.urls")),
     path("api/", include("campos.urls")),
     path("api/", include("lotes.urls")),
     path("api/", include("tareas.urls")),
-    path("api/", include("productos.urls")),
+    path("api/productos/", include("productos.urls")),
     path("api/", include("reportes.urls")), 
 
     path('api/auth/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),

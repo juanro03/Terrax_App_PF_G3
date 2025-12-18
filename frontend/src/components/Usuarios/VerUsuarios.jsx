@@ -27,6 +27,7 @@ const VerUsuarios = () => {
   const [usuarioParaNotificar, setUsuarioParaNotificar] = useState(null);
   const [usuarioAConfirmar, setUsuarioAConfirmar] = useState(null);
   const [showConfirmDesactivar, setShowConfirmDesactivar] = useState(false);
+  
 
   useEffect(() => {
     fetchUsuarios();
