@@ -13,7 +13,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
 import { useUser } from "../../UserContext";
 import { FaStackOverflow } from "react-icons/fa";
-import { Sprout } from "lucide-react";
+import { Sprout, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import SolicitarServicio from "../campos/SolicitarServicio";
 import Dashboard from "../Estadisticas/Dashboard";
@@ -177,7 +177,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             )}
             {usuario.rol === "admin" && (
               <SidebarItem
-                icon={<User size={18} />}
+                icon={<LayoutDashboard size={18} />}
                 label="Panel de control"
                 isOpen={isOpen}
                 to="/dashboard"
