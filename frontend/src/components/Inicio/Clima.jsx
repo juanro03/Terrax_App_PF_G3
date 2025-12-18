@@ -56,8 +56,8 @@ const getMinMaxDia = (dia) => {
 };
 
 const Clima = () => {
-  const [ciudadTexto, setCiudadTexto] = useState("Córdoba,AR");
-  const [displayCiudad, setDisplayCiudad] = useState("Córdoba,AR");
+  const [ciudadTexto, setCiudadTexto] = useState("Punta del Monte, Santa Cruz Province, AR");
+  const [displayCiudad, setDisplayCiudad] = useState("Punta del Monte, Santa Cruz Province, AR");
 
   const [daily, setDaily] = useState([]); // días con horas
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);

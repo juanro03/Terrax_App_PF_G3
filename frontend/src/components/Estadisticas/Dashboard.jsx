@@ -74,8 +74,9 @@ export default function Dashboard() {
   const [tareas, setTareas] = useState([]);
   const [notificaciones, setNotificaciones] = useState([]);
 
-  // NUEVO
+  // ✅ seleccionadas ahora guarda IDS DE NOTIFICACIONES (no usuarioId)
   const [seleccionadas, setSeleccionadas] = useState([]);
+
   const [mostrarGraficoNotificaciones, setMostrarGraficoNotificaciones] =
     useState(false);
 
@@ -129,15 +130,6 @@ export default function Dashboard() {
   }, []);
 
   /* =======================
-     CHECKBOX HANDLER
-  ======================= */
-  const toggleSeleccion = (id) => {
-    setSeleccionadas((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  };
-
-  /* =======================
      DERIVED DATA
   ======================= */
   const filteredActivities = useMemo(() => tareas, [tareas]);
@@ -154,13 +146,66 @@ export default function Dashboard() {
   const usuariosActivos = usuarios.filter((u) => u.is_active);
   const usuariosInactivos = usuarios.filter((u) => !u.is_active);
 
+  // ✅ Agrupar notificaciones por usuario, guardando también los IDs reales
+  const filasNotificaciones = useMemo(() => {
+    const acc = {};
+    for (const n of notificaciones) {
+      const userId = n.usuario;
+      if (!acc[userId]) {
+        acc[userId] = {
+          usuarioId: userId,
+          ultimaFecha: n.fecha,
+          cantidad: 0,
+          ids: [],
+        };
+      }
+      acc[userId].cantidad += 1;
+      acc[userId].ids.push(n.id);
+
+      if (n.fecha > acc[userId].ultimaFecha) {
+        acc[userId].ultimaFecha = n.fecha;
+      }
+    }
+    return Object.values(acc);
+  }, [notificaciones]);
+
+  // ✅ Limpiar seleccionadas si cambian notificaciones (evita ids fantasmas)
+  useEffect(() => {
+    const idsExistentes = new Set(notificaciones.map((n) => n.id));
+    setSeleccionadas((prev) => prev.filter((id) => idsExistentes.has(id)));
+  }, [notificaciones]);
+
   /* =======================
-   GRAFICO NOTIFICACIONES (AGRUPADO)
-======================= */
+     CHECKBOX (por usuario)
+     - cada fila selecciona todos los IDs de ese usuario
+  ======================= */
+  const isUserSelected = (idsDeUsuario) => {
+    if (!idsDeUsuario?.length) return false;
+    return idsDeUsuario.every((id) => seleccionadas.includes(id));
+  };
+
+  const toggleSeleccionUsuario = (idsDeUsuario) => {
+    setSeleccionadas((prev) => {
+      const allSelected = idsDeUsuario.every((id) => prev.includes(id));
+
+      if (allSelected) {
+        // deseleccionar todos los ids de ese usuario
+        return prev.filter((id) => !idsDeUsuario.includes(id));
+      }
+
+      // seleccionar (agregar sin duplicar)
+      const set = new Set(prev);
+      idsDeUsuario.forEach((id) => set.add(id));
+      return Array.from(set);
+    });
+  };
+
+  /* =======================
+     GRAFICO NOTIFICACIONES
+  ======================= */
   const graficoNotificaciones = useMemo(() => {
     const conteoPorFecha = {};
 
-    // Agrupar notificaciones por fecha
     notificaciones.forEach((n) => {
       const fecha = n.fecha.slice(0, 10);
       conteoPorFecha[fecha] = (conteoPorFecha[fecha] || 0) + 1;
@@ -181,6 +226,37 @@ export default function Dashboard() {
       ],
     };
   }, [notificaciones]);
+
+  const handleEliminarNotificaciones = async () => {
+    const token = localStorage.getItem("accessToken");
+
+    try {
+      console.log("🗑️ Eliminando ids:", seleccionadas);
+
+      await axios.delete(
+        "http://localhost:8000/api/notificaciones-mora/eliminar/",
+        {
+          data: { ids: seleccionadas }, // ✅ lo que normalmente espera el backend
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }
+      );
+
+      // ✅ actualizar estado local (filtra por id de notificación)
+      setNotificaciones((prev) =>
+        prev.filter((n) => !seleccionadas.includes(n.id))
+      );
+
+      setSeleccionadas([]);
+      setShowModal2(false);
+    } catch (err) {
+      console.error(
+        "❌ Error al eliminar:",
+        err.response?.status,
+        err.response?.data || err.message
+      );
+      // si querés, podés dejar el modal abierto para reintentar
+    }
+  };
 
   if (!stats) return <p className="text-center mt-5">Cargando dashboard…</p>;
 
@@ -429,28 +505,29 @@ export default function Dashboard() {
           </thead>
 
           <tbody>
-            {notificaciones.map((n) => {
-              const usuario = usuarios.find((u) => u.id === n.usuario);
-              const cantidad = notificaciones.filter(
-                (x) => x.usuario === n.usuario
-              ).length;
+            {filasNotificaciones.map((item) => {
+              const usuario = usuarios.find((u) => u.id === item.usuarioId);
 
               return (
-                <tr key={n.id}>
+                <tr key={item.usuarioId}>
                   <td>
                     <input
                       type="checkbox"
-                      checked={seleccionadas.includes(n.id)}
-                      onChange={() => toggleSeleccion(n.id)}
+                      checked={isUserSelected(item.ids)}
+                      onChange={() => toggleSeleccionUsuario(item.ids)}
                     />
                   </td>
+
                   <td>
                     {usuario?.first_name} {usuario?.last_name}
                   </td>
+
                   <td>{usuario?.email}</td>
-                  <td>{n.fecha.slice(0, 10)}</td>
+
+                  <td>{item.ultimaFecha.slice(0, 10)}</td>
+
                   <td>
-                    <strong>{cantidad}</strong>
+                    <strong>{item.cantidad}</strong>
                   </td>
                 </tr>
               );
@@ -487,13 +564,9 @@ export default function Dashboard() {
       ======================================= */}
       {showModal1 && (
         <div
-          className="modal-backdrop fade show"
           style={{
             position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
+            inset: 0,
             background: "rgba(0,0,0,0.45)",
             display: "flex",
             justifyContent: "center",
@@ -507,7 +580,8 @@ export default function Dashboard() {
               padding: "24px",
               borderRadius: "12px",
               width: "420px",
-              boxShadow: "0px 4px 18px rgba(0,0,0,0.15)",
+              boxShadow: "0px 4px 18px rgba(0,0,0,0.25)",
+              opacity: 1,
             }}
           >
             <h5 className="fw-bold mb-2">
@@ -546,13 +620,9 @@ export default function Dashboard() {
       ======================================= */}
       {showModal2 && (
         <div
-          className="modal-backdrop fade show"
           style={{
             position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
+            inset: 0,
             background: "rgba(0,0,0,0.45)",
             display: "flex",
             justifyContent: "center",
@@ -566,7 +636,8 @@ export default function Dashboard() {
               padding: "24px",
               borderRadius: "12px",
               width: "420px",
-              boxShadow: "0px 4px 18px rgba(0,0,0,0.15)",
+              boxShadow: "0px 4px 18px rgba(0,0,0,0.25)",
+              opacity: 1,
             }}
           >
             <h5 className="fw-bold mb-2">
@@ -588,22 +659,7 @@ export default function Dashboard() {
 
               <button
                 className="btn btn-danger"
-                onClick={() => {
-                  axios
-                    .delete(
-                      "http://localhost:8000/api/notificaciones-mora/eliminar/",
-                      {
-                        data: { ids: seleccionadas },
-                      }
-                    )
-                    .then(() => {
-                      setNotificaciones((prev) =>
-                        prev.filter((n) => !seleccionadas.includes(n.id))
-                      );
-                      setSeleccionadas([]);
-                      setShowModal2(false);
-                    });
-                }}
+                onClick={handleEliminarNotificaciones}
               >
                 Sí, eliminar definitivamente
               </button>
