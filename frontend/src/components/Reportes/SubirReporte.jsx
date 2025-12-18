@@ -12,7 +12,7 @@ const SubirReporte = () => {
   const [archivo, setArchivo] = useState(null);
   const [mensaje, setMensaje] = useState("");
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
   const headers = {
     Authorization: `Bearer ${token}`,
   };

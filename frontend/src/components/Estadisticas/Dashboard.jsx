@@ -188,7 +188,7 @@ export default function Dashboard() {
     <div style={dashboardWrapper}>
       {/* TÍTULO */}
       <h2 style={{ fontWeight: 700, color: "#2E7D32", marginBottom: "24px" }}>
-        Gestión de Usuarios
+        Panel de Control
       </h2>
 
       {/* =======================
@@ -307,7 +307,7 @@ export default function Dashboard() {
           ACTIVIDADES
       ======================= */}
       <div style={cardStyle} className="mb-4">
-        <h6 className="mb-3">Actividades</h6>
+        <h6 className="mb-3">Tareas Agrícolas por mes</h6>
 
         <div style={{ height: 220 }}>
           <Line
