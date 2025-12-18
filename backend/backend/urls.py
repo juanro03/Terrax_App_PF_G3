@@ -33,7 +33,6 @@ urlpatterns = [
     path("api/", include("tareas.urls")),
     path("api/", include("productos.urls")),
     path("api/", include("reportes.urls")), 
-    path('api/', include('reportes.urls')),
 
     path('api/auth/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     path('siembras/finalizar/<int:lote_id>/', FinalizarCampaniaView.as_view(), name='finalizar-campania'),

@@ -109,7 +109,7 @@ class ReporteAnotacionProxyViewSet(viewsets.ReadOnlyModelViewSet):
     /api/reportes/<reporte_pk>/anotaciones/
     """
     serializer_class = AnotacionSerializer
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         rep_id = self.kwargs.get("reporte_pk")
