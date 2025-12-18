@@ -18,7 +18,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     "UNICODE_JSON": False,
-    "STRICT_JSON": True,  # fuerza a que NaN / Infinity den error antes de llegar al renderizado
+    "STRICT_JSON": True,  
 }
 
 SIMPLE_JWT = {

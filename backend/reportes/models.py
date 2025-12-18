@@ -13,7 +13,7 @@ class Reporte(models.Model):
     tipo_reporte = models.CharField(max_length=50)
     observaciones = models.TextField(blank=True)
     archivo_pdf = models.FileField(upload_to='reportes/')
-    fecha_reporte = models.DateTimeField(auto_now_add=False)
+    fecha_reporte = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
       return f"{self.nombre} ({self.lote})"

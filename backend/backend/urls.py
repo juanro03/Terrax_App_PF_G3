@@ -11,7 +11,9 @@ from usuarios.views import (
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 from lotes.views import FinalizarCampaniaView
+from . import views
 from .views_cac import cac_pizarra
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -30,11 +32,14 @@ urlpatterns = [
     path("api/", include("lotes.urls")),
     path("api/", include("tareas.urls")),
     path("api/", include("productos.urls")),
-    path("api/", include("reportes.urls")),  # 👈 ESTA LÍNEA
+    path("api/", include("reportes.urls")), 
+    path('api/', include('reportes.urls')),
+
+    path('api/auth/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    path('siembras/finalizar/<int:lote_id>/', FinalizarCampaniaView.as_view(), name='finalizar-campania'),
+    path("api/cac/pizarra/", cac_pizarra, name="cac_pizarra"),
 
     path("api/notificar/", enviar_notificacion),
-    path("siembras/finalizar/<int:lote_id>/", FinalizarCampaniaView.as_view()),
-    path("api/cac/pizarra/", cac_pizarra, name="cac_pizarra"),  # 👈 COMA
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
