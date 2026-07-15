@@ -1,0 +1,236 @@
+/* ===== PANEL ANOTACIONES / REGISTROS ===== */
+.registros-card {
+  background: var(--blanco);
+  border: 1px solid rgba(25, 135, 84, .2);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .1);
+}
+
+.registros-header {
+  padding: 12px 16px;
+  font-weight: 800;
+  color: var(--verdeOscuro);
+  border-bottom: 1px solid rgba(25, 135, 84, .15);
+  background: #fafdf9;
+}
+
+.registros-body { padding: 14px 16px; }
+
+.registros-placeholder {
+  color: #517a60;
+  background: #f3fff1;
+  border: 1px dashed #cfead2;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.registros-subhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.registros-subhead .rs-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #4f6f5b;
+}
+
+.registros-subhead .rs-left .bullet {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #9ad38f;
+  display: inline-block;
+}
+
+.registros-subhead .rs-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ==== Imagen del lote en panel derecho ==== */
+.registros-imgWrap {
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.registros-img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.registros-loading,
+.registros-noimg {
+  color: #476c58;
+  font-size: 14px;
+  padding: 30px 0;
+}
+
+/* ===== Imagen en el modal expandido ===== */
+.registros-modal .registros-imgWrap {
+  padding: 12px;
+}
+
+.registros-modal .pins-canvas {
+  width: min(120vh, 100%);   
+  max-width: 2000px;         
+          
+}
+
+.registros-modal .registros-img {
+  max-height: none;
+  height: 100%;             
+  width: 100%;
+  object-fit: cover;        
+  border-radius: 14px;
+}
+
+/* Burbujas */
+.registro-bubble {
+  padding: 10px 12px;
+  border-radius: 12px;
+  margin: 8px 0;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, .15);
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.registro-bubble.warn { background: #ffe97a; color: #2f2f2f; }
+.registro-bubble.ok   { background: #d8f3d1; color: #234f2f; }
+
+/* ===== PINES ===== */
+.pins-canvas {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.pins-canvas.is-placing { cursor: crosshair; }
+
+.pins-canvas .registros-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+}
+
+.pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  z-index: 2;
+  transition: transform .15s ease, filter .15s ease;
+}
+
+.pin.is-hovered {
+  transform: translate(-50%, -100%) scale(1.12);
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35));
+  z-index: 3;
+}
+
+.pin-icon { width: 26px; height: 26px; }
+
+/* ===== COMENTARIOS ===== */
+.comentarios-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.comentario-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;               
+  flex: 1;                
+  flex-wrap: wrap;
+}
+
+.comentario-empty {
+  padding: 12px;
+  border-radius: 10px;
+  background: #f8fff8;
+  color: #5f6f64;
+  font-size: .95rem;
+}
+
+.comentario-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .04);
+  border: 1px solid rgba(25, 135, 84, .18);
+  transition: background .15s ease, box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+}
+
+.comentario-row.is-hovered {
+  background: #f6fff8;
+  box-shadow: 0 0 0 2px var(--pinColor, #2ecc71) inset;
+  transform: translateY(-1px);
+}
+
+.comentario-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: 0 0 10px;
+}
+
+.comentario-date {
+  color: #606e68;
+  font-size: 0.9em;
+}
+
+.comentario-text {
+  color: #3f4a45;
+  font-weight: 500;
+}
+
+.comentario-del {
+  margin-left:auto;
+  border: 0;
+  background: #f2f2f2;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.comentario-del:hover { background: #e8e8e8; }
+
+.color-pill {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  cursor: pointer;
+  outline: none;
+  display: inline-block;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.color-pill:hover {
+  transform: scale(1.1);
+  border-color: #888;
+}
+
+.color-pill.selected {
+  border: 3px solid #000; /* resalta el color elegido */
+}

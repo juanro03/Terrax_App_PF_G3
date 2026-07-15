@@ -1,0 +1,36 @@
+{% autoescape off %}
+<!DOCTYPE html>
+<html>
+  <body style="font-family:Arial, sans-serif; color:#333">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="background:#28a745; padding:20px; text-align:center; color:#fff;">
+          <h2 style="margin:0;">Terrax</h2>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:30px;">
+          <p>Estimado/a <strong>{{ nombre }}</strong>,</p>
+          <p>
+            Detectamos que tiene una <strong>suscripción pendiente de pago</strong>.
+            Para regularizarla, por favor contacte a los administradores.
+          </p>
+          <p style="margin:30px 0;">
+            <a href="mailto:admin@terrax.com"
+               style="background:#28a745; color:#fff; padding:10px 20px;
+                      text-decoration:none; border-radius:4px;">
+              Contactar ahora
+            </a>
+          </p>
+          <p>Saludos,<br>Equipo&nbsp;Terrax</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="background:#f4f4f4; padding:10px; font-size:12px; text-align:center;">
+          © 2025 Terrax. Todos los derechos reservados.
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+{% endautoescape %}

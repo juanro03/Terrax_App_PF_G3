@@ -1,6 +1,42 @@
-# Ignorar node_modules de frontend y backend
+# === Node.js / React ===
 frontend/node_modules/
-backend/node_modules/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
 
-# Ignorar entorno virtual de Python (backend Django)
+# Build de React / Vite
+frontend/build/
+frontend/dist/
+.vite/
+
+# === Python / Django ===
+venv/
 backend/venv/
+.env
+.env.*
+*.sqlite3
+*.db
+*.log
+__pycache__/
+*.py[cod]
+*.pyo
+
+
+# === Archivos multimedia ===
+backend/media/
+
+# === Coverage y testing ===
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# === Configuraciones de IDEs ===
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# === Archivos de sistema operativo ===
+.DS_Store
+Thumbs.db

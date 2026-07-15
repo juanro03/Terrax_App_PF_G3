@@ -1,0 +1,142 @@
+.inicio-gutter {
+  padding-left: 1rem;     /* móvil */
+  padding-right: 1rem;
+}
+
+@media (min-width: 992px) { /* desktop */
+  .inicio-gutter {
+    padding-left: 2.5rem; /* ↑ separa más del sidebar cuando está abierto */
+    padding-right: 2rem;
+  }
+}
+
+:root{
+  --sidebar-open: 260px;   /* ancho del sidebar abierto */
+  --sidebar-closed: 72px;  /* ancho del sidebar cerrado (solo íconos) */
+}
+
+/* Contenido principal */
+.inicio-wrapper{
+  padding-left: var(--sidebar-closed);
+  padding: 40px ;
+  transition: padding-left .25s ease;
+}
+
+/* Cuando el sidebar esté abierto, sumá más padding */
+.sidebar-open .inicio-wrapper{
+  padding-left: var(--sidebar-open);
+}
+
+/* Hace que el Clima no se limite a 1000px dentro de la columna */
+.widget .clima-card {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+}
+
+/* Widgets hijos ocupan todo el ancho de su contenedor */
+.widget > * {
+  width: 100%;
+}
+
+/* Borde redondeado para todo el carrusel */
+.carrusel-redondeado {
+  border-radius: 20px;          /* ajustá el radio a gusto */
+  overflow: hidden;             /* oculta las esquinas sobrantes de las imágenes */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* opcional: sombra suave */
+  margin-bottom: 0 !important;  /* pegado a la siguiente sección */
+}
+
+/* Asegura que las imágenes sigan el borde */
+.carrusel-redondeado .carousel-item img {
+  border-radius: 0;   /* sin redondeo adicional */
+  width: 100%;
+  height: auto;
+}
+
+/* ======== Estilos comunes de widget ======== */
+.widget {
+  background: transparent;
+}
+
+/* ======== BLOQUE DE PRECIOS DE GRANOS – FULL WIDTH SIN ESPACIOS ======== */
+
+/* El wrapper del widget de granos no debe estirarse en altura */
+.widget-auto,
+.widget-auto > *,
+.widget-auto .card-terrax,
+.widget-auto .card-terrax .card-body {
+  height: auto !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Quitar cualquier margen/padding del wrapper del widget */
+.widget-auto.no-padding {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* TerraxCard del widget de granos: alineado a full width */
+.widget-auto.no-padding .card-terrax {
+  margin: 0 !important;
+  border-radius: 0;     /* para alinearlo de borde a borde */
+  box-shadow: none;     /* opcional: que quede totalmente integrado */
+  border: 0;
+}
+
+/* Compactar interiores del card para que no agregue aire extra */
+.widget-auto.no-padding .card-terrax .card-header {
+  padding: 10px 16px;
+}
+.widget-auto.no-padding .card-terrax .card-body {
+  padding: 8px 12px;
+}
+
+/* La sección que viene DESPUÉS de granos (clima + dólar) no debe agregar gap arriba */
+.precios-granos-container + .container,
+.precios-granos-container + .container-fluid {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* La fila actúa como contenedor flex y estira columnas */
+.widgets-eq { align-items: stretch; }
+
+/* Cada columna es flex para que su contenido se estire */
+.widgets-eq > [class*="col-"] { display: flex; }
+
+/* El wrapper .widget ocupa todo el alto de su columna */
+.widgets-eq > [class*="col-"] > .widget {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0; /* evita overflow en Safari/Chrome con zoom */
+}
+
+/* El contenido real del widget se estira */
+.widgets-eq > [class*="col-"] > .widget > * {
+  flex: 1 1 auto;
+  min-height: 0; /* importante para que los hijos flex puedan encoger */
+}
+
+/* Asegurá que tarjetas internas también se comporten como columnas full-height */
+.widget .clima-card,
+.widget .dolar-card,
+.widget .card-terrax {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Dentro de esas tarjetas, permite que el body crezca y el footer baje */
+.widget .card-terrax .card-body { flex: 1 1 auto; min-height: 0; }
+
+/* Asegura que la grilla de tarjetas no se corte y quede centrada en móviles */
+@media (max-width: 992px) {
+  .granos-grid {
+    justify-content: center;
+  }
+}

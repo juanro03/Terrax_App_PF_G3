@@ -1,3 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "./styles/terrax-card.css";
+
 .App {
   text-align: center;
 }
@@ -14,7 +19,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: #000000;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -35,4 +40,233 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.login-card {
+  width: 900px;
+  height: 500px;
+  border-radius: 20px;
+}
+
+.bg-image {
+  height: 100%;
+  position: relative;
+}
+
+.overlay {
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+}
+
+.logo-text {
+  font-size: 3rem;
+  letter-spacing: 2px;
+  margin-top: 10px;
+}
+/* Ancho y alineación cuando está colapsado */
+.collapsed-sidebar {
+  width: 70px !important; /* ya lo forzás inline, esto es por coherencia */
+}
+
+.collapsed-sidebar .nav-link {
+  justify-content: center; /* íconos centrados */
+  padding: 0.5rem 0; /* igual vertical */
+}
+
+.collapsed-sidebar .nav-link span,
+.collapsed-sidebar .dropdown-toggle span      /* esconde textos */ {
+  display: none !important;
+}
+
+/* Tooltip opcional al pasar el mouse */
+.collapsed-sidebar .nav-link[title] {
+  position: relative;
+}
+.collapsed-sidebar .nav-link[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.75);
+  color: #000000;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+
+.icon-hover {
+  transition: transform 0.2s ease;
+}
+
+.icon-hover:hover {
+  transform: scale(1.1);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.tabla-verde thead {
+  background-color: #198754 !important;
+  color: white;
+}
+
+/* Para todas las pestañas */
+.nav-tabs .nav-link {
+  color: #198754 !important;
+}
+
+/* Y cuando esté activa */
+.nav-tabs .nav-link.active {
+  color: #ffffff !important;
+  background-color: #198754 !important;
+}
+
+/* Para todos los THEAD que quieras en verde Terrax */
+.thead-terrax {
+  background-color: #198754 !important;
+  color: #ffffff !important;
+}
+
+/* Tabla de condiciones */
+.condiciones-table {
+  border: 1px solid var(--gris-suave);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Celdas con padding extra y separación */
+.condiciones-table td {
+  padding: 0.5rem 0.75rem;
+  vertical-align: middle;
+  border-color: var(--gris-suave);
+}
+
+/* Filas alternas más claras */
+.condiciones-table tbody tr:nth-child(odd) {
+  background-color: var(--verde-claro);
+}
+
+/* Hover suave */
+.condiciones-table tbody tr:hover {
+  background-color: rgba(25, 135, 84, 0.1);
+}
+
+/* Texto del label */
+.text-terrax-oscuro {
+  color: var(--fuente-oscura);
+}
+.btn-terrax-light {
+  background-color: var(--verde-claro);
+  color: var(--verde-terrax-oscuro);
+  border: 1px solid var(--verde-terrax);
+}
+.btn-terrax-light:hover {
+  background-color: var(--verde-terrax);
+  color: var(--blanco);
+}
+
+/* Estilo general para tablas */
+.table-rounded {
+  border-collapse: separate !important;
+  border-spacing: 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.table-rounded thead {
+  background-color: #198754; /* Verde Bootstrap */
+  color: white;
+}
+
+.table-rounded th,
+.table-rounded td {
+  padding: 0.55rem 0.75rem;
+  border: none !important;
+}
+
+.table-rounded tbody tr:nth-child(even) {
+  background-color: #f5fdf7;
+}
+
+.table-rounded tbody tr:hover {
+  background-color: #e4f9ee;
+}
+
+/* Bordes superiores redondeados para thead */
+.table-rounded thead tr:first-child th:first-child {
+  border-top-left-radius: 0.75rem;
+}
+.table-rounded thead tr:first-child th:last-child {
+  border-top-right-radius: 0.75rem;
+}
+
+/* Bordes inferiores redondeados para tbody */
+.table-rounded tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 0.75rem;
+}
+.table-rounded tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 0.75rem;
+}
+
+.btn-terrax {
+  background-color: #198754;
+  color: white;
+  border-radius: 0.5rem;
+  border: none;
+  transition: all 0.2s ease-in-out;
+}
+.btn-terrax:hover {
+  background-color: #157347;
+  transform: scale(1.02);
+}
+
+.table-terrax th {
+  background-color: #e8faee !important;
+  color: #155a36 !important; /* Verde oscuro para contraste */
+  font-weight: 600;
+  border-bottom: 2px solid #e9fbe5;
+  letter-spacing: 0.5px;
+}
+.input-terrax {
+  border-radius: 14px !important;
+  border: 1px solid #19875420 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  width: 100%;
+}
+
+.leaflet-container {
+  z-index: 1 !important;
+}
+
+.modal .leaflet-draw {
+  z-index: 9999 !important;
+}
+
+.modal {
+  overflow: visible !important;
+}
+
+.leaflet-draw-tooltip {
+  z-index: 999999 !important;
+}
+
+/* === Desactivar zoom en tarjetas que lo necesiten === */
+.no-zoom-card,
+.no-zoom-card:hover,
+.no-zoom-card:focus,
+.no-zoom-card:active {
+  transform: none !important;
+  transition: none !important;
 }

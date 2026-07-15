@@ -1,0 +1,107 @@
+/* === GRID principal tipo "panel BCR" === */
+.granos-grid{
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  padding: 0.8rem 1rem;
+}
+
+.titulo{
+  color: #000;
+  font-family: Helvetica;
+  margin: 15px 0 10px 25px;
+  font-size: 1.5rem;
+  font-weight: 550;
+}
+
+@media (max-width: 1200px){ .granos-grid{ grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px){  .granos-grid{ grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 460px){  .granos-grid{ grid-template-columns: 1fr; } }
+
+/* === Tarjeta individual === */
+.grano-tile{
+  --tile-bg: var(--verde-claro);
+  --tile-fg: #0f2720;
+  --tile-muted: rgba(0,0,0,.45);
+  background: var(--tile-bg);
+  color: var(--tile-fg);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(0,0,0,.08);
+  border: 1px solid rgba(0,0,0,.06);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.grano-tile:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(0,0,0,.12);
+}
+
+/* Barra superior con acento por producto */
+.grano-tile .tile-head{
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  color: #fff;
+  font-weight: 700;
+}
+
+.tile-icon{ font-size: 1.2rem; }
+.tile-title{ font-size: .95rem; line-height: 1; margin: 0; letter-spacing: .3px; }
+
+/* Cuerpo */
+.grano-tile .tile-body{
+  padding: 14px;
+  background: var(--tile-bg);
+}
+
+.tile-price{
+  font-weight: 700;
+  font-size: 1.85rem;
+  line-height: 1.1;
+  letter-spacing: .3px;
+  margin-bottom: 8px;
+}
+
+.tile-price.sc{
+  color: var(--tile-muted);
+  font-weight: 700;
+}
+
+/* fila secundaria */
+.tile-sub{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: .95rem;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0,0,0,.12);
+}
+
+.tile-sub .sub-label{
+  color: var(--tile-muted);
+  font-weight: 600;
+}
+
+.tile-sub .sub-value{
+  font-weight: 700;
+}
+
+/* === Colores de acento por producto (barra superior con gradiente) === */
+.grano-tile.trigo .tile-head{
+  background: linear-gradient(90deg,#a56b2c 0%, #c88f55 100%);
+}
+.grano-tile.maiz .tile-head{
+  background: linear-gradient(90deg,#d8a200 0%, #f0c447 100%);
+}
+.grano-tile.girasol .tile-head{
+  background: linear-gradient(90deg,#c79e00 0%, #ffd54d 100%);
+}
+.grano-tile.soja .tile-head{
+  background: linear-gradient(90deg,#177c52 0%, #24a071 100%);
+}
+.grano-tile.sorgo .tile-head{
+  background: linear-gradient(90deg,#b2472d 0%, #d36b51 100%);
+}

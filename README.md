@@ -83,6 +83,8 @@ Es necesario tener la Base de Datos Postgresql para poder realizar este paso, pa
 
 ```sql
 CREATE DATABASE terrax_db;
+CREATE USER admin WITH PASSWORD 'admin';
+GRANT ALL PRIVILEGES ON DATABASE terrax_db TO admin;
 ```
 
 ### Opción B - Usando pgAdmin 4

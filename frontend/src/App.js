@@ -1,25 +1,100 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+import Login from "./components/Auth/Login";
+import Inicio from "./components/Inicio/Inicio";
+import VerCampos from "./components/campos/VerCampos";
+import VerLotes from "./components/lotes/VerLotes";
+import Calendario from "./components/Calendario/Calendario";
+import VerUsuarios from "./components/Usuarios/VerUsuarios";
+import Sidebar from "./components/Inicio/Sidebar";
+import AdminRoute from "./components/Auth/AdminRoute";
+import Perfil from "./components/Usuarios/Perfil";
+import Calculadora from "./components/Calculadora/Calculadora";
+import ProductosInicio from "./components/Productos/ProductosInicio";
+import ProductosLista from "./components/Productos/ProductosLista";
+import ProductoForm from "./components/Productos/ProductosForm";
+import "leaflet/dist/leaflet.css";
+import "leaflet-draw/dist/leaflet.draw.css";
+import "leaflet-draw";
+import Estadisticas from "./components/Estadisticas/Estadisticas";
+import VerLotesWrapper from "./components/lotes/VerLotesWrapper";
+import ResetPassword from "./components/Auth/ResetPassword";
+import DetalleLote from "./components/DetalleLote/DetalleLote";
+import ProductosForm from "./components/Productos/ProductosForm";
+import Reportes from "./components/Reportes/reportes.jsx";
+import HistorialCampanias from "./components/DetalleLote/HistorialCampanias";
+import TareasAgricolas from "./components/TareasAgricolas/TareasAgricolas";
+import TrazabilidadEmbed from "./components/TareasAgricolas/TrazabilidadEmbed";
+import AlertasClimaticas from "./components/Alertas/Alertas";
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const hideSidebarPaths = ["/login", "/"];
+  const isSidebarVisible = !hideSidebarPaths.includes(location.pathname);
+
+  const contentMarginLeft = !isSidebarVisible
+    ? "0px"
+    : sidebarOpen
+      ? "250px"
+      : "70px";
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="d-flex" style={{ minHeight: "100vh" }}>
+      {isSidebarVisible && (
+        <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+      )}
+
+      <div
+        className="flex-grow-1"
+        style={{
+          marginLeft: contentMarginLeft,
+          width: "100%",
+          backgroundColor: "#effeee",
+          minHeight: "100vh",
+          overflowX: "hidden",
+        }}
+      >
+        <Routes location={location}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Login />} />
+          <Route path="/inicio" element={<Inicio />} />
+          <Route path="/calendario" element={<Calendario />} />
+          <Route path="/tareas" element={<TareasAgricolas />} />
+          <Route path="/vercampos" element={<VerCampos />} />
+          <Route path="/campos/:campoId/lotes" element={<VerLotesWrapper />} />
+          <Route path="/perfil" element={<Perfil />} />
+          <Route path="/calculadora" element={<Calculadora />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/productos" element={<ProductosInicio />} />
+          <Route path="/productos/agregar" element={<ProductosForm />} />
+          <Route path="/productos/ver" element={<ProductosLista />} />
+          <Route path="/reportes" element={<Reportes />} />
+          <Route path="/tareas/trazabilidad" element={<TrazabilidadEmbed />} />
+
+          <Route path="/lote/:loteId" element={<DetalleLote />} />
+          {/*<Route
+            path="/lotes/:loteId/historial"
+            element={<HistorialCampanias />}
+          />*/}
+          <Route path="/alertas" element={<AlertasClimaticas />} />
+          <Route
+            path="/usuarios"
+            element={
+              <AdminRoute>
+                <VerUsuarios />
+              </AdminRoute>
+            }
+          />
+          <Route path="/estadisticas" element={<Estadisticas />} />
+        </Routes>
+      </div>
     </div>
   );
 }
 
-export default App;
+export default function App() {
+  return <AppContent />;
+}

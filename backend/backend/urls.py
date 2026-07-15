@@ -1,24 +1,40 @@
-"""
-URL configuration for backend project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import include, path
+from django.conf.urls.static import static
+from django.conf import settings
+from usuarios.views import (
+    PasswordResetRequestAPIView,
+    PasswordResetConfirmAPIView,
+    CustomTokenObtainPairView
+)
+from rest_framework_simplejwt.views import TokenRefreshView
+from usuarios.views import enviar_notificacion
+from lotes.views import FinalizarCampaniaView
+from . import views
+from .views_cac import cac_pizarra
 
 urlpatterns = [
-    path('api/auth/', include('dj_rest_auth.urls')),  # Login, logout
-    path('api/auth/registration/', include('dj_rest_auth.registration.urls')),  # Registro
     path('admin/', admin.site.urls),
-]
+    
+    # Rutas de autenticación usando email en lugar de username
+    path('api/auth/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/auth/password_reset/', PasswordResetRequestAPIView.as_view()),
+    path('api/auth/password_reset/confirm/', PasswordResetConfirmAPIView.as_view()),
+    path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    
+    # Rutas de tus apps
+    path('api/', include('usuarios.urls')),
+    path('api/', include('campos.urls')),
+    path('api/', include('lotes.urls')),
+    path('api/', include('tareas.urls')),
+    path('api/auth/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    path("api/", include("usuarios.urls")),
+    path('api/productos/', include('productos.urls')),  
+    path('siembras/finalizar/<int:lote_id>/', FinalizarCampaniaView.as_view(), name='finalizar-campania'),
+    path('api/', include('reportes.urls')),
+    path("api/cac/pizarra/", cac_pizarra, name="cac_pizarra")
+    
+] 
+
+# Agrega soporte para archivos MEDIA en desarrollo
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

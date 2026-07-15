@@ -1,0 +1,367 @@
+/* ===== PALETA (global) ===== */
+:root {
+  --verde: #198754;
+  --verdeOscuro: #155a36;
+  --verdeClaro: #e9fbe5;
+  --grisClaro: #f3f6f5;
+  --grisBorde: #e6e6e6;
+  --grisOscuro: #424242;
+  --blanco: #fff;
+
+  /* Terrax UI tokens extra */
+  --radius-xl: 1.4rem; /* cards grandes */
+  --radius-md: 0.5rem; /* BOTONES CUADRADOS */
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --focus: 0 0 0 3px rgba(25, 135, 84, 0.2);
+}
+
+/* === Ajuste de ancho de selects === */
+.reportes-container select,
+.reportes-container .css-13cymwt-control, /* clase base de react-select */
+.reportes-container .css-1s2u09g-control {
+  width: 100%; /* que ocupen todo el ancho del contenedor */
+  max-width: 100%; /* evita que se achiquen */
+  border-radius: 8px; /* cuadrado suave (igual que botones) */
+  border: 1px solid var(--grisBorde);
+  padding: 0.6rem 0.8rem; /* similar a inputs */
+  font-size: 0.95rem;
+}
+
+/* Contenedor de filtros para que respete el ancho */
+.filtros-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ===== CONTENEDOR PRINCIPAL (card blanca) ===== */
+.terrax-card {
+  background: var(--blanco);
+  border-radius: 1.5rem;
+  border: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+
+  max-width: 1150px;
+
+  /*  altura mínima para que la cartulina siempre sea alta */
+  min-height: 95vh; /* ocupa 80% de la altura visible */
+  display: flex;
+  flex-direction: column;
+}
+
+.terrax-title {
+  color: var(--verdeOscuro);
+  font-weight: 700;
+  margin: 0 0 1rem;
+}
+
+/* ===== LISTA / TARJETAS ===== */
+.lista-reportes {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* NO seleccionado: gris */
+.reporte-card {
+  background: var(--grisClaro);
+  border-radius: 16px;
+  border: 1px solid rgba(66, 66, 66, 0.18);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s,
+    background 0.18s;
+}
+.reporte-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+  border-color: rgba(66, 66, 66, 0.28);
+  background: var(--blanco);
+}
+
+.reporte-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #e9ecef;
+  color: var(--grisOscuro);
+}
+
+.reporte-titulo {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.15px;
+  color: var(--grisOscuro);
+  word-break: break-word;
+}
+
+.reporte-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f4f7f6;
+}
+
+.reporte-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* Chips informativas (no botón) */
+.chip {
+  background: #fff;
+  border: 1px solid var(--grisBorde);
+  padding: 6px 10px;
+  border-radius: 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* ===== BOTONES (CUADRADOS y verde consistente) ===== */
+.btn-terrax {
+  background: var(--verde);
+  color: #fff;
+  border: 1px solid var(--verde);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  padding: 0.6rem 1rem;
+  transition: filter 0.15s ease, transform 0.02s ease-in, box-shadow 0.1s ease;
+  cursor: pointer;
+}
+.btn-terrax:hover {
+  filter: brightness(0.95);
+}
+.btn-terrax:active {
+  transform: translateY(1px);
+}
+.btn-terrax:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+.btn-terrax[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-terrax-outline {
+  background: transparent;
+  color: var(--verde);
+  border: 1px solid var(--verde);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  padding: 0.55rem 0.9rem;
+  transition: background 0.15s ease, transform 0.02s ease-in,
+    box-shadow 0.1s ease;
+  cursor: pointer;
+}
+.btn-terrax-outline:hover {
+  background: rgba(25, 135, 84, 0.08);
+}
+.btn-terrax-outline:active {
+  transform: translateY(1px);
+}
+.btn-terrax-outline:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+.btn-terrax-outline[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Botón claro para acciones secundarias (links tipo botón) */
+.btn-light-terrax {
+  background: #f8fafc;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.9rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+.btn-light-terrax:hover {
+  background: #f3f4f6;
+}
+.btn-light-terrax:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+/* Ajuste de botones dentro de acciones de tarjeta */
+.reporte-actions {
+  display: flex;
+  gap: 8px;
+}
+.reporte-actions .btn,
+
+/* Compatibilidad con clase existente "ver-pdf" (se alinea a estilo light) */
+.ver-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  border-radius: var(--radius-md); /* cuadrado */
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  background: #f8fafc;
+  text-decoration: none;
+}
+.ver-pdf:hover {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+}
+.ver-pdf:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+/* Card vacío */
+.reporte-card.empty {
+  padding: 16px 18px;
+  text-align: center;
+  background: #fafafa;
+  border: 1px dashed var(--grisBorde);
+  color: #555;
+  border-radius: 16px;
+}
+
+/* SELECCIONADO: verde */
+.reporte-card.selected {
+  border-color: var(--verde);
+  box-shadow: 0 10px 20px rgba(25, 135, 84, 0.12);
+  background: var(--verdeClaro);
+}
+.reporte-card.selected .reporte-top {
+  background: var(--verde);
+  color: #fff;
+}
+.reporte-card.selected .reporte-titulo {
+  color: #fff;
+}
+.reporte-card.selected .reporte-body {
+  background: #f0fff0;
+}
+.reporte-card.selected .chip {
+  background: var(--verdeClaro);
+  color: var(--verdeOscuro);
+  border-color: rgba(25, 135, 84, 0.25);
+}
+.reporte-card.selected .ver-pdf {
+  color: var(--verdeOscuro);
+  border-color: rgba(25, 135, 84, 0.25);
+  background: #fff;
+}
+.reporte-card.selected .ver-pdf:hover {
+  background: var(--verdeClaro);
+  border-color: rgba(25, 135, 84, 0.45);
+}
+
+/* ===== LAYOUT 2 COLUMNAS (estructura) ===== */
+.reportes-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr;
+  gap: 30px;
+  max-width: 1500px;
+  width: 100%;
+}
+.reportes-col,
+.registros-col {
+  min-width: 0;
+}
+.registros-col {
+  position: sticky;
+  top: 20px;
+}
+
+@media (max-width: 992px) {
+  .reportes-layout {
+    grid-template-columns: 1fr;
+  }
+  .registros-col {
+    position: static;
+  }
+}
+
+/* ===== FOCUS ACCESIBLE GLOBAL (inputs/selects de filtros si aplican) ===== */
+.input-terrax {
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid #e5e7eb;
+  padding: 0.6rem 0.75rem;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.input-terrax:focus {
+  border-color: var(--verde);
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+/* ===== MODALES ===== */
+.modal-content {
+  border-radius: 1rem;
+  border: 1px solid rgba(25, 135, 84, 0.18);
+}
+.modal-header {
+  background: #fafdf9;
+  border-bottom: 1px solid rgba(25, 135, 84, 0.12);
+}
+
+/* ==== BOTONES REDONDOS DE ACCIONES (Editar / Eliminar) ==== */
+.btn-round-outline {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%; /* círculo perfecto */
+  border: 2px solid var(--verde);
+  background: #fff;
+  color: var(--verde);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px; /* tamaño del ícono */
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.btn-round-outline:hover {
+  background: var(--verde);
+  color: #fff;
+  transform: scale(1.08);
+}
+
+.btn-round-outline:active {
+  transform: scale(0.95);
+}
+
+/* ====== CUANDO EL REPORTE ESTÁ SELECCIONADO ====== */
+.reporte-card.selected .btn-round-outline {
+  background: var(--blanco);
+  color: var(--verde);
+  border-color: var(--blanco);
+}
+
+/* Hover en seleccionado → mantener contraste */
+.reporte-card.selected .btn-round-outline:hover {
+  background: var(--verde);
+  color: #fff;
+  border-color: var(--verde);
+}
+
+/* Alineación dentro del contenedor de acciones */
+.reporte-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}

@@ -1,0 +1,7 @@
+Estimado/a {{ nombre }},
+
+Tiene una suscripción pendiente de pago. 
+Para regularizarla, por favor contacte a los administradores.
+
+Saludos,
+Equipo Terrax
