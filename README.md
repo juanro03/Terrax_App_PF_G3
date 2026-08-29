@@ -1,7 +1,7 @@
 
-# Terrax App - Proyecto de Gestión de Monitoreo Agrícola
+# Terrax App - Plataforma de Gestión Agropecuaria
 
-Este proyecto tiene como objetivo la creación de una aplicación web para gestionar el monitoreo de lotes agrícolas, permitiendo el análisis de imágenes satelitales y de drones, la visualización de índices de vegetación y la gestión de usuarios.
+Este proyecto tiene como objetivo la creación de una aplicación web integral para la gestión y visualización de información agrícola, control de lotes y seguimiento de campañas. Implementación de módulos para la carga y análisis de reportes de estado de suelo y cultivos basados en datos recolectados por drones.
 
 Integrantes:
 - **García, Agustina**
